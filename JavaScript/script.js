@@ -4,8 +4,6 @@ if (yearElement) {
   yearElement.textContent = new Date().getFullYear();
 }
 
-/* LOADING */
-
 window.addEventListener("load", () => {
   const loaderScreen = document.getElementById("loaderScreen");
 
@@ -16,8 +14,6 @@ window.addEventListener("load", () => {
   }, 900);
 });
 
-/* LANGUAGE */
-
 const langDropdown = document.getElementById("langDropdown");
 const langCurrent = document.getElementById("langCurrent");
 const currentFlag = document.getElementById("currentFlag");
@@ -25,18 +21,9 @@ const currentLangText = document.getElementById("currentLangText");
 const langOptions = document.querySelectorAll(".lang-option");
 
 const langMeta = {
-  uz: {
-    label: "UZ",
-    flag: "./images/uz.png"
-  },
-  en: {
-    label: "EN",
-    flag: "./images/en.png"
-  },
-  ru: {
-    label: "RU",
-    flag: "./images/ru.png"
-  }
+  uz: { label: "UZ", flag: "./images/uz.png" },
+  en: { label: "EN", flag: "./images/en.png" },
+  ru: { label: "RU", flag: "./images/ru.png" }
 };
 
 if (langCurrent) {
@@ -98,7 +85,6 @@ changeLanguage(savedLang);
 /* MODAL */
 
 const googleLoginBtn = document.getElementById("googleLoginBtn");
-const githubLoginBtn = document.getElementById("githubLoginBtn");
 
 const authModal = document.getElementById("authModal");
 const closeAuthModal = document.getElementById("closeAuthModal");
@@ -137,21 +123,4 @@ if (authModal) {
   });
 }
 
-if (continueAuthBtn) {
-  continueAuthBtn.addEventListener("click", () => {
-    closeModal();
-
-    console.log("Google login boshlanmoqda...");
-
-    /*
-      Bu yerga Firebase Google Auth kodi ulanadi.
-      Masalan: signInWithPopup(auth, provider)
-    */
-  });
-}
-
-if (githubLoginBtn) {
-  githubLoginBtn.addEventListener("click", () => {
-    console.log("Github login boshlanmoqda...");
-  });
-}
+window.closeAuthModalWindow = closeModal;
