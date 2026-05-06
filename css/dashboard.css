@@ -1,0 +1,251 @@
+:root{
+  --primary:#21466d;
+  --blue:#0d6efd;
+  --cyan:#00b7ff;
+  --bg:#f4f7fb;
+  --text:#1f3552;
+  --muted:#71829a;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  min-height:100vh;
+  font-family:"Segoe UI", sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+}
+
+.dashboard-grid{
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(33,70,109,.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(33,70,109,.055) 1px, transparent 1px);
+  background-size:42px 42px;
+  animation:gridMove 18s linear infinite;
+  pointer-events:none;
+}
+
+@keyframes gridMove{
+  from{background-position:0 0;}
+  to{background-position:42px 42px;}
+}
+
+.dashboard-header{
+  position:relative;
+  z-index:2;
+  min-height:86px;
+  padding:22px 34px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  background:rgba(255,255,255,.74);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(255,255,255,.9);
+}
+
+.dashboard-header h1{
+  font-size:28px;
+  font-weight:850;
+  color:var(--primary);
+  margin-bottom:4px;
+}
+
+.dashboard-header p{
+  margin:0;
+  color:var(--muted);
+}
+
+.profile-wrapper{
+  position:relative;
+}
+
+.profile-btn{
+  width:52px;
+  height:52px;
+  border:none;
+  border-radius:50%;
+  padding:3px;
+  cursor:pointer;
+  background:linear-gradient(135deg,var(--cyan),var(--blue));
+  box-shadow:0 12px 30px rgba(13,110,253,.22);
+}
+
+.profile-btn img{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  object-fit:cover;
+  background:#fff;
+}
+
+.profile-menu{
+  position:absolute;
+  top:66px;
+  right:0;
+
+  width:290px;
+  padding:14px;
+
+  border-radius:24px;
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:0 24px 65px rgba(31,53,82,.18);
+
+  opacity:0;
+  visibility:hidden;
+  transform:translateY(10px) scale(.98);
+  transition:.22s ease;
+  z-index:20;
+}
+
+.profile-wrapper.active .profile-menu{
+  opacity:1;
+  visibility:visible;
+  transform:translateY(0) scale(1);
+}
+
+.profile-info{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  padding:10px;
+  border-radius:18px;
+  background:rgba(13,110,253,.06);
+  margin-bottom:10px;
+}
+
+.profile-info img{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  object-fit:cover;
+}
+
+.profile-info h3{
+  font-size:16px;
+  font-weight:850;
+  color:var(--primary);
+  margin:0 0 3px;
+}
+
+.profile-info p{
+  max-width:170px;
+  font-size:13px;
+  color:var(--muted);
+  margin:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.profile-info span{
+  display:inline-block;
+  margin-top:6px;
+  padding:4px 9px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+  color:var(--blue);
+  background:rgba(13,110,253,.09);
+}
+
+.profile-menu-item{
+  width:100%;
+  height:46px;
+  border:none;
+  border-radius:15px;
+  background:transparent;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:0 12px;
+  color:#294766;
+  font-weight:750;
+  cursor:pointer;
+  transition:.2s ease;
+}
+
+.profile-menu-item:hover{
+  background:rgba(13,110,253,.08);
+  color:var(--blue);
+}
+
+.profile-menu-item.logout{
+  color:#dc3545;
+}
+
+.profile-menu-item.logout:hover{
+  background:rgba(220,53,69,.08);
+  color:#dc3545;
+}
+
+.dashboard-main{
+  position:relative;
+  z-index:1;
+  padding:34px;
+}
+
+.welcome-card{
+  max-width:760px;
+  padding:34px;
+  border-radius:28px;
+  background:rgba(255,255,255,.76);
+  backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:0 25px 80px rgba(29,58,95,.13);
+}
+
+.welcome-icon{
+  width:64px;
+  height:64px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-size:28px;
+  background:linear-gradient(135deg,var(--cyan),var(--blue));
+  margin-bottom:20px;
+}
+
+.welcome-card h2{
+  font-size:30px;
+  font-weight:850;
+  color:var(--primary);
+  margin-bottom:12px;
+}
+
+.welcome-card p{
+  color:var(--muted);
+  line-height:1.7;
+  margin:0;
+}
+
+@media(max-width:576px){
+  .dashboard-header{
+    padding:18px;
+  }
+
+  .dashboard-header h1{
+    font-size:22px;
+  }
+
+  .dashboard-main{
+    padding:18px;
+  }
+
+  .profile-menu{
+    width:calc(100vw - 36px);
+    right:0;
+  }
+}
