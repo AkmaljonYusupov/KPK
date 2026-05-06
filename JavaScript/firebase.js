@@ -31,6 +31,88 @@ githubProvider.addScope("user:email");
 
 const continueAuthBtn = document.getElementById("continueAuthBtn");
 
+/* TRANSLATION */
+
+function getLang() {
+  return localStorage.getItem("kpk-lang") || "uz";
+}
+
+const authTexts = {
+  uz: {
+    loginSuccessTitle: "Kirish tasdiqlandi",
+    loginSuccessText: "Tizimga muvaffaqiyatli kirildi.",
+    logoutSuccessTitle: "Chiqish tasdiqlandi",
+    logoutSuccessText: "Tizimdan muvaffaqiyatli chiqildi.",
+    loginErrorTitle: "Login xatoligi",
+    loginErrorText: "Kirishda xatolik yuz berdi.",
+    logoutErrorTitle: "Chiqish xatoligi",
+    logoutErrorText: "Tizimdan chiqishda xatolik yuz berdi.",
+    telegramSuccessTitle: "Telegram yuborildi",
+    telegramLoginText: "User kirish maʼlumotlari Telegram botga yuborildi.",
+    telegramLogoutText: "User chiqish maʼlumotlari Telegram botga yuborildi.",
+    telegramErrorTitle: "Telegram xatoligi",
+    telegramErrorText: "Telegram botga maʼlumot yuborilmadi.",
+    serverErrorTitle: "Server xatoligi",
+    serverErrorText: "Telegram server bilan ulanishda xatolik.",
+    noEmail: "Email ko‘rsatilmagan",
+    user: "User"
+  },
+
+  en: {
+    loginSuccessTitle: "Login confirmed",
+    loginSuccessText: "You have successfully signed in.",
+    logoutSuccessTitle: "Logout confirmed",
+    logoutSuccessText: "You have successfully logged out.",
+    loginErrorTitle: "Login error",
+    loginErrorText: "An error occurred during sign-in.",
+    logoutErrorTitle: "Logout error",
+    logoutErrorText: "An error occurred during logout.",
+    telegramSuccessTitle: "Telegram sent",
+    telegramLoginText: "User login information was sent to the Telegram bot.",
+    telegramLogoutText: "User logout information was sent to the Telegram bot.",
+    telegramErrorTitle: "Telegram error",
+    telegramErrorText: "Information was not sent to the Telegram bot.",
+    serverErrorTitle: "Server error",
+    serverErrorText: "An error occurred while connecting to the Telegram server.",
+    noEmail: "Email not provided",
+    user: "User"
+  },
+
+  ru: {
+    loginSuccessTitle: "Вход подтверждён",
+    loginSuccessText: "Вы успешно вошли в систему.",
+    logoutSuccessTitle: "Выход подтверждён",
+    logoutSuccessText: "Вы успешно вышли из системы.",
+    loginErrorTitle: "Ошибка входа",
+    loginErrorText: "Во время входа произошла ошибка.",
+    logoutErrorTitle: "Ошибка выхода",
+    logoutErrorText: "Во время выхода произошла ошибка.",
+    telegramSuccessTitle: "Telegram отправлен",
+    telegramLoginText: "Информация о входе пользователя отправлена в Telegram бот.",
+    telegramLogoutText: "Информация о выходе пользователя отправлена в Telegram бот.",
+    telegramErrorTitle: "Ошибка Telegram",
+    telegramErrorText: "Информация не была отправлена в Telegram бот.",
+    serverErrorTitle: "Ошибка сервера",
+    serverErrorText: "Ошибка подключения к серверу Telegram.",
+    noEmail: "Email не указан",
+    user: "Пользователь"
+  }
+};
+
+function t() {
+  return authTexts[getLang()] || authTexts.uz;
+}
+
+function showToast(title, message, type = "info") {
+  if (window.showModernToast) {
+    window.showModernToast({
+      title,
+      message,
+      type
+    });
+  }
+}
+
 /* TELEGRAM LOG */
 
 async function sendTelegramLog(action, userData) {
@@ -51,12 +133,38 @@ async function sendTelegramLog(action, userData) {
 
     console.log("Telegram result:", result);
 
-    if (!result.ok) {
-      console.error("Telegram API Error:", result);
+    if (result.ok) {
+      showToast(
+        t().telegramSuccessTitle,
+        action === "LOGIN"
+          ? t().telegramLoginText
+          : t().telegramLogoutText,
+        "success"
+      );
+
+      return true;
     }
+
+    showToast(
+      t().telegramErrorTitle,
+      t().telegramErrorText,
+      "error"
+    );
+
+    console.error("Telegram API Error:", result);
+
+    return false;
 
   } catch (error) {
     console.error("Telegram log error:", error);
+
+    showToast(
+      t().serverErrorTitle,
+      t().serverErrorText,
+      "error"
+    );
+
+    return false;
   }
 }
 
@@ -76,8 +184,8 @@ async function loginWithProvider() {
 
     const userData = {
       uid: user.uid,
-      name: user.displayName || "User",
-      email: user.email || "Email ko‘rsatilmagan",
+      name: user.displayName || t().user,
+      email: user.email || t().noEmail,
       image: user.photoURL || "./images/user.png",
       provider: providerName
     };
@@ -90,17 +198,15 @@ async function loginWithProvider() {
       window.closeAuthModalWindow();
     }
 
-    if (window.showModernToast) {
-      window.showModernToast({
-        title: "Kirish tasdiqlandi",
-        message: `${userData.name} tizimga muvaffaqiyatli kirdi.`,
-        type: "success"
-      });
-    }
+    showToast(
+      t().loginSuccessTitle,
+      `${userData.name} — ${t().loginSuccessText}`,
+      "success"
+    );
 
     setTimeout(() => {
       window.location.href = "/dashboard.html";
-    }, 900);
+    }, 1100);
 
   } catch (error) {
     console.error("Login Error Code:", error.code);
@@ -109,17 +215,15 @@ async function loginWithProvider() {
     const toast = window.getAuthToastText
       ? window.getAuthToastText(error.code)
       : {
-          title: "Login xatoligi",
-          message: "Kirishda xatolik yuz berdi."
+          title: t().loginErrorTitle,
+          message: t().loginErrorText
         };
 
-    if (window.showModernToast) {
-      window.showModernToast({
-        title: toast.title,
-        message: toast.message,
-        type: "error"
-      });
-    }
+    showToast(
+      toast.title,
+      toast.message,
+      "error"
+    );
   }
 }
 
@@ -141,27 +245,23 @@ window.kpkLogout = async function() {
 
     localStorage.removeItem("kpk-user");
 
-    if (window.showModernToast) {
-      window.showModernToast({
-        title: "Chiqish tasdiqlandi",
-        message: "Tizimdan muvaffaqiyatli chiqildi.",
-        type: "success"
-      });
-    }
+    showToast(
+      t().logoutSuccessTitle,
+      t().logoutSuccessText,
+      "success"
+    );
 
     setTimeout(() => {
       window.location.href = "/index.html";
-    }, 800);
+    }, 1000);
 
   } catch (error) {
     console.error("Logout Error:", error);
 
-    if (window.showModernToast) {
-      window.showModernToast({
-        title: "Chiqish xatoligi",
-        message: "Tizimdan chiqishda xatolik yuz berdi.",
-        type: "error"
-      });
-    }
+    showToast(
+      t().logoutErrorTitle,
+      t().logoutErrorText,
+      "error"
+    );
   }
 };
