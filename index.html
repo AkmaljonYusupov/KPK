@@ -21,7 +21,7 @@
       </div>
 
       <h1>KPK Platform</h1>
-      <p>Platforma yuklanmoqda...</p>
+      <p data-lang="loadingText">Platforma yuklanmoqda...</p>
 
       <div class="loader-line">
         <span></span>
@@ -71,7 +71,9 @@
 
         <div class="auth-box">
           <div class="top-bar">
-            <h2 class="auth-title" data-lang="welcome">Dasturga xush kelibsiz</h2>
+            <h2 class="auth-title" data-lang="welcome">
+              Dasturga xush kelibsiz
+            </h2>
 
             <div class="lang-dropdown" id="langDropdown">
               <button class="lang-current" id="langCurrent" type="button">
@@ -126,6 +128,7 @@
     </section>
   </main>
 
+  <!-- AUTH MODAL -->
   <div class="auth-modal" id="authModal">
     <div class="auth-modal-card">
 
@@ -133,29 +136,30 @@
         <i class="bi bi-x-lg"></i>
       </button>
 
-      <div class="auth-modal-icon">
+      <div class="auth-modal-icon" id="authModalIcon">
         <i class="bi bi-google"></i>
       </div>
 
-      <h2>Google Authentication</h2>
+      <h2 id="authModalTitle">Google Authentication</h2>
 
-      <p>
+      <p id="authModalText">
         Google account orqali platformaga kirish jarayoni boshlanadi.
       </p>
 
       <div class="auth-modal-actions">
-        <button class="auth-modal-btn cancel-btn" id="cancelAuthBtn" type="button">
+        <button class="auth-modal-btn cancel-btn" id="cancelAuthBtn" type="button" data-lang="modalCancel">
           Bekor qilish
         </button>
 
-        <button class="auth-modal-btn continue-btn" id="continueAuthBtn" type="button">
+        <button class="auth-modal-btn continue-btn" id="continueAuthBtn" type="button" data-lang="modalContinue">
           Davom etish
         </button>
       </div>
 
     </div>
   </div>
+
   <script src="./JavaScript/script.js"></script>
-  <script src="./JavaScript/script.js"></script>
+  <script type="module" src="./JavaScript/firebase.js"></script>
 </body>
 </html>
