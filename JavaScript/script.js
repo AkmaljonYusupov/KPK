@@ -206,3 +206,99 @@ document.addEventListener("keydown", (event) => {
 });
 
 window.closeAuthModalWindow = closeModal;
+
+/* MODERN TOAST */
+
+const modernToast = document.getElementById("modernToast");
+const toastTitle = document.getElementById("toastTitle");
+const toastMessage = document.getElementById("toastMessage");
+const toastCloseBtn = document.getElementById("toastCloseBtn");
+
+let toastTimer;
+
+window.showModernToast = function({ title, message, type = "info" }) {
+  if (!modernToast) return;
+
+  modernToast.classList.remove("show", "success", "error", "info");
+  modernToast.classList.add(type);
+
+  if (toastTitle) {
+    toastTitle.textContent = title;
+  }
+
+  if (toastMessage) {
+    toastMessage.textContent = message;
+  }
+
+  setTimeout(() => {
+    modernToast.classList.add("show");
+  }, 30);
+
+  clearTimeout(toastTimer);
+
+  toastTimer = setTimeout(() => {
+    modernToast.classList.remove("show");
+  }, 4500);
+};
+
+if (toastCloseBtn) {
+  toastCloseBtn.addEventListener("click", () => {
+    if (modernToast) {
+      modernToast.classList.remove("show");
+    }
+  });
+}
+
+window.getAuthToastText = function(code) {
+  const lang = localStorage.getItem("kpk-lang") || "uz";
+
+  const texts = {
+    uz: {
+      successTitle: "Kirish tasdiqlandi",
+      successText: "Tizimga muvaffaqiyatli kirildi.",
+      errorTitle: "Login xatoligi",
+      accountExists: "Bu email boshqa login usuli bilan ulangan.",
+      popupClosed: "Login oynasi yopildi.",
+      defaultError: "Kirishda xatolik yuz berdi."
+    },
+
+    en: {
+      successTitle: "Login confirmed",
+      successText: "You have successfully signed in.",
+      errorTitle: "Login error",
+      accountExists: "This email is linked with another login method.",
+      popupClosed: "The login window was closed.",
+      defaultError: "An error occurred during sign-in."
+    },
+
+    ru: {
+      successTitle: "Вход подтверждён",
+      successText: "Вы успешно вошли в систему.",
+      errorTitle: "Ошибка входа",
+      accountExists: "Этот email связан с другим способом входа.",
+      popupClosed: "Окно входа было закрыто.",
+      defaultError: "Во время входа произошла ошибка."
+    }
+  };
+
+  const t = texts[lang] || texts.uz;
+
+  if (code === "auth/account-exists-with-different-credential") {
+    return {
+      title: t.errorTitle,
+      message: t.accountExists
+    };
+  }
+
+  if (code === "auth/popup-closed-by-user") {
+    return {
+      title: t.errorTitle,
+      message: t.popupClosed
+    };
+  }
+
+  return {
+    title: t.errorTitle,
+    message: t.defaultError
+  };
+};
