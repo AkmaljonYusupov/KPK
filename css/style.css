@@ -23,8 +23,6 @@ body{
   background:var(--bg);
 }
 
-/* LOADING */
-
 .loader-screen{
   position:fixed;
   inset:0;
@@ -117,26 +115,14 @@ body{
 }
 
 @keyframes loaderPulse{
-  0%,100%{
-    transform:scale(1);
-  }
-
-  50%{
-    transform:scale(1.06);
-  }
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.06);}
 }
 
 @keyframes loaderLine{
-  0%{
-    transform:translateX(-120%);
-  }
-
-  100%{
-    transform:translateX(240%);
-  }
+  0%{transform:translateX(-120%);}
+  100%{transform:translateX(240%);}
 }
-
-/* BACKGROUND */
 
 .animated-grid{
   position:fixed;
@@ -151,13 +137,8 @@ body{
 }
 
 @keyframes gridMove{
-  from{
-    background-position:0 0;
-  }
-
-  to{
-    background-position:42px 42px;
-  }
+  from{background-position:0 0;}
+  to{background-position:42px 42px;}
 }
 
 .soft-orb{
@@ -185,16 +166,9 @@ body{
 }
 
 @keyframes floatOrb{
-  from{
-    transform:translate3d(0,0,0) scale(1);
-  }
-
-  to{
-    transform:translate3d(28px,22px,0) scale(1.08);
-  }
+  from{transform:translate3d(0,0,0) scale(1);}
+  to{transform:translate3d(28px,22px,0) scale(1.08);}
 }
-
-/* MAIN */
 
 .main-wrapper{
   min-height:100vh;
@@ -239,8 +213,6 @@ body{
   padding:48px;
   align-items:center;
 }
-
-/* LEFT */
 
 .left-side{
   text-align:center;
@@ -332,8 +304,6 @@ body{
   font-size:15px;
 }
 
-/* RIGHT */
-
 .auth-box{
   background:rgba(255,255,255,.76);
   border:1px solid rgba(255,255,255,.9);
@@ -362,8 +332,6 @@ body{
   line-height:1.7;
   margin-bottom:26px;
 }
-
-/* LANGUAGE */
 
 .lang-dropdown{
   position:relative;
@@ -447,8 +415,6 @@ body{
   color:var(--blue);
 }
 
-/* AUTH BUTTONS */
-
 .auth-buttons{
   display:flex;
   gap:14px;
@@ -501,8 +467,6 @@ body{
   box-shadow:0 15px 35px rgba(17,24,39,.2);
 }
 
-/* FOOTER */
-
 .footer-text{
   position:absolute;
   bottom:18px;
@@ -514,7 +478,136 @@ body{
   z-index:3;
 }
 
-/* RESPONSIVE */
+/* AUTH MODAL */
+
+.auth-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.45);
+  backdrop-filter:blur(8px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  opacity:0;
+  visibility:hidden;
+  transition:.25s ease;
+  z-index:99999;
+}
+
+.auth-modal.show{
+  opacity:1;
+  visibility:visible;
+}
+
+.auth-modal-card{
+  width:min(430px,100%);
+  position:relative;
+  padding:34px 30px;
+  border-radius:28px;
+  background:rgba(255,255,255,.92);
+  border:1px solid rgba(255,255,255,.9);
+  backdrop-filter:blur(18px);
+  box-shadow:0 25px 80px rgba(15,23,42,.22);
+  text-align:center;
+  animation:modalShow .28s ease;
+}
+
+@keyframes modalShow{
+  from{
+    opacity:0;
+    transform:translateY(12px) scale(.96);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
+}
+
+.auth-modal-close{
+  position:absolute;
+  top:16px;
+  right:16px;
+  width:38px;
+  height:38px;
+  border:none;
+  border-radius:12px;
+  background:rgba(15,23,42,.05);
+  color:#1f3552;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:.2s ease;
+}
+
+.auth-modal-close:hover{
+  background:rgba(15,23,42,.1);
+}
+
+.auth-modal-icon{
+  width:82px;
+  height:82px;
+  margin:0 auto 18px;
+  border-radius:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,#00b7ff,#0d6efd);
+  color:#fff;
+  font-size:34px;
+  box-shadow:0 18px 45px rgba(13,110,253,.28);
+}
+
+.auth-modal-card h2{
+  font-size:28px;
+  font-weight:850;
+  color:#1f3552;
+  margin-bottom:12px;
+}
+
+.auth-modal-card p{
+  color:#71829a;
+  line-height:1.7;
+  margin-bottom:28px;
+  font-size:15px;
+}
+
+.auth-modal-actions{
+  display:flex;
+  gap:12px;
+}
+
+.auth-modal-btn{
+  flex:1;
+  height:52px;
+  border:none;
+  border-radius:16px;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.2s ease;
+}
+
+.cancel-btn{
+  background:rgba(15,23,42,.06);
+  color:#1f3552;
+}
+
+.cancel-btn:hover{
+  background:rgba(15,23,42,.1);
+}
+
+.continue-btn{
+  background:linear-gradient(135deg,#00b7ff,#0d6efd);
+  color:#fff;
+  box-shadow:0 15px 35px rgba(13,110,253,.24);
+}
+
+.continue-btn:hover{
+  filter:brightness(1.05);
+}
 
 @media(max-width:992px){
   .card-content{
@@ -583,5 +676,13 @@ body{
 
   .lang-current{
     min-width:112px;
+  }
+
+  .auth-modal-card{
+    padding:30px 22px;
+  }
+
+  .auth-modal-actions{
+    flex-direction:column;
   }
 }
