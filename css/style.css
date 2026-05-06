@@ -23,6 +23,8 @@ body{
   background:var(--bg);
 }
 
+/* LOADING */
+
 .loader-screen{
   position:fixed;
   inset:0;
@@ -115,14 +117,26 @@ body{
 }
 
 @keyframes loaderPulse{
-  0%,100%{transform:scale(1);}
-  50%{transform:scale(1.06);}
+  0%,100%{
+    transform:scale(1);
+  }
+
+  50%{
+    transform:scale(1.06);
+  }
 }
 
 @keyframes loaderLine{
-  0%{transform:translateX(-120%);}
-  100%{transform:translateX(240%);}
+  0%{
+    transform:translateX(-120%);
+  }
+
+  100%{
+    transform:translateX(240%);
+  }
 }
+
+/* BACKGROUND */
 
 .animated-grid{
   position:fixed;
@@ -137,8 +151,13 @@ body{
 }
 
 @keyframes gridMove{
-  from{background-position:0 0;}
-  to{background-position:42px 42px;}
+  from{
+    background-position:0 0;
+  }
+
+  to{
+    background-position:42px 42px;
+  }
 }
 
 .soft-orb{
@@ -166,9 +185,16 @@ body{
 }
 
 @keyframes floatOrb{
-  from{transform:translate3d(0,0,0) scale(1);}
-  to{transform:translate3d(28px,22px,0) scale(1.08);}
+  from{
+    transform:translate3d(0,0,0) scale(1);
+  }
+
+  to{
+    transform:translate3d(28px,22px,0) scale(1.08);
+  }
 }
+
+/* MAIN */
 
 .main-wrapper{
   min-height:100vh;
@@ -179,6 +205,8 @@ body{
   position:relative;
   z-index:2;
 }
+
+/* CARD */
 
 .login-card{
   width:min(1220px,100%);
@@ -213,6 +241,8 @@ body{
   padding:48px;
   align-items:center;
 }
+
+/* LEFT */
 
 .left-side{
   text-align:center;
@@ -304,6 +334,8 @@ body{
   font-size:15px;
 }
 
+/* RIGHT */
+
 .auth-box{
   background:rgba(255,255,255,.76);
   border:1px solid rgba(255,255,255,.9);
@@ -332,6 +364,8 @@ body{
   line-height:1.7;
   margin-bottom:26px;
 }
+
+/* LANGUAGE */
 
 .lang-dropdown{
   position:relative;
@@ -415,6 +449,8 @@ body{
   color:var(--blue);
 }
 
+/* AUTH BUTTONS */
+
 .auth-buttons{
   display:flex;
   gap:14px;
@@ -466,6 +502,8 @@ body{
   background:linear-gradient(135deg,#1f2937,#111827);
   box-shadow:0 15px 35px rgba(17,24,39,.2);
 }
+
+/* FOOTER */
 
 .footer-text{
   position:absolute;
@@ -560,6 +598,11 @@ body{
   box-shadow:0 18px 45px rgba(13,110,253,.28);
 }
 
+.github-modal-icon{
+  background:linear-gradient(135deg,#1f2937,#111827) !important;
+  box-shadow:0 18px 45px rgba(17,24,39,.25) !important;
+}
+
 .auth-modal-card h2{
   font-size:28px;
   font-weight:850;
@@ -608,6 +651,8 @@ body{
 .continue-btn:hover{
   filter:brightness(1.05);
 }
+
+/* RESPONSIVE */
 
 @media(max-width:992px){
   .card-content{
@@ -678,16 +723,118 @@ body{
     min-width:112px;
   }
 
-  .auth-modal-card{
-    padding:30px 22px;
+  .auth-modal{
+    padding:18px;
+    align-items:center;
+    justify-content:center;
   }
 
-  .github-modal-icon{
-  background:linear-gradient(135deg,#1f2937,#111827) !important;
-  box-shadow:0 18px 45px rgba(17,24,39,.25) !important;
-}
+  .auth-modal-card{
+    width:100%;
+    max-width:420px;
+    padding:34px 22px 24px;
+    border-radius:32px;
+    overflow:hidden;
+  }
+
+  .auth-modal-close{
+    top:18px;
+    right:18px;
+    width:44px;
+    height:44px;
+    border-radius:16px;
+    font-size:18px;
+  }
+
+  .auth-modal-icon{
+    width:84px;
+    height:84px;
+    border-radius:26px;
+    font-size:36px;
+    margin:0 auto 20px;
+  }
+
+  .auth-modal-card h2{
+    font-size:28px;
+    line-height:1.18;
+    margin-bottom:14px;
+    padding:0 8px;
+  }
+
+  .auth-modal-card p{
+    font-size:15px;
+    line-height:1.75;
+    margin-bottom:26px;
+    padding:0 4px;
+  }
 
   .auth-modal-actions{
+    width:100%;
+    display:flex;
     flex-direction:column;
+    gap:12px;
+  }
+
+  .auth-modal-btn{
+    width:100%;
+    flex:none;
+    height:54px;
+    min-height:54px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:16px;
+    font-weight:800;
+    padding:0 18px;
+    white-space:nowrap;
+  }
+
+  .cancel-btn{
+    background:rgba(15,23,42,.06);
+    border:1px solid rgba(15,23,42,.05);
+  }
+
+  .continue-btn{
+    background:linear-gradient(135deg,#00b7ff,#0d6efd);
+    box-shadow:0 16px 34px rgba(13,110,253,.22);
+  }
+
+  .continue-btn:active,
+  .cancel-btn:active{
+    transform:scale(.99);
+  }
+}
+
+@media(max-width:380px){
+  .auth-modal{
+    padding:14px;
+  }
+
+  .auth-modal-card{
+    padding:28px 18px 20px;
+    border-radius:28px;
+  }
+
+  .auth-modal-icon{
+    width:76px;
+    height:76px;
+    font-size:32px;
+    border-radius:22px;
+  }
+
+  .auth-modal-card h2{
+    font-size:24px;
+  }
+
+  .auth-modal-card p{
+    font-size:14px;
+  }
+
+  .auth-modal-btn{
+    height:52px;
+    min-height:52px;
+    font-size:15px;
+    border-radius:16px;
   }
 }
