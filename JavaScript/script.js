@@ -42,7 +42,7 @@ const langMeta = {
 let currentLang = localStorage.getItem("kpk-lang") || "uz";
 let currentTranslations = {};
 
-if (langCurrent) {
+if (langCurrent && langDropdown) {
   langCurrent.addEventListener("click", () => {
     langDropdown.classList.toggle("active");
   });
@@ -77,8 +77,13 @@ async function changeLanguage(lang) {
       }
     });
 
-    currentFlag.src = langMeta[lang].flag;
-    currentLangText.textContent = langMeta[lang].label;
+    if (currentFlag) {
+      currentFlag.src = langMeta[lang].flag;
+    }
+
+    if (currentLangText) {
+      currentLangText.textContent = langMeta[lang].label;
+    }
 
     langOptions.forEach((option) => {
       option.classList.toggle("active", option.dataset.langCode === lang);
@@ -117,7 +122,6 @@ const githubLoginBtn = document.getElementById("githubLoginBtn");
 const authModal = document.getElementById("authModal");
 const closeAuthModal = document.getElementById("closeAuthModal");
 const cancelAuthBtn = document.getElementById("cancelAuthBtn");
-const continueAuthBtn = document.getElementById("continueAuthBtn");
 
 const authModalIcon = document.getElementById("authModalIcon");
 const authModalTitle = document.getElementById("authModalTitle");
