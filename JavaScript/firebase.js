@@ -31,12 +31,32 @@ githubProvider.addScope("user:email");
 
 const continueAuthBtn = document.getElementById("continueAuthBtn");
 
-async function loginWithProvider(){
-  try{
+async function sendTelegramLog(action, userData) {
+  try {
+    await fetch("/api/telegram", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        action,
+        user: userData,
+        time: new Date().toLocaleString("uz-UZ")
+      })
+    });
+  } catch (error) {
+    console.error("Telegram log error:", error);
+  }
+}
+
+async function loginWithProvider() {
+  try {
     const providerName = window.kpkSelectedProvider || "google";
 
     const selectedProvider =
-      providerName === "github" ? githubProvider : googleProvider;
+      providerName === "github"
+        ? githubProvider
+        : googleProvider;
 
     const result = await signInWithPopup(auth, selectedProvider);
     const user = result.user;
@@ -51,47 +71,82 @@ async function loginWithProvider(){
 
     localStorage.setItem("kpk-user", JSON.stringify(userData));
 
-    if(window.closeAuthModalWindow){
+    await sendTelegramLog("LOGIN", userData);
+
+    if (window.closeAuthModalWindow) {
       window.closeAuthModalWindow();
     }
 
-    window.location.assign("/dashboard.html");
-  }
+    if (window.showModernToast) {
+      window.showModernToast({
+        title: "Kirish tasdiqlandi",
+        message: `${userData.name} tizimga muvaffaqiyatli kirdi.`,
+        type: "success"
+      });
+    }
 
-  catch(error){
+    setTimeout(() => {
+      window.location.href = "/dashboard.html";
+    }, 900);
+
+  } catch (error) {
     console.error("Login Error Code:", error.code);
     console.error("Login Error Message:", error.message);
 
-    if(error.code === "auth/account-exists-with-different-credential"){
-      alert("Bu email boshqa login usuli bilan ulangan. Avval Google bilan kirgan bo‘lsangiz, Google orqali kiring.");
-      return;
-    }
+    const toast = window.getAuthToastText
+      ? window.getAuthToastText(error.code)
+      : {
+          title: "Login xatoligi",
+          message: "Kirishda xatolik yuz berdi."
+        };
 
-    if(error.code === "auth/popup-closed-by-user"){
-      console.log("Foydalanuvchi login oynasini yopdi.");
-      return;
+    if (window.showModernToast) {
+      window.showModernToast({
+        title: toast.title,
+        message: toast.message,
+        type: "error"
+      });
     }
-
-    if(error.code === "auth/unauthorized-domain"){
-      alert("Firebase Authorized domains ichiga kpk-uz.vercel.app qo‘shilmagan.");
-      return;
-    }
-
-    alert("GitHub orqali kirishda xatolik bor. Console’da error code ni tekshiring.");
   }
 }
 
-if(continueAuthBtn){
+if (continueAuthBtn) {
   continueAuthBtn.addEventListener("click", loginWithProvider);
 }
 
-window.kpkLogout = async function(){
-  try{
+window.kpkLogout = async function() {
+  try {
+    const userData = JSON.parse(localStorage.getItem("kpk-user"));
+
+    if (userData) {
+      await sendTelegramLog("LOGOUT", userData);
+    }
+
     await signOut(auth);
+
     localStorage.removeItem("kpk-user");
-    window.location.assign("/index.html");
-  }
-  catch(error){
+
+    if (window.showModernToast) {
+      window.showModernToast({
+        title: "Chiqish tasdiqlandi",
+        message: "Tizimdan muvaffaqiyatli chiqildi.",
+        type: "success"
+      });
+    }
+
+    setTimeout(() => {
+      window.location.href = "/index.html";
+    }, 800);
+
+  } catch (error) {
     console.error("Logout Error:", error);
+
+    if (window.showModernToast) {
+      window.showModernToast({
+        title: "Chiqish xatoligi",
+        message: "Tizimdan chiqishda xatolik yuz berdi.",
+        type: "error"
+      });
+    }
   }
 };
