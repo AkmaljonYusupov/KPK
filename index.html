@@ -159,11 +159,25 @@
     </div>
   </div>
 
-  <script src="./JavaScript/script.js"></script>
+  <!-- MODERN TOAST -->
+  <div class="modern-toast" id="modernToast">
+    <div class="toast-icon" id="toastIcon">
+      <i class="bi bi-info-circle-fill"></i>
+    </div>
 
-<script
-type="module"
-src="./JavaScript/firebase.js">
-</script>
+    <div class="toast-content">
+      <h3 id="toastTitle">Notification</h3>
+      <p id="toastMessage">Message</p>
+    </div>
+
+    <button class="toast-close" id="toastCloseBtn" type="button">
+      <i class="bi bi-x-lg"></i>
+    </button>
+
+    <div class="toast-progress"></div>
+  </div>
+
+  <script src="./JavaScript/script.js"></script>
+  <script type="module" src="./JavaScript/firebase.js"></script>
 </body>
 </html>
