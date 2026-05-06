@@ -13,19 +13,14 @@ export default async function handler(req, res) {
     if (!BOT_TOKEN || !CHAT_ID) {
       return res.status(500).json({
         ok: false,
-        message: "BOT_TOKEN yoki CHAT_ID topilmadi"
+        message: "TELEGRAM_BOT_TOKEN yoki TELEGRAM_CHAT_ID topilmadi"
       });
     }
 
     const { action, user, time } = req.body;
 
-    const actionText =
-      action === "LOGIN"
-        ? "✅ TIZIMGA KIRDI"
-        : "🚪 TIZIMDAN CHIQDI";
-
     const message = `
-${actionText}
+${action === "LOGIN" ? "✅ TIZIMGA KIRDI" : "🚪 TIZIMDAN CHIQDI"}
 
 👤 Ism: ${user?.name || "Nomaʼlum"}
 📧 Email: ${user?.email || "Nomaʼlum"}
@@ -34,22 +29,25 @@ ${actionText}
 ⏰ Vaqt: ${time || new Date().toLocaleString("uz-UZ")}
 `;
 
-    const tg = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        chat_id: CHAT_ID,
-        text: message
-      })
-    });
+    const tgResponse = await fetch(
+      `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          text: message
+        })
+      }
+    );
 
-    const data = await tg.json();
+    const tgData = await tgResponse.json();
 
     return res.status(200).json({
-      ok: data.ok,
-      telegram: data
+      ok: tgData.ok,
+      telegram: tgData
     });
 
   } catch (error) {
