@@ -1,126 +1,86 @@
-const yearElement = document.getElementById("year");
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-if (yearElement) {
-  yearElement.textContent = new Date().getFullYear();
-}
+import {
+  getAuth,
+  GoogleAuthProvider,
+  GithubAuthProvider,
+  signInWithPopup
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-window.addEventListener("load", () => {
-  const loaderScreen = document.getElementById("loaderScreen");
+/* FIREBASE CONFIG */
 
-  setTimeout(() => {
-    if (loaderScreen) {
-      loaderScreen.classList.add("hide");
-    }
-  }, 900);
-});
-
-const langDropdown = document.getElementById("langDropdown");
-const langCurrent = document.getElementById("langCurrent");
-const currentFlag = document.getElementById("currentFlag");
-const currentLangText = document.getElementById("currentLangText");
-const langOptions = document.querySelectorAll(".lang-option");
-
-const langMeta = {
-  uz: { label: "UZ", flag: "./images/uz.png" },
-  en: { label: "EN", flag: "./images/en.png" },
-  ru: { label: "RU", flag: "./images/ru.png" }
+const firebaseConfig = {
+  apiKey: "API_KEY",
+  authDomain: "PROJECT_ID.firebaseapp.com",
+  projectId: "PROJECT_ID",
+  storageBucket: "PROJECT_ID.appspot.com",
+  messagingSenderId: "SENDER_ID",
+  appId: "APP_ID"
 };
 
-if (langCurrent) {
-  langCurrent.addEventListener("click", () => {
-    langDropdown.classList.toggle("active");
-  });
-}
+/* FIREBASE INIT */
 
-document.addEventListener("click", (event) => {
-  if (langDropdown && !langDropdown.contains(event.target)) {
-    langDropdown.classList.remove("active");
-  }
-});
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-async function changeLanguage(lang) {
-  try {
-    const response = await fetch(`./json/${lang}.json`);
+const googleProvider = new GoogleAuthProvider();
+const githubProvider = new GithubAuthProvider();
 
-    if (!response.ok) {
-      throw new Error("JSON fayl topilmadi");
-    }
+/* ELEMENTS */
 
-    const data = await response.json();
-
-    document.documentElement.lang = lang;
-
-    document.querySelectorAll("[data-lang]").forEach((element) => {
-      const key = element.getAttribute("data-lang");
-
-      if (data[key]) {
-        element.textContent = data[key];
-      }
-    });
-
-    currentFlag.src = langMeta[lang].flag;
-    currentLangText.textContent = langMeta[lang].label;
-
-    langOptions.forEach((option) => {
-      option.classList.toggle("active", option.dataset.langCode === lang);
-    });
-
-    localStorage.setItem("kpk-lang", lang);
-  } catch (error) {
-    console.error("Til faylini yuklashda xatolik:", error);
-  }
-}
-
-langOptions.forEach((option) => {
-  option.addEventListener("click", () => {
-    const lang = option.dataset.langCode;
-    changeLanguage(lang);
-    langDropdown.classList.remove("active");
-  });
-});
-
-const savedLang = localStorage.getItem("kpk-lang") || "uz";
-changeLanguage(savedLang);
-
-/* MODAL */
-
-const googleLoginBtn = document.getElementById("googleLoginBtn");
-
-const authModal = document.getElementById("authModal");
-const closeAuthModal = document.getElementById("closeAuthModal");
-const cancelAuthBtn = document.getElementById("cancelAuthBtn");
 const continueAuthBtn = document.getElementById("continueAuthBtn");
+const githubLoginBtn = document.getElementById("githubLoginBtn");
 
-function openAuthModal() {
-  if (authModal) {
-    authModal.classList.add("show");
-  }
-}
+/* GOOGLE LOGIN */
 
-function closeModal() {
-  if (authModal) {
-    authModal.classList.remove("show");
-  }
-}
+async function loginWithGoogle() {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
 
-if (googleLoginBtn) {
-  googleLoginBtn.addEventListener("click", openAuthModal);
-}
+    localStorage.setItem("kpk-user", JSON.stringify({
+      uid: user.uid,
+      name: user.displayName,
+      email: user.email,
+      image: user.photoURL,
+      provider: "google"
+    }));
 
-if (closeAuthModal) {
-  closeAuthModal.addEventListener("click", closeModal);
-}
-
-if (cancelAuthBtn) {
-  cancelAuthBtn.addEventListener("click", closeModal);
-}
-
-if (authModal) {
-  authModal.addEventListener("click", (event) => {
-    if (event.target === authModal) {
-      closeModal();
+    if (window.closeAuthModalWindow) {
+      window.closeAuthModalWindow();
     }
-  });
+
+    window.location.href = "./dashboard.html";
+  } catch (error) {
+    console.error("Google login xatoligi:", error);
+  }
 }
 
-window.closeAuthModalWindow = closeModal;
+/* GITHUB LOGIN */
+
+async function loginWithGithub() {
+  try {
+    const result = await signInWithPopup(auth, githubProvider);
+    const user = result.user;
+
+    localStorage.setItem("kpk-user", JSON.stringify({
+      uid: user.uid,
+      name: user.displayName,
+      email: user.email,
+      image: user.photoURL,
+      provider: "github"
+    }));
+
+    window.location.href = "./dashboard.html";
+  } catch (error) {
+    console.error("Github login xatoligi:", error);
+  }
+}
+
+if (continueAuthBtn) {
+  continueAuthBtn.addEventListener("click", loginWithGoogle);
+}
+
+if (githubLoginBtn) {
+  githubLoginBtn.addEventListener("click", loginWithGithub);
+}
