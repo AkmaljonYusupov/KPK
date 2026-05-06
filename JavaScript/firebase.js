@@ -43,17 +43,28 @@ const authTexts = {
     loginSuccessText: "Tizimga muvaffaqiyatli kirildi.",
     logoutSuccessTitle: "Chiqish tasdiqlandi",
     logoutSuccessText: "Tizimdan muvaffaqiyatli chiqildi.",
+
     loginErrorTitle: "Login xatoligi",
     loginErrorText: "Kirishda xatolik yuz berdi.",
     logoutErrorTitle: "Chiqish xatoligi",
     logoutErrorText: "Tizimdan chiqishda xatolik yuz berdi.",
+
+    telegramSendingTitle: "Telegramga yuborilmoqda",
+    telegramLoginSendingText: "User kirish maʼlumotlari Telegram botga yuborilmoqda...",
+    telegramLogoutSendingText: "User chiqish maʼlumotlari Telegram botga yuborilmoqda...",
+
     telegramSuccessTitle: "Telegramga yuborildi",
     telegramLoginText: "User kirish maʼlumotlari Telegram botga muvaffaqiyatli yuborildi.",
     telegramLogoutText: "User chiqish maʼlumotlari Telegram botga muvaffaqiyatli yuborildi.",
+
     telegramErrorTitle: "Telegram xatoligi",
     telegramErrorText: "Telegram botga maʼlumot yuborib bo‘lmadi.",
+    telegramLoginFailedText: "Tizimga kirildi, lekin user maʼlumotlari Telegram botga yuborilmadi.",
+    telegramLogoutFailedText: "Tizimdan chiqildi, lekin chiqish maʼlumotlari Telegram botga yuborilmadi.",
+
     serverErrorTitle: "Server xatoligi",
     serverErrorText: "Telegram server bilan ulanishda xatolik.",
+
     noEmail: "Email ko‘rsatilmagan",
     user: "User"
   },
@@ -63,17 +74,28 @@ const authTexts = {
     loginSuccessText: "You have successfully signed in.",
     logoutSuccessTitle: "Logout confirmed",
     logoutSuccessText: "You have successfully logged out.",
+
     loginErrorTitle: "Login error",
     loginErrorText: "An error occurred during sign-in.",
     logoutErrorTitle: "Logout error",
     logoutErrorText: "An error occurred during logout.",
+
+    telegramSendingTitle: "Sending to Telegram",
+    telegramLoginSendingText: "User login information is being sent to the Telegram bot...",
+    telegramLogoutSendingText: "User logout information is being sent to the Telegram bot...",
+
     telegramSuccessTitle: "Sent to Telegram",
     telegramLoginText: "User login information was successfully sent to the Telegram bot.",
     telegramLogoutText: "User logout information was successfully sent to the Telegram bot.",
+
     telegramErrorTitle: "Telegram error",
     telegramErrorText: "Could not send information to the Telegram bot.",
+    telegramLoginFailedText: "Login completed, but user information was not sent to Telegram.",
+    telegramLogoutFailedText: "Logout completed, but logout information was not sent to Telegram.",
+
     serverErrorTitle: "Server error",
     serverErrorText: "Error connecting to the Telegram server.",
+
     noEmail: "Email not provided",
     user: "User"
   },
@@ -83,17 +105,28 @@ const authTexts = {
     loginSuccessText: "Вы успешно вошли в систему.",
     logoutSuccessTitle: "Выход подтверждён",
     logoutSuccessText: "Вы успешно вышли из системы.",
+
     loginErrorTitle: "Ошибка входа",
     loginErrorText: "Во время входа произошла ошибка.",
     logoutErrorTitle: "Ошибка выхода",
     logoutErrorText: "Во время выхода произошла ошибка.",
+
+    telegramSendingTitle: "Отправка в Telegram",
+    telegramLoginSendingText: "Информация о входе пользователя отправляется в Telegram бот...",
+    telegramLogoutSendingText: "Информация о выходе пользователя отправляется в Telegram бот...",
+
     telegramSuccessTitle: "Отправлено в Telegram",
     telegramLoginText: "Информация о входе пользователя успешно отправлена в Telegram бот.",
     telegramLogoutText: "Информация о выходе пользователя успешно отправлена в Telegram бот.",
+
     telegramErrorTitle: "Ошибка Telegram",
     telegramErrorText: "Не удалось отправить информацию в Telegram бот.",
+    telegramLoginFailedText: "Вход выполнен, но информация пользователя не отправлена в Telegram.",
+    telegramLogoutFailedText: "Выход выполнен, но информация о выходе не отправлена в Telegram.",
+
     serverErrorTitle: "Ошибка сервера",
     serverErrorText: "Ошибка соединения с сервером Telegram.",
+
     noEmail: "Email не указан",
     user: "Пользователь"
   }
@@ -120,6 +153,8 @@ function showToast(title, message, type = "info", iconClass = "bi-info-circle-fi
       message,
       type
     });
+  } else {
+    console.log(`[${type}] ${title}: ${message}`);
   }
 }
 
@@ -127,6 +162,15 @@ function showToast(title, message, type = "info", iconClass = "bi-info-circle-fi
 
 async function sendTelegramLog(action, userData) {
   try {
+    showToast(
+      t().telegramSendingTitle,
+      action === "LOGIN"
+        ? t().telegramLoginSendingText
+        : t().telegramLogoutSendingText,
+      "info",
+      "bi-send-fill"
+    );
+
     const response = await fetch("/api/telegram", {
       method: "POST",
       headers: {
@@ -143,7 +187,7 @@ async function sendTelegramLog(action, userData) {
 
     console.log("Telegram result:", result);
 
-    if (result.ok) {
+    if (response.ok && result.ok) {
       showToast(
         t().telegramSuccessTitle,
         action === "LOGIN"
@@ -205,12 +249,6 @@ async function loginWithProvider() {
 
     localStorage.setItem("kpk-user", JSON.stringify(userData));
 
-    await sendTelegramLog("LOGIN", userData);
-
-    if (window.closeAuthModalWindow) {
-      window.closeAuthModalWindow();
-    }
-
     showToast(
       t().loginSuccessTitle,
       `${userData.name} — ${t().loginSuccessText}`,
@@ -218,9 +256,24 @@ async function loginWithProvider() {
       "bi-check-circle-fill"
     );
 
+    const telegramSent = await sendTelegramLog("LOGIN", userData);
+
+    if (!telegramSent) {
+      showToast(
+        t().telegramErrorTitle,
+        t().telegramLoginFailedText,
+        "error",
+        "bi-send-x-fill"
+      );
+    }
+
+    if (window.closeAuthModalWindow) {
+      window.closeAuthModalWindow();
+    }
+
     setTimeout(() => {
       window.location.href = "/dashboard.html";
-    }, 1100);
+    }, 1300);
 
   } catch (error) {
     console.error("Login Error Code:", error.code);
@@ -252,8 +305,10 @@ window.kpkLogout = async function() {
   try {
     const userData = JSON.parse(localStorage.getItem("kpk-user"));
 
+    let telegramSent = true;
+
     if (userData) {
-      await sendTelegramLog("LOGOUT", userData);
+      telegramSent = await sendTelegramLog("LOGOUT", userData);
     }
 
     await signOut(auth);
@@ -267,9 +322,18 @@ window.kpkLogout = async function() {
       "bi-box-arrow-right"
     );
 
+    if (!telegramSent) {
+      showToast(
+        t().telegramErrorTitle,
+        t().telegramLogoutFailedText,
+        "error",
+        "bi-send-x-fill"
+      );
+    }
+
     setTimeout(() => {
       window.location.href = "/index.html";
-    }, 1000);
+    }, 1200);
 
   } catch (error) {
     console.error("Logout Error:", error);
