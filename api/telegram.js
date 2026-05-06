@@ -3,8 +3,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false });
   }
 
-  const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-  const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+  const BOT_TOKEN = process.env.8097143450:AAH11f4uz2ObC_8FG-HI8NOmPBuWeEPswkQ;
+  const CHAT_ID = process.env.630353326;
 
   const { action, user, time } = req.body;
 
