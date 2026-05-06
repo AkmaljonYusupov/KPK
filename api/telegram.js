@@ -1,12 +1,4 @@
 export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
   if (req.method !== "POST") {
     return res.status(405).json({
       ok: false,
@@ -21,7 +13,7 @@ export default async function handler(req, res) {
     if (!BOT_TOKEN || !CHAT_ID) {
       return res.status(500).json({
         ok: false,
-        message: "Telegram token yoki chat ID topilmadi"
+        message: "BOT_TOKEN yoki CHAT_ID topilmadi"
       });
     }
 
@@ -42,31 +34,21 @@ ${actionText}
 ⏰ Vaqt: ${time || new Date().toLocaleString("uz-UZ")}
 `;
 
-    const telegramResponse = await fetch(
-      `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          chat_id: CHAT_ID,
-          text: message
-        })
-      }
-    );
+    const tg = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        text: message
+      })
+    });
 
-    const data = await telegramResponse.json();
-
-    if (!data.ok) {
-      return res.status(500).json({
-        ok: false,
-        telegram: data
-      });
-    }
+    const data = await tg.json();
 
     return res.status(200).json({
-      ok: true,
+      ok: data.ok,
       telegram: data
     });
 
