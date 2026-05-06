@@ -31,9 +31,11 @@ githubProvider.addScope("user:email");
 
 const continueAuthBtn = document.getElementById("continueAuthBtn");
 
+/* TELEGRAM LOG */
+
 async function sendTelegramLog(action, userData) {
   try {
-    await fetch("/api/telegram", {
+    const response = await fetch("/api/telegram", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -44,10 +46,21 @@ async function sendTelegramLog(action, userData) {
         time: new Date().toLocaleString("uz-UZ")
       })
     });
+
+    const result = await response.json();
+
+    console.log("Telegram result:", result);
+
+    if (!result.ok) {
+      console.error("Telegram API Error:", result);
+    }
+
   } catch (error) {
     console.error("Telegram log error:", error);
   }
 }
+
+/* LOGIN */
 
 async function loginWithProvider() {
   try {
@@ -113,6 +126,8 @@ async function loginWithProvider() {
 if (continueAuthBtn) {
   continueAuthBtn.addEventListener("click", loginWithProvider);
 }
+
+/* LOGOUT */
 
 window.kpkLogout = async function() {
   try {
