@@ -4,6 +4,20 @@ if (yearElement) {
   yearElement.textContent = new Date().getFullYear();
 }
 
+/* LOADING */
+
+window.addEventListener("load", () => {
+  const loaderScreen = document.getElementById("loaderScreen");
+
+  setTimeout(() => {
+    if (loaderScreen) {
+      loaderScreen.classList.add("hide");
+    }
+  }, 900);
+});
+
+/* LANGUAGE */
+
 const langDropdown = document.getElementById("langDropdown");
 const langCurrent = document.getElementById("langCurrent");
 const currentFlag = document.getElementById("currentFlag");
@@ -80,6 +94,8 @@ langOptions.forEach((option) => {
 
 const savedLang = localStorage.getItem("kpk-lang") || "uz";
 changeLanguage(savedLang);
+
+/* AUTH BUTTONS */
 
 const googleLoginBtn = document.getElementById("googleLoginBtn");
 const githubLoginBtn = document.getElementById("githubLoginBtn");
