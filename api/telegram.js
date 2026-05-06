@@ -1,41 +1,79 @@
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ ok: false });
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
   }
 
-  const BOT_TOKEN = process.env.8097143450:AAH11f4uz2ObC_8FG-HI8NOmPBuWeEPswkQ;
-  const CHAT_ID = process.env.630353326;
+  if (req.method !== "POST") {
+    return res.status(405).json({
+      ok: false,
+      message: "Only POST method allowed"
+    });
+  }
 
-  const { action, user, time } = req.body;
+  try {
+    const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+    const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
-  const actionText = action === "LOGIN"
-    ? "✅ TIZIMGA KIRDI"
-    : "🚪 TIZIMDAN CHIQDI";
+    if (!BOT_TOKEN || !CHAT_ID) {
+      return res.status(500).json({
+        ok: false,
+        message: "Telegram token yoki chat ID topilmadi"
+      });
+    }
 
-  const message = `
+    const { action, user, time } = req.body;
+
+    const actionText =
+      action === "LOGIN"
+        ? "✅ TIZIMGA KIRDI"
+        : "🚪 TIZIMDAN CHIQDI";
+
+    const message = `
 ${actionText}
 
 👤 Ism: ${user?.name || "Nomaʼlum"}
 📧 Email: ${user?.email || "Nomaʼlum"}
 🔐 Provider: ${user?.provider || "Nomaʼlum"}
 🆔 UID: ${user?.uid || "Nomaʼlum"}
-⏰ Vaqt: ${time}
+⏰ Vaqt: ${time || new Date().toLocaleString("uz-UZ")}
 `;
 
-  try {
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        chat_id: CHAT_ID,
-        text: message
-      })
+    const telegramResponse = await fetch(
+      `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          text: message
+        })
+      }
+    );
+
+    const data = await telegramResponse.json();
+
+    if (!data.ok) {
+      return res.status(500).json({
+        ok: false,
+        telegram: data
+      });
+    }
+
+    return res.status(200).json({
+      ok: true,
+      telegram: data
     });
 
-    return res.status(200).json({ ok: true });
   } catch (error) {
-    return res.status(500).json({ ok: false });
+    return res.status(500).json({
+      ok: false,
+      message: error.message
+    });
   }
 }
