@@ -7,18 +7,14 @@ import {
   signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* FIREBASE CONFIG */
-
 const firebaseConfig = {
-  apiKey: "API_KEY",
-  authDomain: "PROJECT_ID.firebaseapp.com",
-  projectId: "PROJECT_ID",
-  storageBucket: "PROJECT_ID.appspot.com",
-  messagingSenderId: "SENDER_ID",
-  appId: "APP_ID"
+  apiKey: "BU_YERGA_API_KEY",
+  authDomain: "kpk-platform.firebaseapp.com",
+  projectId: "kpk-platform",
+  storageBucket: "kpk-platform.appspot.com",
+  messagingSenderId: "BU_YERGA_SENDER_ID",
+  appId: "BU_YERGA_APP_ID"
 };
-
-/* FIREBASE INIT */
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -26,12 +22,8 @@ const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
 
-/* ELEMENTS */
-
 const continueAuthBtn = document.getElementById("continueAuthBtn");
 const githubLoginBtn = document.getElementById("githubLoginBtn");
-
-/* GOOGLE LOGIN */
 
 async function loginWithGoogle() {
   try {
@@ -55,8 +47,6 @@ async function loginWithGoogle() {
     console.error("Google login xatoligi:", error);
   }
 }
-
-/* GITHUB LOGIN */
 
 async function loginWithGithub() {
   try {
