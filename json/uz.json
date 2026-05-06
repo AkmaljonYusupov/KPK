@@ -1,9 +1,16 @@
 {
+  "loadingText": "Platforma yuklanmoqda...",
   "badge": "KPK Platform",
   "title": "KPK — Kreativlik. Potentsial. Kasbiy o‘sish",
   "description": "Ta’lim muassasasi talabalaridagi ijodkorlik va salohiyatni amaliy o‘sishga yo‘naltirish.",
   "purposeTitle": "Platformaning maqsadi",
   "purposeText": "Talabalar bilimini, ijodiy fikrlashini va kasbiy rivojlanishini raqamli muhitda qo‘llab-quvvatlash.",
   "welcome": "Dasturga xush kelibsiz",
-  "authDesc": "Tizimdan foydalanish uchun Google yoki GitHub akkauntingiz orqali kiring."
+  "authDesc": "Tizimdan foydalanish uchun Google yoki GitHub akkauntingiz orqali kiring.",
+  "modalGoogleTitle": "Google orqali kirish",
+  "modalGoogleText": "Google account orqali platformaga kirish jarayoni boshlanadi.",
+  "modalGithubTitle": "Github orqali kirish",
+  "modalGithubText": "Github account orqali platformaga kirish jarayoni boshlanadi.",
+  "modalCancel": "Bekor qilish",
+  "modalContinue": "Davom etish"
 }
