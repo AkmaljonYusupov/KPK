@@ -8,7 +8,7 @@ if (yearElement) {
 
 window.addEventListener("load", () => {
   const loaderScreen = document.getElementById("loaderScreen");
-
+ 
   setTimeout(() => {
     if (loaderScreen) {
       loaderScreen.classList.add("hide");
