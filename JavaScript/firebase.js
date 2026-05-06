@@ -10,8 +10,6 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* FIREBASE CONFIG */
-
 const firebaseConfig = {
   apiKey: "AIzaSyBfmybIJBQjvVPMXBJqnST2kLH7LDKc_Gs",
   authDomain: "kpk-platform.firebaseapp.com",
@@ -22,12 +20,8 @@ const firebaseConfig = {
   measurementId: "G-W02BY5MCFB"
 };
 
-/* INIT */
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-
-/* PROVIDERS */
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -35,67 +29,68 @@ const githubProvider = new GithubAuthProvider();
 githubProvider.addScope("read:user");
 githubProvider.addScope("user:email");
 
-/* ELEMENT */
-
 const continueAuthBtn = document.getElementById("continueAuthBtn");
-
-/* LOGIN */
 
 async function loginWithProvider(){
   try{
     const providerName = window.kpkSelectedProvider || "google";
 
     const selectedProvider =
-      providerName === "github"
-        ? githubProvider
-        : googleProvider;
+      providerName === "github" ? githubProvider : googleProvider;
 
     const result = await signInWithPopup(auth, selectedProvider);
-
     const user = result.user;
 
-    localStorage.setItem(
-      "kpk-user",
-      JSON.stringify({
-        uid: user.uid,
-        name: user.displayName || "User",
-        email: user.email || "Email ko‘rsatilmagan",
-        image: user.photoURL || "./images/user.png",
-        provider: providerName
-      })
-    );
+    const userData = {
+      uid: user.uid,
+      name: user.displayName || "User",
+      email: user.email || "Email ko‘rsatilmagan",
+      image: user.photoURL || "./images/user.png",
+      provider: providerName
+    };
+
+    localStorage.setItem("kpk-user", JSON.stringify(userData));
 
     if(window.closeAuthModalWindow){
       window.closeAuthModalWindow();
     }
 
-    window.location.href = "/dashboard.html";
+    window.location.assign("/dashboard.html");
   }
 
   catch(error){
     console.error("Login Error Code:", error.code);
     console.error("Login Error Message:", error.message);
-    console.error("Login Error:", error);
+
+    if(error.code === "auth/account-exists-with-different-credential"){
+      alert("Bu email boshqa login usuli bilan ulangan. Avval Google bilan kirgan bo‘lsangiz, Google orqali kiring.");
+      return;
+    }
+
+    if(error.code === "auth/popup-closed-by-user"){
+      console.log("Foydalanuvchi login oynasini yopdi.");
+      return;
+    }
+
+    if(error.code === "auth/unauthorized-domain"){
+      alert("Firebase Authorized domains ichiga kpk-uz.vercel.app qo‘shilmagan.");
+      return;
+    }
+
+    alert("GitHub orqali kirishda xatolik bor. Console’da error code ni tekshiring.");
   }
 }
-
-/* BUTTON */
 
 if(continueAuthBtn){
   continueAuthBtn.addEventListener("click", loginWithProvider);
 }
 
-/* LOGOUT */
-
 window.kpkLogout = async function(){
   try{
     await signOut(auth);
-
     localStorage.removeItem("kpk-user");
-
-    window.location.href = "/index.html";
+    window.location.assign("/index.html");
   }
-
   catch(error){
     console.error("Logout Error:", error);
   }
