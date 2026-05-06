@@ -23,11 +23,15 @@ const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
 
 const continueAuthBtn = document.getElementById("continueAuthBtn");
-const githubLoginBtn = document.getElementById("githubLoginBtn");
 
-async function loginWithGoogle() {
+async function loginWithProvider() {
   try {
-    const result = await signInWithPopup(auth, googleProvider);
+    const providerName = window.kpkSelectedProvider || "google";
+
+    const selectedProvider =
+      providerName === "github" ? githubProvider : googleProvider;
+
+    const result = await signInWithPopup(auth, selectedProvider);
     const user = result.user;
 
     localStorage.setItem("kpk-user", JSON.stringify({
@@ -35,7 +39,7 @@ async function loginWithGoogle() {
       name: user.displayName,
       email: user.email,
       image: user.photoURL,
-      provider: "google"
+      provider: providerName
     }));
 
     if (window.closeAuthModalWindow) {
@@ -43,34 +47,12 @@ async function loginWithGoogle() {
     }
 
     window.location.href = "./dashboard.html";
+
   } catch (error) {
-    console.error("Google login xatoligi:", error);
-  }
-}
-
-async function loginWithGithub() {
-  try {
-    const result = await signInWithPopup(auth, githubProvider);
-    const user = result.user;
-
-    localStorage.setItem("kpk-user", JSON.stringify({
-      uid: user.uid,
-      name: user.displayName,
-      email: user.email,
-      image: user.photoURL,
-      provider: "github"
-    }));
-
-    window.location.href = "./dashboard.html";
-  } catch (error) {
-    console.error("Github login xatoligi:", error);
+    console.error("Login xatoligi:", error);
   }
 }
 
 if (continueAuthBtn) {
-  continueAuthBtn.addEventListener("click", loginWithGoogle);
-}
-
-if (githubLoginBtn) {
-  githubLoginBtn.addEventListener("click", loginWithGithub);
+  continueAuthBtn.addEventListener("click", loginWithProvider);
 }
