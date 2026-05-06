@@ -1,9 +1,16 @@
 {
+  "loadingText": "Loading platform...",
   "badge": "KPK Platform",
   "title": "KPK — Creativity. Potential. Professional Growth",
   "description": "Guiding students’ creativity and potential toward practical growth in educational institutions.",
   "purposeTitle": "Platform purpose",
   "purposeText": "To support students’ knowledge, creative thinking and professional development in a digital environment.",
   "welcome": "Welcome to the platform",
-  "authDesc": "Sign in using your Google or GitHub account to continue."
+  "authDesc": "Sign in using your Google or GitHub account to continue.",
+  "modalGoogleTitle": "Sign in with Google",
+  "modalGoogleText": "The Google account sign-in process will begin.",
+  "modalGithubTitle": "Sign in with Github",
+  "modalGithubText": "The Github account sign-in process will begin.",
+  "modalCancel": "Cancel",
+  "modalContinue": "Continue"
 }
