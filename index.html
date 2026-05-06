@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>KPK Platform</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="./CSS/style.css">
+</head>
+
+<body>
+    <div class="animated-grid"></div>
+    <div class="soft-orb orb-one"></div>
+    <div class="soft-orb orb-two"></div>
+
+    <main class="main-wrapper">
+        <section class="login-card">
+            <div class="card-content">
+
+                <div class="left-side">
+                    <div class="logo-wrap">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/77/Emblem_of_Uzbekistan.svg"
+                            alt="Logo">
+                    </div>
+
+                    <div class="system-badge">
+                        <span data-lang="badge">KPK Platform</span>
+                    </div>
+
+                    <h1 class="main-title" data-lang="title">
+                        KPK — Kreativlik. Potentsial. Kasbiy o‘sish
+                    </h1>
+
+                    <p class="desc" data-lang="description">
+                        Ta’lim muassasasi talabalaridagi ijodkorlik va salohiyatni amaliy o‘sishga yo‘naltirish.
+                    </p>
+
+                    <div class="purpose-box">
+                        <div class="purpose-icon">
+                            <i class="bi bi-bullseye"></i>
+                        </div>
+
+                        <div>
+                            <h3 data-lang="purposeTitle">Platformaning maqsadi</h3>
+                            <p data-lang="purposeText">
+                                Talabalar bilimini, ijodiy fikrlashini va kasbiy rivojlanishini raqamli muhitda
+                                qo‘llab-quvvatlash.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="auth-box">
+                    <div class="top-bar">
+                        <h2 class="auth-title" data-lang="welcome">
+                            Dasturga xush kelibsiz
+                        </h2>
+
+                        <div class="lang-dropdown" id="langDropdown">
+                            <button class="lang-current" id="langCurrent" type="button">
+                                <span class="lang-left">
+                                    <img src="./images/uz.png" class="flag-img" id="currentFlag" alt="flag">
+                                    <span id="currentLangText">UZ</span>
+                                </span>
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+
+                            <div class="lang-menu">
+                                <button class="lang-option active" data-lang-code="uz" type="button">
+                                    <img src="./images/uz.png" class="flag-img" alt="uz">
+                                    <span>Uzbek</span>
+                                </button>
+
+                                <button class="lang-option" data-lang-code="en" type="button">
+                                    <img src="./images/en.png" class="flag-img" alt="en">
+                                    <span>English</span>
+                                </button>
+
+                                <button class="lang-option" data-lang-code="ru" type="button">
+                                    <img src="./images/ru.png" class="flag-img" alt="ru">
+                                    <span>Русский</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="auth-desc" data-lang="authDesc">
+                        Tizimdan foydalanish uchun Google yoki GitHub akkauntingiz orqali kiring.
+                    </p>
+
+                    <div class="auth-buttons">
+                        <button class="auth-btn google-btn" id="googleLoginBtn" type="button">
+                            <i class="bi bi-google"></i>
+                            <span>Google</span>
+                        </button>
+
+                        <button class="auth-btn github-btn" id="githubLoginBtn" type="button">
+                            <i class="bi bi-github"></i>
+                            <span>Github</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="footer-text">
+                © <span id="year"></span> KPK Platform
+            </div>
+        </section>
+    </main>
+
+    <script src="./JavaScript/script.js"></script>
+</body>
+
+</html>
