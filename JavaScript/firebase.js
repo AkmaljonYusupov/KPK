@@ -30,7 +30,10 @@ const auth = getAuth(app);
 /* PROVIDERS */
 
 const googleProvider = new GoogleAuthProvider();
+
 const githubProvider = new GithubAuthProvider();
+githubProvider.addScope("read:user");
+githubProvider.addScope("user:email");
 
 /* ELEMENT */
 
@@ -54,11 +57,11 @@ async function loginWithProvider(){
     localStorage.setItem(
       "kpk-user",
       JSON.stringify({
-        uid:user.uid,
-        name:user.displayName,
-        email:user.email,
-        image:user.photoURL,
-        provider:providerName
+        uid: user.uid,
+        name: user.displayName || "User",
+        email: user.email || "Email ko‘rsatilmagan",
+        image: user.photoURL || "./images/user.png",
+        provider: providerName
       })
     );
 
@@ -66,10 +69,12 @@ async function loginWithProvider(){
       window.closeAuthModalWindow();
     }
 
-    window.location.href = "./dashboard.html";
+    window.location.href = "/dashboard.html";
   }
 
   catch(error){
+    console.error("Login Error Code:", error.code);
+    console.error("Login Error Message:", error.message);
     console.error("Login Error:", error);
   }
 }
@@ -88,7 +93,7 @@ window.kpkLogout = async function(){
 
     localStorage.removeItem("kpk-user");
 
-    window.location.href = "./index.html";
+    window.location.href = "/index.html";
   }
 
   catch(error){
