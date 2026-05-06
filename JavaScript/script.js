@@ -95,19 +95,63 @@ langOptions.forEach((option) => {
 const savedLang = localStorage.getItem("kpk-lang") || "uz";
 changeLanguage(savedLang);
 
-/* AUTH BUTTONS */
+/* MODAL */
 
 const googleLoginBtn = document.getElementById("googleLoginBtn");
 const githubLoginBtn = document.getElementById("githubLoginBtn");
 
+const authModal = document.getElementById("authModal");
+const closeAuthModal = document.getElementById("closeAuthModal");
+const cancelAuthBtn = document.getElementById("cancelAuthBtn");
+const continueAuthBtn = document.getElementById("continueAuthBtn");
+
+function openAuthModal() {
+  if (authModal) {
+    authModal.classList.add("show");
+  }
+}
+
+function closeModal() {
+  if (authModal) {
+    authModal.classList.remove("show");
+  }
+}
+
 if (googleLoginBtn) {
-  googleLoginBtn.addEventListener("click", () => {
-    alert("Google Authentication ulanishi shu yerga yoziladi.");
+  googleLoginBtn.addEventListener("click", openAuthModal);
+}
+
+if (closeAuthModal) {
+  closeAuthModal.addEventListener("click", closeModal);
+}
+
+if (cancelAuthBtn) {
+  cancelAuthBtn.addEventListener("click", closeModal);
+}
+
+if (authModal) {
+  authModal.addEventListener("click", (event) => {
+    if (event.target === authModal) {
+      closeModal();
+    }
+  });
+}
+
+if (continueAuthBtn) {
+  continueAuthBtn.addEventListener("click", () => {
+    closeModal();
+
+    console.log("Google login boshlanmoqda...");
+
+    /*
+      Bu yerga Firebase Google Auth kodi ulanadi.
+      Masalan: signInWithPopup(auth, provider)
+    */
   });
 }
 
 if (githubLoginBtn) {
   githubLoginBtn.addEventListener("click", () => {
-    alert("GitHub Authentication ulanishi shu yerga yoziladi.");
+    console.log("Github login boshlanmoqda...");
   });
 }
