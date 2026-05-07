@@ -30,6 +30,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 const googleProvider = new GoogleAuthProvider();
+googleProvider.addScope("email");
+googleProvider.addScope("profile");
 googleProvider.setCustomParameters({ prompt: "select_account" });
 
 const githubProvider = new GithubAuthProvider();
@@ -214,7 +216,6 @@ async function sendTelegramLog(action, userData) {
     );
 
     const result = await response.json();
-
     console.log("Telegram result:", result);
 
     if (result.ok) {
@@ -252,10 +253,16 @@ async function loginWithProvider() {
     const result = await signInWithPopup(auth, selectedProvider);
     const user = result.user;
 
+    // Email: Firebase dan olish, bo'lmasa providerData dan qidirish
+    const email =
+      user.email ||
+      user.providerData?.find(p => p.email)?.email ||
+      t().noEmail;
+
     const userData = {
       uid: user.uid,
       name: user.displayName || t().user,
-      email: user.email || t().noEmail,
+      email: email,
       image: user.photoURL || "./images/user.png",
       provider: providerName,
       createdAt: user.metadata?.creationTime || "Noma'lum",
