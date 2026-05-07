@@ -1,11 +1,4 @@
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({
-      ok: false,
-      message: "Only POST method allowed"
-    });
-  }
-
   try {
     const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
     const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
@@ -13,20 +6,28 @@ export default async function handler(req, res) {
     if (!BOT_TOKEN || !CHAT_ID) {
       return res.status(500).json({
         ok: false,
-        message: "TELEGRAM_BOT_TOKEN yoki TELEGRAM_CHAT_ID topilmadi"
+        message: "TOKEN yoki CHAT_ID topilmadi",
+        tokenFound: Boolean(BOT_TOKEN),
+        chatIdFound: Boolean(CHAT_ID)
       });
     }
 
-    const { action, user, time } = req.body;
+    const body = req.method === "POST" ? req.body : {};
+
+    const action = body.action || "TEST";
+    const user = body.user || {};
+    const time = body.time || new Date().toLocaleString("uz-UZ");
+    const page = body.page || "Test sahifa";
 
     const message = `
-${action === "LOGIN" ? "✅ TIZIMGA KIRDI" : "🚪 TIZIMDAN CHIQDI"}
+${action === "LOGIN" ? "✅ TIZIMGA KIRDI" : action === "LOGOUT" ? "🚪 TIZIMDAN CHIQDI" : "🧪 TEST XABAR"}
 
-👤 Ism: ${user?.name || "Nomaʼlum"}
-📧 Email: ${user?.email || "Nomaʼlum"}
-🔐 Provider: ${user?.provider || "Nomaʼlum"}
-🆔 UID: ${user?.uid || "Nomaʼlum"}
-⏰ Vaqt: ${time || new Date().toLocaleString("uz-UZ")}
+👤 Ism: ${user.name || "Test User"}
+📧 Email: ${user.email || "test@gmail.com"}
+🔐 Provider: ${user.provider || "test"}
+🆔 UID: ${user.uid || "test-uid"}
+🌐 Sahifa: ${page}
+⏰ Vaqt: ${time}
 `;
 
     const tgResponse = await fetch(
@@ -45,8 +46,9 @@ ${action === "LOGIN" ? "✅ TIZIMGA KIRDI" : "🚪 TIZIMDAN CHIQDI"}
 
     const tgData = await tgResponse.json();
 
-    return res.status(200).json({
+    return res.status(tgData.ok ? 200 : 400).json({
       ok: tgData.ok,
+      message: tgData.ok ? "Telegramga yuborildi" : "Telegramga yuborilmadi",
       telegram: tgData
     });
 
