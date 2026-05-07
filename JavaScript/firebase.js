@@ -20,11 +20,16 @@ const firebaseConfig = {
   measurementId: "G-W02BY5MCFB"
 };
 
+// ═══════════════════════════════════════════════════════
+// TELEGRAM CONFIG — shu ikki qiymatni o'zgartiring
+const TELEGRAM_BOT_TOKEN = "8600474887:AAH8OeZ9pDlpBS_tviQ0zMIOfc2emzjpwNE";
+const TELEGRAM_CHAT_ID   = "529092761";
+// ═══════════════════════════════════════════════════════
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 const googleProvider = new GoogleAuthProvider();
-// COOP xatosini kamaytirish uchun
 googleProvider.setCustomParameters({ prompt: "select_account" });
 
 const githubProvider = new GithubAuthProvider();
@@ -68,7 +73,7 @@ const authTexts = {
     telegramLogoutFailedText: "Tizimdan chiqildi, lekin chiqish ma'lumotlari Telegram botga yuborilmadi.",
 
     serverErrorTitle: "Server xatoligi",
-    serverErrorText: "Telegram API bilan ulanishda xatolik. Live Server ishlatayotgan bo'lsangiz, yonida vercel dev ham ishga tushgan bo'lishi kerak.",
+    serverErrorText: "Telegram API bilan ulanishda xatolik yuz berdi.",
 
     noEmail: "Email ko'rsatilmagan",
     user: "User"
@@ -102,7 +107,7 @@ const authTexts = {
     telegramLogoutFailedText: "Logout completed, but logout information was not sent to Telegram.",
 
     serverErrorTitle: "Server error",
-    serverErrorText: "Telegram API connection error. If you use Live Server, vercel dev must also be running.",
+    serverErrorText: "An error occurred connecting to Telegram API.",
 
     noEmail: "Email not provided",
     user: "User"
@@ -136,7 +141,7 @@ const authTexts = {
     telegramLogoutFailedText: "Выход выполнен, но информация о выходе не отправлена в Telegram.",
 
     serverErrorTitle: "Ошибка сервера",
-    serverErrorText: "Ошибка соединения с Telegram API. Если используете Live Server, vercel dev тоже должен быть запущен.",
+    serverErrorText: "Произошла ошибка подключения к Telegram API.",
 
     noEmail: "Email не указан",
     user: "Пользователь"
@@ -173,62 +178,46 @@ function redirectToPage(pageName) {
   window.location.href = `${window.location.origin}${folderPath}${pageName}`;
 }
 
-/* ─── TELEGRAM API URL ────────────────────────────────────────────────────── */
-function getTelegramApiUrl() {
-  const host = window.location.hostname;
-  const port = window.location.port;
-
-  const isLiveServer =
-    (host === "127.0.0.1" || host === "localhost") && port === "5500";
-
-  if (isLiveServer) {
-    // vercel dev o'rniga to'g'ridan deploy qilingan URL ga yubor
-    return "https://kpk-platform.vercel.app/api/telegram";
-  }
-
-  return `${window.location.origin}/api/telegram`;
-}
-
-/* ─── TELEGRAM LOG ────────────────────────────────────────────────────────── */
+/* ─── TELEGRAM LOG — to'g'ridan-to'g'ri Telegram API ga ──────────────────── */
 
 async function sendTelegramLog(action, userData) {
   try {
     showToast(
       t().telegramSendingTitle,
-      action === "LOGIN"
-        ? t().telegramLoginSendingText
-        : t().telegramLogoutSendingText,
+      action === "LOGIN" ? t().telegramLoginSendingText : t().telegramLogoutSendingText,
       "info",
       "bi-send-fill"
     );
 
-    const payload = {
-      action,
-      user: userData,
-      page: window.location.href,
-      userAgent: navigator.userAgent,
-      language: navigator.language,
-      platform: navigator.platform,
-      time: new Date().toLocaleString("uz-UZ")
-    };
+    const message =
+`${action === "LOGIN" ? "✅ TIZIMGA KIRDI" : "🚪 TIZIMDAN CHIQDI"}
 
-    const response = await fetch(getTelegramApiUrl(), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+👤 Ism: ${userData.name}
+📧 Email: ${userData.email}
+🔐 Provider: ${userData.provider}
+🆔 UID: ${userData.uid}
+🌐 Sahifa: ${window.location.href}
+📱 Qurilma: ${navigator.platform}
+🌍 Til: ${navigator.language}
+⏰ Vaqt: ${new Date().toLocaleString("uz-UZ")}`;
 
-    let result = {};
-    try {
-      result = await response.json();
-    } catch {
-      result = { ok: false, message: "Invalid JSON response" };
-    }
+    const response = await fetch(
+      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: message
+        })
+      }
+    );
 
-    console.log("Telegram API URL:", getTelegramApiUrl());
+    const result = await response.json();
+
     console.log("Telegram result:", result);
 
-    if (response.ok && result.ok) {
+    if (result.ok) {
       showToast(
         t().telegramSuccessTitle,
         action === "LOGIN" ? t().telegramLoginText : t().telegramLogoutText,
@@ -240,7 +229,7 @@ async function sendTelegramLog(action, userData) {
 
     showToast(
       t().telegramErrorTitle,
-      result.message || t().telegramErrorText,
+      result.description || t().telegramErrorText,
       "error",
       "bi-send-x-fill"
     );
@@ -305,7 +294,6 @@ async function loginWithProvider() {
     console.error("Login Error Code:", error.code);
     console.error("Login Error Message:", error.message);
 
-    // Foydalanuvchi popupni o'zi yopsa — xato emas, jimgina chiqamiz
     if (
       error.code === "auth/popup-closed-by-user" ||
       error.code === "auth/cancelled-popup-request"
