@@ -1,4 +1,15 @@
 export default async function handler(req, res) {
+
+  // CORS headerlar — barcha originlarga ruxsat
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  // Preflight request (OPTIONS) ga javob
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   try {
     const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
     const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
@@ -34,9 +45,7 @@ ${action === "LOGIN" ? "✅ TIZIMGA KIRDI" : action === "LOGOUT" ? "🚪 TIZIMDA
       `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: CHAT_ID,
           text: message
