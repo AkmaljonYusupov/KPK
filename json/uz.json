@@ -1,3 +1,4 @@
+
 {
   "loadingText": "Platforma yuklanmoqda...",
   "badge": "KPK Platform",
@@ -12,5 +13,14 @@
   "modalGithubTitle": "Github orqali kirish",
   "modalGithubText": "Github account orqali platformaga kirish jarayoni boshlanadi.",
   "modalCancel": "Bekor qilish",
-  "modalContinue": "Davom etish"
+  "modalContinue": "Davom etish",
+
+  "dashboardTitle": "Dashboard",
+  "dashboardDesc": "KPK platformasiga xush kelibsiz",
+  "logout": "Chiqish",
+  "welcomeDashboard": "KPK platformasiga xush kelibsiz",
+  "welcomeDashboardText": "Bu yerda talabalar salohiyati, ijodkorlik va kasbiy o‘sish jarayonlari boshqariladi.",
+  "google": "Google orqali kirilgan",
+  "github": "Github orqali kirilgan"
 }
+

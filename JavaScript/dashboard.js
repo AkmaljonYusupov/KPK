@@ -1,3 +1,4 @@
+
 const user = JSON.parse(localStorage.getItem("kpk-user"));
 
 if (!user) {
@@ -16,63 +17,104 @@ const profileProvider = document.getElementById("profileProvider");
 
 const logoutBtn = document.getElementById("logoutBtn");
 
+const langDropdown = document.getElementById("langDropdown");
+const langCurrent = document.getElementById("langCurrent");
+
+const currentFlag = document.getElementById("currentFlag");
+const currentLangText = document.getElementById("currentLangText");
+
+const langOptions = document.querySelectorAll(".lang-option");
+
+let translations = {};
+
 const currentLang = localStorage.getItem("kpk-lang") || "uz";
 
-const translations = {
+const languageData = {
+
   uz: {
-    dashboardTitle: "Dashboard",
-    dashboardDesc: "KPK platformasiga xush kelibsiz",
-    settings: "Sozlamalar",
-    logout: "Chiqish",
-    welcomeDashboard: "KPK platformasiga xush kelibsiz",
-    welcomeDashboardText: "Bu yerda talabalar salohiyati, ijodkorlik va kasbiy o‘sish jarayonlari boshqariladi.",
-    google: "Google orqali kirilgan",
-    github: "Github orqali kirilgan"
+    text: "UZ",
+    flag: "./images/uz.png"
   },
 
   en: {
-    dashboardTitle: "Dashboard",
-    dashboardDesc: "Welcome to KPK platform",
-    settings: "Settings",
-    logout: "Logout",
-    welcomeDashboard: "Welcome to KPK platform",
-    welcomeDashboardText: "Here, students’ potential, creativity and professional growth processes are managed.",
-    google: "Signed in with Google",
-    github: "Signed in with Github"
+    text: "EN",
+    flag: "./images/en.png"
   },
 
   ru: {
-    dashboardTitle: "Панель управления",
-    dashboardDesc: "Добро пожаловать на платформу KPK",
-    settings: "Настройки",
-    logout: "Выйти",
-    welcomeDashboard: "Добро пожаловать на платформу KPK",
-    welcomeDashboardText: "Здесь управляются потенциал студентов, креативность и профессиональный рост.",
-    google: "Вход через Google",
-    github: "Вход через Github"
+    text: "RU",
+    flag: "./images/ru.png"
   }
+
 };
 
-function applyLanguage(lang) {
-  const data = translations[lang] || translations.uz;
+async function loadLanguage(lang) {
 
-  document.documentElement.lang = lang;
+  try {
 
-  document.querySelectorAll("[data-lang]").forEach((element) => {
-    const key = element.getAttribute("data-lang");
+    const response = await fetch(`./json/${lang}.json`);
 
-    if (data[key]) {
-      element.textContent = data[key];
+    translations = await response.json();
+
+    document.documentElement.lang = lang;
+
+    document.querySelectorAll("[data-lang]").forEach((element) => {
+
+      const key = element.getAttribute("data-lang");
+
+      if (translations[key]) {
+
+        element.textContent = translations[key];
+
+      }
+
+    });
+
+    if (profileProvider) {
+
+      profileProvider.textContent =
+        user.provider === "github"
+          ? translations.github
+          : translations.google;
+
     }
+
+    localStorage.setItem("kpk-lang", lang);
+
+  } catch (error) {
+
+    console.error("Language loading error:", error);
+
+  }
+
+}
+
+function updateLanguageUI(lang) {
+
+  const current = languageData[lang];
+
+  if (!current) return;
+
+  currentFlag.src = current.flag;
+
+  currentLangText.textContent = current.text;
+
+  langOptions.forEach(option => {
+
+    option.classList.remove("active");
+
+    if (option.dataset.langCode === lang) {
+
+      option.classList.add("active");
+
+    }
+
   });
 
-  if (profileProvider) {
-    profileProvider.textContent =
-      user.provider === "github" ? data.github : data.google;
-  }
 }
 
 function setUserData() {
+
   const fallbackImage = "./images/user.png";
 
   if (profileImage) {
@@ -88,32 +130,87 @@ function setUserData() {
   }
 
   if (profileEmail) {
-    profileEmail.textContent = user.email || "No email";
+    profileEmail.textContent = user.email || "No Email";
   }
+
 }
 
-if (profileBtn) {
-  profileBtn.addEventListener("click", () => {
-    profileWrapper.classList.toggle("active");
+if (langCurrent) {
+
+  langCurrent.addEventListener("click", () => {
+
+    langDropdown.classList.toggle("active");
+
   });
+
+}
+
+document.addEventListener("click", (e) => {
+
+  if (langDropdown && !langDropdown.contains(e.target)) {
+
+    langDropdown.classList.remove("active");
+
+  }
+
+});
+
+langOptions.forEach(option => {
+
+  option.addEventListener("click", () => {
+
+    const lang = option.dataset.langCode;
+
+    loadLanguage(lang);
+
+    updateLanguageUI(lang);
+
+    langDropdown.classList.remove("active");
+
+  });
+
+});
+
+if (profileBtn) {
+
+  profileBtn.addEventListener("click", () => {
+
+    profileWrapper.classList.toggle("active");
+
+  });
+
 }
 
 document.addEventListener("click", (event) => {
+
   if (profileWrapper && !profileWrapper.contains(event.target)) {
+
     profileWrapper.classList.remove("active");
+
   }
+
 });
 
 if (logoutBtn) {
+
   logoutBtn.addEventListener("click", async () => {
+
     if (window.kpkLogout) {
+
       await window.kpkLogout();
+
     }
 
     localStorage.removeItem("kpk-user");
+
     window.location.href = "./index.html";
+
   });
+
 }
 
 setUserData();
-applyLanguage(currentLang);
+
+loadLanguage(currentLang);
+
+updateLanguageUI(currentLang);

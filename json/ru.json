@@ -12,5 +12,14 @@
   "modalGithubTitle": "Войти через Github",
   "modalGithubText": "Начнётся процесс входа через аккаунт Github.",
   "modalCancel": "Отмена",
-  "modalContinue": "Продолжить"
+  "modalContinue": "Продолжить",
+
+  "dashboardTitle": "Панель управления",
+  "dashboardDesc": "Добро пожаловать на платформу KPK",
+  "logout": "Выйти",
+  "welcomeDashboard": "Добро пожаловать на платформу KPK",
+  "welcomeDashboardText": "Здесь управляются потенциал студентов, креативность и профессиональный рост.",
+  "google": "Вход через Google",
+  "github": "Вход через Github"
 }
+

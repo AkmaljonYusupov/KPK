@@ -1,3 +1,4 @@
+
 {
   "loadingText": "Loading platform...",
   "badge": "KPK Platform",
@@ -12,5 +13,14 @@
   "modalGithubTitle": "Sign in with Github",
   "modalGithubText": "The Github account sign-in process will begin.",
   "modalCancel": "Cancel",
-  "modalContinue": "Continue"
+  "modalContinue": "Continue",
+
+  "dashboardTitle": "Dashboard",
+  "dashboardDesc": "Welcome to KPK platform",
+  "logout": "Logout",
+  "welcomeDashboard": "Welcome to KPK platform",
+  "welcomeDashboardText": "Here, students’ potential, creativity and professional growth processes are managed.",
+  "google": "Signed in with Google",
+  "github": "Signed in with Github"
 }
+
