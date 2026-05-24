@@ -1,4 +1,3 @@
-
 const questionBox =
 document.getElementById("questionBox");
 
@@ -8,427 +7,294 @@ document.getElementById("nextBtn");
 const prevBtn =
 document.getElementById("prevBtn");
 
+const timer =
+document.getElementById("timer");
+
+const questionNumber =
+document.getElementById("questionNumber");
+
+const scoreText =
+document.getElementById("score");
+
+const percentText =
+document.getElementById("percent");
+
 const progressBar =
 document.getElementById("progressBar");
 
-const timerElement =
-document.getElementById("timer");
-
-const questionTimerElement =
-document.getElementById("questionTimer");
-
 let questions = [];
 
-let currentIndex = 0;
+let currentQuestion = 0;
 
-let score = 0;
-
-let userAnswers = [];
+let selectedAnswers = [];
 
 let totalTime = 300;
 
-let questionTime = 20;
-
-let totalTimer;
-let questionTimer;
-
-const currentLang =
-localStorage.getItem("kpk-lang")
-|| "uz";
-
-async function loadLanguage(){
-
-  const response =
-  await fetch(`./json/${currentLang}.json`);
-
-  const data =
-  await response.json();
-
-  document.documentElement.lang =
-  currentLang;
-
-  document.querySelectorAll("[data-lang]")
-  .forEach(element => {
-
-    const key =
-    element.getAttribute("data-lang");
-
-    if(data[key]){
-
-      element.textContent =
-      data[key];
-
-    }
-
-  });
-
-}
+let timerInterval;
 
 async function loadQuestions(){
 
-  const response =
-  await fetch("./json/questions.json");
+    try{
 
-  const data =
-  await response.json();
+        const response =
+        await fetch("./json/questions.json");
 
-  questions =
-  [...data]
-  .sort(() => Math.random() - 0.5)
-  .slice(0,15);
+        const data =
+        await response.json();
 
-  showQuestion();
+        questions = data
+        .sort(() => Math.random() - 0.5)
+        .slice(0,10);
 
-  startTotalTimer();
+        showQuestion();
 
-  startQuestionTimer();
+        startTimer();
+
+    }
+
+    catch(error){
+
+        questionBox.innerHTML = `
+        
+            <div class="result-box">
+
+                <h2>Xatolik</h2>
+
+                <p>
+                    Savollar yuklanmadi
+                </p>
+
+            </div>
+
+        `;
+
+    }
 
 }
 
 function showQuestion(){
 
-  clearInterval(questionTimer);
+    const question =
+    questions[currentQuestion];
 
-  questionTime = 20;
+    questionNumber.innerText =
+    `${currentQuestion + 1} / ${questions.length}`;
 
-  questionTimerElement.textContent =
-  questionTime;
+    updateProgress();
 
-  startQuestionTimer();
+    questionBox.innerHTML = `
+    
+        <h2 class="question-title">
 
-  updateProgress();
+            ${currentQuestion + 1}.
+            ${question.question}
 
-  const current =
-  questions[currentIndex];
+        </h2>
+    
+    `;
 
-  questionBox.innerHTML = "";
+    question.options.forEach(option => {
 
-  const title =
-  document.createElement("h2");
+        const button =
+        document.createElement("button");
 
-  title.className =
-  "question-title";
+        button.classList.add("option-btn");
 
-  title.textContent =
-  `${currentIndex + 1}. ${current.question}`;
+        button.innerText = option;
 
-  questionBox.appendChild(title);
+        if(
+            selectedAnswers[currentQuestion]
+            === option
+        ){
+            button.classList.add("active");
+        }
 
-  const shuffledOptions =
-  [...current.options]
-  .sort(() => Math.random() - 0.5);
+        button.onclick = () => {
 
-  shuffledOptions.forEach(option => {
+            document
+            .querySelectorAll(".option-btn")
+            .forEach(btn => {
 
-    const button =
-    document.createElement("button");
+                btn.classList.remove("active");
 
-    button.className =
-    "option-btn";
+            });
 
-    button.textContent =
-    option;
+            button.classList.add("active");
 
-    if(userAnswers[currentIndex] === option){
+            selectedAnswers[currentQuestion]
+            = option;
 
-      button.classList.add("active");
+            updateScore();
 
-    }
+        };
 
-    button.onclick = () => {
+        questionBox.appendChild(button);
 
-      document
-      .querySelectorAll(".option-btn")
-      .forEach(btn => {
-
-        btn.classList.remove("active");
-
-      });
-
-      button.classList.add("active");
-
-      userAnswers[currentIndex] =
-      option;
-
-    };
-
-    questionBox.appendChild(button);
-
-  });
+    });
 
 }
 
 function updateProgress(){
 
-  const percent =
+    const percent =
+    ((currentQuestion + 1)
+    / questions.length) * 100;
 
-  ((currentIndex + 1)
-  / questions.length) * 100;
-
-  progressBar.style.width =
-  `${percent}%`;
-
-}
-
-function startTotalTimer(){
-
-  totalTimer = setInterval(() => {
-
-    totalTime--;
-
-    const minutes =
-    Math.floor(totalTime / 60);
-
-    const seconds =
-    totalTime % 60;
-
-    timerElement.textContent =
-
-    `${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}`;
-
-    if(totalTime <= 0){
-
-      finishTest();
-
-    }
-
-  },1000);
+    progressBar.style.width =
+    `${percent}%`;
 
 }
 
-function startQuestionTimer(){
+function updateScore(){
 
-  questionTimer = setInterval(() => {
+    let score = 0;
 
-    questionTime--;
+    questions.forEach((question,index)=>{
 
-    questionTimerElement.textContent =
-    questionTime;
+        if(
+            selectedAnswers[index]
+            === question.answer
+        ){
+            score++;
+        }
 
-    if(questionTime <= 0){
+    });
 
-      nextQuestion();
+    scoreText.innerText = score;
 
-    }
+    const percent =
+    Math.round(
+        (score / questions.length) * 100
+    );
 
-  },1000);
+    percentText.innerText =
+    `${percent}%`;
 
 }
 
-function nextQuestion(){
+function startTimer(){
 
-  clearInterval(questionTimer);
+    timerInterval = setInterval(()=>{
 
-  const current =
-  questions[currentIndex];
+        totalTime--;
 
-  const correctAnswer =
-  current.options[current.correct];
+        const minutes =
+        Math.floor(totalTime / 60);
 
-  if(
-    userAnswers[currentIndex] ===
-    correctAnswer
-  ){
+        const seconds =
+        totalTime % 60;
+
+        timer.innerText =
+        `${String(minutes)
+        .padStart(2,"0")}:${String(seconds)
+        .padStart(2,"0")}`;
+
+        if(totalTime <= 0){
+
+            finishAssessment();
+
+        }
+
+    },1000);
+
+}
+
+nextBtn.onclick = ()=>{
 
     if(
-      !questions[currentIndex].counted
+        currentQuestion
+        < questions.length - 1
     ){
 
-      score++;
+        currentQuestion++;
 
-      questions[currentIndex].counted =
-      true;
-
-    }
-
-  }
-
-  currentIndex++;
-
-  if(currentIndex >= questions.length){
-
-    finishTest();
-
-    return;
-
-  }
-
-  showQuestion();
-
-}
-
-nextBtn.onclick = () => {
-
-  nextQuestion();
-
-};
-
-prevBtn.onclick = () => {
-
-  if(currentIndex > 0){
-
-    currentIndex--;
-
-    showQuestion();
-
-  }
-
-};
-
-function finishTest(){
-
-  clearInterval(totalTimer);
-
-  clearInterval(questionTimer);
-
-  const percent =
-  Math.floor((score / 15) * 100);
-
-  let unlockedModule = 1;
-
-  let grade = 2;
-
-  let resultText = "";
-
-  if(percent >= 56 && percent <= 70){
-
-    unlockedModule = 2;
-
-    grade = 3;
-
-    resultText = "3 baho";
-
-  }
-
-  else if(percent >= 71 && percent <= 89){
-
-    unlockedModule = 3;
-
-    grade = 4;
-
-    resultText = "4 baho";
-
-  }
-
-  else if(percent >= 90){
-
-    unlockedModule = 4;
-
-    grade = 5;
-
-    resultText = "5 baho";
-
-  }
-
-  else{
-
-    resultText = "2 baho";
-
-  }
-
-  const progress = {
-
-    percent,
-
-    grade,
-
-    unlockedModule,
-
-    currentModule:
-    unlockedModule,
-
-    completedModules: [],
-
-    modules: {
-
-      1:{
-        unlocked:true,
-        completed:false
-      },
-
-      2:{
-        unlocked:
-        unlockedModule >= 2,
-
-        completed:false
-      },
-
-      3:{
-        unlocked:
-        unlockedModule >= 3,
-
-        completed:false
-      },
-
-      4:{
-        unlocked:
-        unlockedModule >= 4,
-
-        completed:false
-      }
+        showQuestion();
 
     }
 
-  };
+    else{
 
-  localStorage.setItem(
-    "kpk-progress",
-    JSON.stringify(progress)
-  );
+        finishAssessment();
 
-  questionBox.innerHTML =
-
-  `
-  <div class="result-box">
-
-    <div class="result-icon">
-      🏆
-    </div>
-
-    <h2>
-      Test yakunlandi
-    </h2>
-
-    <p>
-      Sizning natijangiz
-    </p>
-
-    <div class="result-percent">
-      ${percent}%
-    </div>
-
-    <div class="result-grade">
-      ${resultText}
-    </div>
-
-    <button
-      class="finish-btn"
-      onclick="goDashboard()"
-    >
-
-      Dashboardga o‘tish
-
-    </button>
-
-  </div>
-  `;
-
-  nextBtn.style.display =
-  "none";
-
-  prevBtn.style.display =
-  "none";
-
-}
-
-window.goDashboard = function(){
-
-  window.location.href =
-  "./dashboard.html";
+    }
 
 };
 
-loadLanguage();
+prevBtn.onclick = ()=>{
+
+    if(currentQuestion > 0){
+
+        currentQuestion--;
+
+        showQuestion();
+
+    }
+
+};
+
+function finishAssessment(){
+
+    clearInterval(timerInterval);
+
+    let score = 0;
+
+    questions.forEach((question,index)=>{
+
+        if(
+            selectedAnswers[index]
+            === question.answer
+        ){
+            score++;
+        }
+
+    });
+
+    const finalPercent =
+    Math.round(
+        (score / questions.length) * 100
+    );
+
+    questionBox.innerHTML = `
+    
+        <div class="result-box">
+
+            <div class="result-circle">
+
+                ${finalPercent}%
+
+            </div>
+
+            <h2>
+                Test Yakunlandi
+            </h2>
+
+            <p>
+
+                To'g'ri javoblar:
+                ${score} / ${questions.length}
+
+            </p>
+
+            <button
+                class="btn next-btn"
+
+                onclick="
+                window.location.href=
+                'dashboard.html'
+                ">
+
+                Dashboardga o'tish
+
+            </button>
+
+        </div>
+
+    `;
+
+    nextBtn.style.display = "none";
+
+    prevBtn.style.display = "none";
+
+}
 
 loadQuestions();
-
