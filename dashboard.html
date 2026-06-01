@@ -1,91 +1,107 @@
 <!DOCTYPE html>
 <html lang="uz">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
-    <title>Assessment</title>
-
-    <link rel="stylesheet"
-        href="./css/assessment.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - KPK Platform</title>
+    <link rel="stylesheet" href="./css/dashboard.css">
 </head>
-
 <body>
+    <div class="dashboard-grid"></div>
+    <div class="soft-orb orb-one"></div>
+    <div class="soft-orb orb-two"></div>
 
-    <div class="assessment-container">
-
-        <div class="header">
-
-            <div class="header-text">
-                <h1>Bilim Testi</h1>
-                <p>Testni ishlang va dashboardga o'ting</p>
-            </div>
-
-            <div class="timer"
-                id="timer">
-                05:00
-            </div>
-
+    <div class="dashboard-header">
+        <div class="header-left">
+            <h1 data-lang="dashboardTitle">Dashboard</h1>
+            <p data-lang="welcomeDashboard">KPK platformasiga xush kelibsiz</p>
         </div>
 
-        <div class="info-cards">
-
-            <div class="card">
-                <h3>Savol</h3>
-                <p id="questionNumber">
-                    1 / 10
-                </p>
+        <div class="header-right">
+            <!-- Til -->
+            <div class="lang-dropdown" id="langDropdown">
+                <button class="lang-current" id="langCurrent" type="button">
+                    <span class="lang-left">
+                        <img src="./images/uz.png" class="flag-img" id="currentFlag" alt="flag">
+                        <span id="currentLangText">UZ</span>
+                    </span>
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+                <div class="lang-menu">
+                    <button class="lang-option active" data-lang-code="uz">
+                        <img src="./images/uz.png" class="flag-img" alt="uz">
+                        <span>Uzbek</span>
+                    </button>
+                    <button class="lang-option" data-lang-code="en">
+                        <img src="./images/en.png" class="flag-img" alt="en">
+                        <span>English</span>
+                    </button>
+                    <button class="lang-option" data-lang-code="ru">
+                        <img src="./images/ru.png" class="flag-img" alt="ru">
+                        <span>Русский</span>
+                    </button>
+                </div>
             </div>
 
-            <div class="card">
-                <h3>To'g'ri</h3>
-                <p id="score">
-                    0
-                </p>
+            <!-- Profil -->
+            <div class="profile-wrapper" id="profileWrapper">
+                <button class="profile-btn" id="profileBtn">
+                    <img src="./images/user.png" id="profileImage" alt="Profile">
+                </button>
+                <div class="profile-menu" id="profileMenu">
+                    <div class="profile-info">
+                        <img src="./images/user.png" id="menuProfileImage" alt="Profile">
+                        <div>
+                            <h3 id="profileName">Foydalanuvchi</h3>
+                            <p id="profileEmail">email@example.com</p>
+                            <span id="profileProvider">Google</span>
+                        </div>
+                    </div>
+                    <button class="profile-menu-item logout" id="logoutBtn">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span data-lang="logout">Chiqish</span>
+                    </button>
+                </div>
             </div>
-
-            <div class="card">
-                <h3>Foiz</h3>
-                <p id="percent">
-                    0%
-                </p>
-            </div>
-
         </div>
-
-        <div class="progress">
-
-            <div class="progress-bar"
-                id="progressBar"></div>
-
-        </div>
-
-        <div id="questionBox"></div>
-
-        <div class="button-group">
-
-            <button class="btn prev-btn"
-                id="prevBtn">
-
-                Ortga
-
-            </button>
-
-            <button class="btn next-btn"
-                id="nextBtn">
-
-                Keyingi
-
-            </button>
-
-        </div>
-
     </div>
 
-    <script src="./JavaScript/assessment.js"></script>
+    <div class="dashboard-main">
+        <div class="modules-section">
+            <div class="module-card" id="module1">
+                <div class="module-top"><div class="module-badge beginner">BEGINNER</div></div>
+                <div class="module-icon">📘</div>
+                <h2 data-lang="module1Title">1-Bo‘lim</h2>
+                <p data-lang="module1Desc">Boshlang‘ich daraja</p>
+                <button class="module-btn" onclick="openModule(1)">Boshlash</button>
+            </div>
 
+            <div class="module-card" id="module2">
+                <div class="module-top"><div class="module-badge intermediate">INTERMEDIATE</div></div>
+                <div class="module-icon">📈</div>
+                <h2 data-lang="module2Title">2-Bo‘lim</h2>
+                <p data-lang="module2Desc">O‘rta daraja</p>
+                <button class="module-btn" onclick="openModule(2)">Boshlash</button>
+            </div>
+
+            <div class="module-card" id="module3">
+                <div class="module-top"><div class="module-badge advanced">ADVANCED</div></div>
+                <div class="module-icon">⭐</div>
+                <h2 data-lang="module3Title">3-Bo‘lim</h2>
+                <p data-lang="module3Desc">Yuqori daraja</p>
+                <button class="module-btn" onclick="openModule(3)">Boshlash</button>
+            </div>
+
+            <div class="module-card" id="module4">
+                <div class="module-top"><div class="module-badge master">MASTER</div></div>
+                <div class="module-icon">👑</div>
+                <h2 data-lang="module4Title">4-Bo‘lim</h2>
+                <p data-lang="module4Desc">Eng yuqori daraja</p>
+                <button class="module-btn" onclick="openModule(4)">Boshlash</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./JavaScript/dashboard.js"></script>
 </body>
-
 </html>

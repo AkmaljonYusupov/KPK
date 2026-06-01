@@ -1,35 +1,27 @@
 [
   {
-    "question":"HTML nima?",
-    "options":[
-      "Programming language",
-      "Markup language",
-      "Database",
-      "Framework"
-    ],
-    "correct":1
+    "question": "HTML nima?",
+    "options": ["Programming language", "Markup language", "Database", "Framework"],
+    "correct": 1
   },
-
   {
-    "question":"CSS nima uchun ishlatiladi?",
-    "options":[
-      "Design uchun",
-      "Database uchun",
-      "Server uchun",
-      "AI uchun"
-    ],
-    "correct":0
+    "question": "CSS nima uchun ishlatiladi?",
+    "options": ["Dizayn uchun", "Ma'lumotlar bazasi uchun", "Server uchun", "AI uchun"],
+    "correct": 0
   },
-
   {
-    "question":"JavaScript nima?",
-    "options":[
-      "Backend",
-      "Database",
-      "Programming language",
-      "Design tool"
-    ],
-    "correct":2
+    "question": "JavaScript nima?",
+    "options": ["Backend", "Database", "Programming language", "Design tool"],
+    "correct": 2
+  },
+  {
+    "question": "React nima?",
+    "options": ["Backend framework", "Frontend library", "Database", "Operating System"],
+    "correct": 1
+  },
+  {
+    "question": "HTTP nima?",
+    "options": ["HyperText Transfer Protocol", "High Transfer Protocol", "Hyper Transfer Text", "None"],
+    "correct": 0
   }
-
 ]

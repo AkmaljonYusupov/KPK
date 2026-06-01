@@ -1,14 +1,5 @@
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
-import {
-  getAuth,
-  GoogleAuthProvider,
-  GithubAuthProvider,
-  signInWithPopup,
-  signOut
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 /* ═══════════════════════════════════════════════════════
    FIREBASE CONFIG
@@ -28,37 +19,26 @@ const firebaseConfig = {
    TELEGRAM CONFIG
 ═══════════════════════════════════════════════════════ */
 
-const TELEGRAM_BOT_TOKEN =
-"8600474887:AAH8OeZ9pDlpBS_tviQ0zMIOfc2emzjpwNE";
-
-const TELEGRAM_CHAT_ID =
-"529092761";
+const TELEGRAM_BOT_TOKEN = "8600474887:AAH8OeZ9pDlpBS_tviQ0zMIOfc2emzjpwNE";
+const TELEGRAM_CHAT_ID = "529092761";
 
 /* ═══════════════════════════════════════════════════════
    FIREBASE INIT
 ═══════════════════════════════════════════════════════ */
 
 const app = initializeApp(firebaseConfig);
-
 const auth = getAuth(app);
 
 /* ═══════════════════════════════════════════════════════
    PROVIDERS
 ═══════════════════════════════════════════════════════ */
 
-const googleProvider =
-new GoogleAuthProvider();
-
+const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope("email");
 googleProvider.addScope("profile");
+googleProvider.setCustomParameters({ prompt: "select_account" });
 
-googleProvider.setCustomParameters({
-  prompt: "select_account"
-});
-
-const githubProvider =
-new GithubAuthProvider();
-
+const githubProvider = new GithubAuthProvider();
 githubProvider.addScope("read:user");
 githubProvider.addScope("user:email");
 
@@ -66,352 +46,145 @@ githubProvider.addScope("user:email");
    ELEMENTS
 ═══════════════════════════════════════════════════════ */
 
-const continueAuthBtn =
-document.getElementById("continueAuthBtn");
+const continueAuthBtn = document.getElementById("continueAuthBtn");
 
 /* ═══════════════════════════════════════════════════════
    LANGUAGE
 ═══════════════════════════════════════════════════════ */
 
-function getLang(){
-
-  return localStorage.getItem("kpk-lang")
-  || "uz";
-
+function getLang() {
+  return localStorage.getItem("kpk-lang") || "uz";
 }
 
 const authTexts = {
-
   uz: {
-
-    loginSuccessTitle:
-    "Kirish tasdiqlandi",
-
-    loginSuccessText:
-    "Tizimga muvaffaqiyatli kirildi.",
-
-    logoutSuccessTitle:
-    "Chiqish tasdiqlandi",
-
-    logoutSuccessText:
-    "Tizimdan muvaffaqiyatli chiqildi.",
-
-    loginErrorTitle:
-    "Login xatoligi",
-
-    loginErrorText:
-    "Kirishda xatolik yuz berdi.",
-
-    logoutErrorTitle:
-    "Chiqish xatoligi",
-
-    logoutErrorText:
-    "Tizimdan chiqishda xatolik yuz berdi.",
-
-    unauthorizedDomainTitle:
-    "Firebase domen xatoligi",
-
-    unauthorizedDomainText:
-    "Firebase Console → Authentication → Settings → Authorized domains bo'limiga localhost va 127.0.0.1 ni qo'shing.",
-
-    telegramSendingTitle:
-    "Telegramga yuborilmoqda",
-
-    telegramLoginSendingText:
-    "User kirish ma'lumotlari Telegram botga yuborilmoqda...",
-
-    telegramLogoutSendingText:
-    "User chiqish ma'lumotlari Telegram botga yuborilmoqda...",
-
-    telegramSuccessTitle:
-    "Telegramga yuborildi",
-
-    telegramLoginText:
-    "User kirish ma'lumotlari Telegram botga muvaffaqiyatli yuborildi.",
-
-    telegramLogoutText:
-    "User chiqish ma'lumotlari Telegram botga muvaffaqiyatli yuborildi.",
-
-    telegramErrorTitle:
-    "Telegram xatoligi",
-
-    telegramErrorText:
-    "Telegram botga ma'lumot yuborib bo'lmadi.",
-
-    telegramLoginFailedText:
-    "Tizimga kirildi, lekin user ma'lumotlari Telegram botga yuborilmadi.",
-
-    telegramLogoutFailedText:
-    "Tizimdan chiqildi, lekin chiqish ma'lumotlari Telegram botga yuborilmadi.",
-
-    serverErrorTitle:
-    "Server xatoligi",
-
-    serverErrorText:
-    "Telegram API bilan ulanishda xatolik yuz berdi.",
-
-    noEmail:
-    "Email ko'rsatilmagan",
-
-    user:
-    "User"
-
+    loginSuccessTitle: "Kirish tasdiqlandi",
+    loginSuccessText: "Tizimga muvaffaqiyatli kirildi.",
+    logoutSuccessTitle: "Chiqish tasdiqlandi",
+    logoutSuccessText: "Tizimdan muvaffaqiyatli chiqildi.",
+    loginErrorTitle: "Login xatoligi",
+    loginErrorText: "Kirishda xatolik yuz berdi.",
+    logoutErrorTitle: "Chiqish xatoligi",
+    logoutErrorText: "Tizimdan chiqishda xatolik yuz berdi.",
+    unauthorizedDomainTitle: "Firebase domen xatoligi",
+    unauthorizedDomainText: "Firebase Console → Authentication → Settings → Authorized domains bo'limiga localhost va 127.0.0.1 ni qo'shing.",
+    telegramSendingTitle: "Telegramga yuborilmoqda",
+    telegramLoginSendingText: "User kirish ma'lumotlari Telegram botga yuborilmoqda...",
+    telegramLogoutSendingText: "User chiqish ma'lumotlari Telegram botga yuborilmoqda...",
+    telegramSuccessTitle: "Telegramga yuborildi",
+    telegramLoginText: "User kirish ma'lumotlari Telegram botga muvaffaqiyatli yuborildi.",
+    telegramLogoutText: "User chiqish ma'lumotlari Telegram botga muvaffaqiyatli yuborildi.",
+    telegramErrorTitle: "Telegram xatoligi",
+    telegramErrorText: "Telegram botga ma'lumot yuborib bo'lmadi.",
+    telegramLoginFailedText: "Tizimga kirildi, lekin user ma'lumotlari Telegram botga yuborilmadi.",
+    telegramLogoutFailedText: "Tizimdan chiqildi, lekin chiqish ma'lumotlari Telegram botga yuborilmadi.",
+    serverErrorTitle: "Server xatoligi",
+    serverErrorText: "Telegram API bilan ulanishda xatolik yuz berdi.",
+    noEmail: "Email ko'rsatilmagan",
+    user: "User"
   },
-
   en: {
-
-    loginSuccessTitle:
-    "Login confirmed",
-
-    loginSuccessText:
-    "You have successfully signed in.",
-
-    logoutSuccessTitle:
-    "Logout confirmed",
-
-    logoutSuccessText:
-    "You have successfully logged out.",
-
-    loginErrorTitle:
-    "Login error",
-
-    loginErrorText:
-    "An error occurred during sign-in.",
-
-    logoutErrorTitle:
-    "Logout error",
-
-    logoutErrorText:
-    "An error occurred during logout.",
-
-    unauthorizedDomainTitle:
-    "Firebase domain error",
-
-    unauthorizedDomainText:
-    "Add localhost and 127.0.0.1 in Firebase Console → Authentication → Settings → Authorized domains.",
-
-    telegramSendingTitle:
-    "Sending to Telegram",
-
-    telegramLoginSendingText:
-    "User login information is being sent to Telegram bot...",
-
-    telegramLogoutSendingText:
-    "User logout information is being sent to Telegram bot...",
-
-    telegramSuccessTitle:
-    "Sent to Telegram",
-
-    telegramLoginText:
-    "User login information was successfully sent to Telegram bot.",
-
-    telegramLogoutText:
-    "User logout information was successfully sent to Telegram bot.",
-
-    telegramErrorTitle:
-    "Telegram error",
-
-    telegramErrorText:
-    "Could not send information to Telegram bot.",
-
-    telegramLoginFailedText:
-    "Login completed, but user information was not sent to Telegram.",
-
-    telegramLogoutFailedText:
-    "Logout completed, but logout information was not sent to Telegram.",
-
-    serverErrorTitle:
-    "Server error",
-
-    serverErrorText:
-    "An error occurred connecting to Telegram API.",
-
-    noEmail:
-    "Email not provided",
-
-    user:
-    "User"
-
+    loginSuccessTitle: "Login confirmed",
+    loginSuccessText: "You have successfully signed in.",
+    logoutSuccessTitle: "Logout confirmed",
+    logoutSuccessText: "You have successfully logged out.",
+    loginErrorTitle: "Login error",
+    loginErrorText: "An error occurred during sign-in.",
+    logoutErrorTitle: "Logout error",
+    logoutErrorText: "An error occurred during logout.",
+    unauthorizedDomainTitle: "Firebase domain error",
+    unauthorizedDomainText: "Add localhost and 127.0.0.1 in Firebase Console → Authentication → Settings → Authorized domains.",
+    telegramSendingTitle: "Sending to Telegram",
+    telegramLoginSendingText: "User login information is being sent to Telegram bot...",
+    telegramLogoutSendingText: "User logout information is being sent to Telegram bot...",
+    telegramSuccessTitle: "Sent to Telegram",
+    telegramLoginText: "User login information was successfully sent to Telegram bot.",
+    telegramLogoutText: "User logout information was successfully sent to Telegram bot.",
+    telegramErrorTitle: "Telegram error",
+    telegramErrorText: "Could not send information to Telegram bot.",
+    telegramLoginFailedText: "Login completed, but user information was not sent to Telegram.",
+    telegramLogoutFailedText: "Logout completed, but logout information was not sent to Telegram.",
+    serverErrorTitle: "Server error",
+    serverErrorText: "An error occurred connecting to Telegram API.",
+    noEmail: "Email not provided",
+    user: "User"
   },
-
   ru: {
-
-    loginSuccessTitle:
-    "Вход подтверждён",
-
-    loginSuccessText:
-    "Вы успешно вошли в систему.",
-
-    logoutSuccessTitle:
-    "Выход подтверждён",
-
-    logoutSuccessText:
-    "Вы успешно вышли из системы.",
-
-    loginErrorTitle:
-    "Ошибка входа",
-
-    loginErrorText:
-    "Во время входа произошла ошибка.",
-
-    logoutErrorTitle:
-    "Ошибка выхода",
-
-    logoutErrorText:
-    "Во время выхода произошла ошибка.",
-
-    unauthorizedDomainTitle:
-    "Ошибка домена Firebase",
-
-    unauthorizedDomainText:
-    "Добавьте localhost и 127.0.0.1 в Firebase Console → Authentication → Settings → Authorized domains.",
-
-    telegramSendingTitle:
-    "Отправка в Telegram",
-
-    telegramLoginSendingText:
-    "Информация о входе пользователя отправляется в Telegram бот...",
-
-    telegramLogoutSendingText:
-    "Информация о выходе пользователя отправляется в Telegram бот...",
-
-    telegramSuccessTitle:
-    "Отправлено в Telegram",
-
-    telegramLoginText:
-    "Информация о входе пользователя успешно отправлена в Telegram бот.",
-
-    telegramLogoutText:
-    "Информация о выходе пользователя успешно отправлена в Telegram бот.",
-
-    telegramErrorTitle:
-    "Ошибка Telegram",
-
-    telegramErrorText:
-    "Не удалось отправить информацию в Telegram бот.",
-
-    telegramLoginFailedText:
-    "Вход выполнен, но информация пользователя не отправлена в Telegram.",
-
-    telegramLogoutFailedText:
-    "Выход выполнен, но информация о выходе не отправлена в Telegram.",
-
-    serverErrorTitle:
-    "Ошибка сервера",
-
-    serverErrorText:
-    "Произошла ошибка подключения к Telegram API.",
-
-    noEmail:
-    "Email не указан",
-
-    user:
-    "Пользователь"
-
+    loginSuccessTitle: "Вход подтверждён",
+    loginSuccessText: "Вы успешно вошли в систему.",
+    logoutSuccessTitle: "Выход подтверждён",
+    logoutSuccessText: "Вы успешно вышли из системы.",
+    loginErrorTitle: "Ошибка входа",
+    loginErrorText: "Во время входа произошла ошибка.",
+    logoutErrorTitle: "Ошибка выхода",
+    logoutErrorText: "Во время выхода произошла ошибка.",
+    unauthorizedDomainTitle: "Ошибка домена Firebase",
+    unauthorizedDomainText: "Добавьте localhost и 127.0.0.1 в Firebase Console → Authentication → Settings → Authorized domains.",
+    telegramSendingTitle: "Отправка в Telegram",
+    telegramLoginSendingText: "Информация о входе пользователя отправляется в Telegram бот...",
+    telegramLogoutSendingText: "Информация о выходе пользователя отправляется в Telegram бот...",
+    telegramSuccessTitle: "Отправлено в Telegram",
+    telegramLoginText: "Информация о входе пользователя успешно отправлена в Telegram бот.",
+    telegramLogoutText: "Информация о выходе пользователя успешно отправлена в Telegram бот.",
+    telegramErrorTitle: "Ошибка Telegram",
+    telegramErrorText: "Не удалось отправить информацию в Telegram бот.",
+    telegramLoginFailedText: "Вход выполнен, но информация пользователя не отправлена в Telegram.",
+    telegramLogoutFailedText: "Выход выполнен, но информация о выходе не отправлена в Telegram.",
+    serverErrorTitle: "Ошибка сервера",
+    serverErrorText: "Произошла ошибка подключения к Telegram API.",
+    noEmail: "Email не указан",
+    user: "Пользователь"
   }
-
 };
 
-function t(){
-
-  return authTexts[getLang()]
-  || authTexts.uz;
-
+function t() {
+  return authTexts[getLang()] || authTexts.uz;
 }
 
 /* ═══════════════════════════════════════════════════════
    TOAST
 ═══════════════════════════════════════════════════════ */
 
-function setToastIcon(iconClass){
-
-  const toastIcon =
-  document.getElementById("toastIcon");
-
-  if(toastIcon){
-
-    toastIcon.innerHTML =
-    `<i class="bi ${iconClass}"></i>`;
-
+function setToastIcon(iconClass) {
+  const toastIcon = document.getElementById("toastIcon");
+  if (toastIcon) {
+    toastIcon.innerHTML = `<i class="bi ${iconClass}"></i>`;
   }
-
 }
 
-function showToast(
-  title,
-  message,
-  type = "info",
-  iconClass = "bi-info-circle-fill"
-){
-
+function showToast(title, message, type = "info", iconClass = "bi-info-circle-fill") {
   setToastIcon(iconClass);
-
-  if(window.showModernToast){
-
-    window.showModernToast({
-      title,
-      message,
-      type
-    });
-
-  }else{
-
-    console.log(
-      `[${type}] ${title}: ${message}`
-    );
-
+  if (window.showModernToast) {
+    window.showModernToast({ title, message, type });
+  } else {
+    console.log(`[${type}] ${title}: ${message}`);
   }
-
 }
 
 /* ═══════════════════════════════════════════════════════
    REDIRECT
 ═══════════════════════════════════════════════════════ */
 
-function redirectToPage(pageName){
-
-  const currentPath =
-  window.location.pathname;
-
-  const folderPath =
-  currentPath.substring(
-    0,
-    currentPath.lastIndexOf("/") + 1
-  );
-
-  window.location.href =
-  `${window.location.origin}${folderPath}${pageName}`;
-
+function redirectToPage(pageName) {
+  const currentPath = window.location.pathname;
+  const folderPath = currentPath.substring(0, currentPath.lastIndexOf("/") + 1);
+  window.location.href = `${window.location.origin}${folderPath}${pageName}`;
 }
 
 /* ═══════════════════════════════════════════════════════
    TELEGRAM LOG
 ═══════════════════════════════════════════════════════ */
 
-async function sendTelegramLog(
-  action,
-  userData
-){
-
-  try{
-
+async function sendTelegramLog(action, userData) {
+  try {
     showToast(
       t().telegramSendingTitle,
-
-      action === "LOGIN"
-      ? t().telegramLoginSendingText
-      : t().telegramLogoutSendingText,
-
+      action === "LOGIN" ? t().telegramLoginSendingText : t().telegramLogoutSendingText,
       "info",
-
       "bi-send-fill"
     );
 
-    const message =
-
-`${action === "LOGIN"
-? "✅ TIZIMGA KIRDI"
-: "🚪 TIZIMDAN CHIQDI"}
+    const message = `${action === "LOGIN" ? "✅ TIZIMGA KIRDI" : "🚪 TIZIMDAN CHIQDI"}
 
 👤 Ism: ${userData.name}
 📧 Email: ${userData.email}
@@ -422,330 +195,132 @@ async function sendTelegramLog(
 🌍 Til: ${navigator.language}
 ⏰ Vaqt: ${new Date().toLocaleString("uz-UZ")}`;
 
-    const response =
-    await fetch(
-      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-      {
-        method:"POST",
+    const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message })
+    });
 
-        headers:{
-          "Content-Type":"application/json"
-        },
-
-        body:JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
-          text: message
-        })
-      }
-    );
-
-    const result =
-    await response.json();
-
-    if(result.ok){
-
+    const result = await response.json();
+    if (result.ok) {
       showToast(
         t().telegramSuccessTitle,
-
-        action === "LOGIN"
-        ? t().telegramLoginText
-        : t().telegramLogoutText,
-
+        action === "LOGIN" ? t().telegramLoginText : t().telegramLogoutText,
         "success",
-
         "bi-send-check-fill"
       );
-
       return true;
-
     }
-
-    showToast(
-      t().telegramErrorTitle,
-      t().telegramErrorText,
-      "error",
-      "bi-send-x-fill"
-    );
-
+    showToast(t().telegramErrorTitle, t().telegramErrorText, "error", "bi-send-x-fill");
     return false;
-
-  }catch(error){
-
+  } catch (error) {
     console.error(error);
-
-    showToast(
-      t().serverErrorTitle,
-      t().serverErrorText,
-      "error",
-      "bi-wifi-off"
-    );
-
+    showToast(t().serverErrorTitle, t().serverErrorText, "error", "bi-wifi-off");
     return false;
-
   }
-
 }
 
 /* ═══════════════════════════════════════════════════════
    LOGIN
 ═══════════════════════════════════════════════════════ */
 
-async function loginWithProvider(){
+async function loginWithProvider() {
+  try {
+    const providerName = window.kpkSelectedProvider || "google";
+    const selectedProvider = providerName === "github" ? githubProvider : googleProvider;
 
-  try{
+    const result = await signInWithPopup(auth, selectedProvider);
+    const user = result.user;
 
-    const providerName =
-    window.kpkSelectedProvider
-    || "google";
-
-    const selectedProvider =
-    providerName === "github"
-    ? githubProvider
-    : googleProvider;
-
-    const result =
-    await signInWithPopup(
-      auth,
-      selectedProvider
-    );
-
-    const user =
-    result.user;
-
-    const email =
-    user.email
-    ||
-    user.providerData?.find(
-      p => p.email
-    )?.email
-    ||
-    t().noEmail;
+    const email = user.email || user.providerData?.find(p => p.email)?.email || t().noEmail;
 
     const userData = {
-
-      uid:
-      user.uid,
-
-      name:
-      user.displayName
-      || t().user,
-
+      uid: user.uid,
+      name: user.displayName || t().user,
       email,
-
-      image:
-      user.photoURL
-      || "./images/user.png",
-
-      provider:
-      providerName,
-
-      createdAt:
-      user.metadata?.creationTime
-      || "Unknown",
-
-      lastLoginAt:
-      user.metadata?.lastSignInTime
-      || "Unknown"
-
+      image: user.photoURL || "./images/user.png",
+      provider: providerName,
+      createdAt: user.metadata?.creationTime || "Unknown",
+      lastLoginAt: user.metadata?.lastSignInTime || "Unknown"
     };
 
-    localStorage.setItem(
-      "kpk-user",
-      JSON.stringify(userData)
-    );
+    localStorage.setItem("kpk-user", JSON.stringify(userData));
 
     showToast(
       t().loginSuccessTitle,
-
       `${userData.name} — ${t().loginSuccessText}`,
-
       "success",
-
       "bi-check-circle-fill"
     );
 
-    const telegramSent =
-    await sendTelegramLog(
-      "LOGIN",
-      userData
-    );
+    const telegramSent = await sendTelegramLog("LOGIN", userData);
 
-    if(!telegramSent){
-
-      showToast(
-        t().telegramErrorTitle,
-        t().telegramLoginFailedText,
-        "error",
-        "bi-send-x-fill"
-      );
-
+    if (!telegramSent) {
+      showToast(t().telegramErrorTitle, t().telegramLoginFailedText, "error", "bi-send-x-fill");
     }
 
-    if(window.closeAuthModalWindow){
-
+    if (window.closeAuthModalWindow) {
       window.closeAuthModalWindow();
-
     }
 
-    /* ═══════════════════════════════════════
-       IMPORTANT PART
-       TEST SYSTEM
-    ═══════════════════════════════════════ */
+    /* ==================== TEST BIR MARTA ISHLASH HIMOYASI ==================== */
+    const progress = JSON.parse(localStorage.getItem("kpk-progress") || "{}");
 
-    setTimeout(() => {
+    if (progress.initialTest && progress.initialTest.completed === true) {
+      // Test allaqachon topshirilgan bo'lsa
+      setTimeout(() => redirectToPage("dashboard.html"), 1000);
+    } else {
+      // Test hali topshirilmagan
+      setTimeout(() => redirectToPage("assessment.html"), 1300);
+    }
 
-      const progress =
-      localStorage.getItem(
-        "kpk-progress"
-      );
+  } catch (error) {
+    console.error("Login Error:", error);
 
-      if(progress){
-
-        redirectToPage(
-          "dashboard.html"
-        );
-
-      }else{
-
-        redirectToPage(
-          "assessment.html"
-        );
-
-      }
-
-    },1300);
-
-  }catch(error){
-
-    console.error(
-      "Login Error:",
-      error
-    );
-
-    if(
-      error.code ===
-      "auth/popup-closed-by-user"
-      ||
-      error.code ===
-      "auth/cancelled-popup-request"
-    ){
-
+    if (error.code === "auth/popup-closed-by-user" || error.code === "auth/cancelled-popup-request") {
       return;
-
     }
 
-    if(
-      error.code ===
-      "auth/unauthorized-domain"
-    ){
-
-      showToast(
-        t().unauthorizedDomainTitle,
-        t().unauthorizedDomainText,
-        "error",
-        "bi-shield-exclamation"
-      );
-
+    if (error.code === "auth/unauthorized-domain") {
+      showToast(t().unauthorizedDomainTitle, t().unauthorizedDomainText, "error", "bi-shield-exclamation");
       return;
-
     }
 
-    showToast(
-      t().loginErrorTitle,
-      t().loginErrorText,
-      "error",
-      "bi-exclamation-triangle-fill"
-    );
-
+    showToast(t().loginErrorTitle, t().loginErrorText, "error", "bi-exclamation-triangle-fill");
   }
-
 }
 
-if(continueAuthBtn){
-
-  continueAuthBtn.addEventListener(
-    "click",
-    loginWithProvider
-  );
-
+if (continueAuthBtn) {
+  continueAuthBtn.addEventListener("click", loginWithProvider);
 }
 
 /* ═══════════════════════════════════════════════════════
    LOGOUT
 ═══════════════════════════════════════════════════════ */
 
-window.kpkLogout =
-async function(){
-
-  try{
-
-    const userData =
-    JSON.parse(
-      localStorage.getItem("kpk-user")
-      || "null"
-    );
+window.kpkLogout = async function() {
+  try {
+    const userData = JSON.parse(localStorage.getItem("kpk-user") || "null");
 
     let telegramSent = true;
-
-    if(userData){
-
-      telegramSent =
-      await sendTelegramLog(
-        "LOGOUT",
-        userData
-      );
-
+    if (userData) {
+      telegramSent = await sendTelegramLog("LOGOUT", userData);
     }
 
     await signOut(auth);
 
-    /* IMPORTANT */
+    localStorage.removeItem("kpk-user");
+    localStorage.removeItem("kpk-progress");
 
-    localStorage.removeItem(
-      "kpk-user"
-    );
+    showToast(t().logoutSuccessTitle, t().logoutSuccessText, "success", "bi-box-arrow-right");
 
-    localStorage.removeItem(
-      "kpk-progress"
-    );
-
-    showToast(
-      t().logoutSuccessTitle,
-      t().logoutSuccessText,
-      "success",
-      "bi-box-arrow-right"
-    );
-
-    if(!telegramSent){
-
-      showToast(
-        t().telegramErrorTitle,
-        t().telegramLogoutFailedText,
-        "error",
-        "bi-send-x-fill"
-      );
-
+    if (!telegramSent) {
+      showToast(t().telegramErrorTitle, t().telegramLogoutFailedText, "error", "bi-send-x-fill");
     }
 
-    setTimeout(() => {
-
-      redirectToPage(
-        "index.html"
-      );
-
-    },1200);
-
-  }catch(error){
-
+    setTimeout(() => redirectToPage("index.html"), 1200);
+  } catch (error) {
     console.error(error);
-
-    showToast(
-      t().logoutErrorTitle,
-      t().logoutErrorText,
-      "error",
-      "bi-x-circle-fill"
-    );
-
+    showToast(t().logoutErrorTitle, t().logoutErrorText, "error", "bi-x-circle-fill");
   }
-
 };

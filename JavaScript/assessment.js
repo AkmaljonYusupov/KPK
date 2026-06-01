@@ -1,300 +1,202 @@
-const questionBox =
-document.getElementById("questionBox");
-
-const nextBtn =
-document.getElementById("nextBtn");
-
-const prevBtn =
-document.getElementById("prevBtn");
-
-const timer =
-document.getElementById("timer");
-
-const questionNumber =
-document.getElementById("questionNumber");
-
-const scoreText =
-document.getElementById("score");
-
-const percentText =
-document.getElementById("percent");
-
-const progressBar =
-document.getElementById("progressBar");
+const questionBox = document.getElementById("questionBox");
+const nextBtn = document.getElementById("nextBtn");
+const prevBtn = document.getElementById("prevBtn");
+const timerEl = document.getElementById("timer");
+const progressBar = document.getElementById("progressBar");
+const questionTimerEl = document.getElementById("questionTimer");
 
 let questions = [];
-
 let currentQuestion = 0;
-
 let selectedAnswers = [];
+let totalTime = 1200; // 20 daqiqa
+let questionTimeLeft = 30;
+let timerInterval, questionTimerInterval;
 
-let totalTime = 300;
-
-let timerInterval;
-
-async function loadQuestions(){
-
-    try{
-
-        const response =
-        await fetch("./json/questions.json");
-
-        const data =
-        await response.json();
-
-        questions = data
-        .sort(() => Math.random() - 0.5)
-        .slice(0,10);
-
-        showQuestion();
-
-        startTimer();
-
-    }
-
-    catch(error){
-
-        questionBox.innerHTML = `
-        
-            <div class="result-box">
-
-                <h2>Xatolik</h2>
-
-                <p>
-                    Savollar yuklanmadi
-                </p>
-
-            </div>
-
-        `;
-
-    }
-
+// ==================== TEST BIR MARTA ISHLASH HIMOYASI ====================
+const savedProgress = JSON.parse(localStorage.getItem("kpk-progress") || "{}");
+if (savedProgress.initialTest && savedProgress.initialTest.completed === true) {
+    window.location.href = "dashboard.html";
 }
 
-function showQuestion(){
+async function loadQuestions() {
+    try {
+        const response = await fetch("./json/questions.json");
 
-    const question =
-    questions[currentQuestion];
+        if (!response.ok) {
+            throw new Error("Savollar topilmadi");
+        }
 
-    questionNumber.innerText =
-    `${currentQuestion + 1} / ${questions.length}`;
+        const data = await response.json();
 
-    updateProgress();
+        questions = data;
+        showQuestion();
 
+    } catch (error) {
+        console.error(error);
+
+        document.getElementById("question-container").innerHTML = `
+            <div class="error">
+                Savollar yuklanmadi
+            </div>
+        `;
+    }
+}
+function showQuestion() {
+    const q = questions[currentQuestion];
     questionBox.innerHTML = `
-    
-        <h2 class="question-title">
-
-            ${currentQuestion + 1}.
-            ${question.question}
-
-        </h2>
-    
+        <h2 class="question-title">${currentQuestion + 1}. ${q.question}</h2>
     `;
 
-    question.options.forEach(option => {
+    q.options.forEach((option, index) => {
+        const btn = document.createElement("button");
+        btn.classList.add("option-btn");
+        btn.textContent = option;
+        if (selectedAnswers[currentQuestion] === index) btn.classList.add("active");
 
-        const button =
-        document.createElement("button");
-
-        button.classList.add("option-btn");
-
-        button.innerText = option;
-
-        if(
-            selectedAnswers[currentQuestion]
-            === option
-        ){
-            button.classList.add("active");
-        }
-
-        button.onclick = () => {
-
-            document
-            .querySelectorAll(".option-btn")
-            .forEach(btn => {
-
-                btn.classList.remove("active");
-
-            });
-
-            button.classList.add("active");
-
-            selectedAnswers[currentQuestion]
-            = option;
-
-            updateScore();
-
+        btn.onclick = () => {
+            document.querySelectorAll(".option-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            selectedAnswers[currentQuestion] = index;
         };
-
-        questionBox.appendChild(button);
-
+        questionBox.appendChild(btn);
     });
 
+    updateProgress();
+    resetQuestionTimer();
 }
 
-function updateProgress(){
-
-    const percent =
-    ((currentQuestion + 1)
-    / questions.length) * 100;
-
-    progressBar.style.width =
-    `${percent}%`;
-
+function updateProgress() {
+    const percent = ((currentQuestion + 1) / questions.length) * 100;
+    progressBar.style.width = `${percent}%`;
 }
 
-function updateScore(){
-
-    let score = 0;
-
-    questions.forEach((question,index)=>{
-
-        if(
-            selectedAnswers[index]
-            === question.answer
-        ){
-            score++;
-        }
-
-    });
-
-    scoreText.innerText = score;
-
-    const percent =
-    Math.round(
-        (score / questions.length) * 100
-    );
-
-    percentText.innerText =
-    `${percent}%`;
-
-}
-
-function startTimer(){
-
-    timerInterval = setInterval(()=>{
-
+function startMainTimer() {
+    timerInterval = setInterval(() => {
         totalTime--;
-
-        const minutes =
-        Math.floor(totalTime / 60);
-
-        const seconds =
-        totalTime % 60;
-
-        timer.innerText =
-        `${String(minutes)
-        .padStart(2,"0")}:${String(seconds)
-        .padStart(2,"0")}`;
-
-        if(totalTime <= 0){
-
-            finishAssessment();
-
-        }
-
-    },1000);
-
+        const min = Math.floor(totalTime / 60);
+        const sec = totalTime % 60;
+        timerEl.textContent = `${min}:${sec.toString().padStart(2, '0')}`;
+        if (totalTime <= 0) finishAssessment();
+    }, 1000);
 }
 
-nextBtn.onclick = ()=>{
+function startQuestionTimer() {
+    questionTimerInterval = setInterval(() => {
+        questionTimeLeft--;
+        questionTimerEl.textContent = questionTimeLeft;
+        if (questionTimeLeft <= 0) nextQuestion();
+    }, 1000);
+}
 
-    if(
-        currentQuestion
-        < questions.length - 1
-    ){
+function resetQuestionTimer() {
+    clearInterval(questionTimerInterval);
+    questionTimeLeft = 30;
+    questionTimerEl.textContent = questionTimeLeft;
+    startQuestionTimer();
+}
 
+function nextQuestion() {
+    if (currentQuestion < questions.length - 1) {
         currentQuestion++;
-
         showQuestion();
-
-    }
-
-    else{
-
+    } else {
         finishAssessment();
-
     }
+}
 
-};
+nextBtn.onclick = () => nextQuestion();
 
-prevBtn.onclick = ()=>{
-
-    if(currentQuestion > 0){
-
+prevBtn.onclick = () => {
+    if (currentQuestion > 0) {
         currentQuestion--;
-
         showQuestion();
-
     }
-
 };
 
-function finishAssessment(){
-
+function finishAssessment() {
     clearInterval(timerInterval);
+    clearInterval(questionTimerInterval);
 
     let score = 0;
+    let reviewHTML = '';
 
-    questions.forEach((question,index)=>{
+    questions.forEach((q, i) => {
+        const userAnswer = selectedAnswers[i];
+        const isCorrect = userAnswer === q.correct;
+        if (isCorrect) score++;
 
-        if(
-            selectedAnswers[index]
-            === question.answer
-        ){
-            score++;
-        }
+        const userText = userAnswer !== undefined ? q.options[userAnswer] : "Javob tanlanmadi";
+        const correctText = q.options[q.correct];
 
+        reviewHTML += `
+            <div class="review-item ${isCorrect ? 'correct' : 'wrong'}">
+                <div class="review-question">
+                    <strong>${i + 1}.</strong> ${q.question}
+                </div>
+                <div class="review-answers">
+                    <div class="user-answer">
+                        Siz tanlagan: <strong>${userText}</strong>
+                    </div>
+                    ${!isCorrect ? `
+                    <div class="correct-answer">
+                        To'g'ri javob: <strong>${correctText}</strong>
+                    </div>` : ''}
+                </div>
+            </div>
+        `;
     });
 
-    const finalPercent =
-    Math.round(
-        (score / questions.length) * 100
-    );
+    const percent = Math.round((score / questions.length) * 100);
 
+    // Progress saqlash
+    let progress = JSON.parse(localStorage.getItem("kpk-progress") || "{}");
+    progress.initialTest = { 
+        score, 
+        percent, 
+        total: questions.length, 
+        completed: true 
+    };
+
+    if (percent >= 90) progress.maxLevel = 4;
+    else if (percent >= 71) progress.maxLevel = 3;
+    else if (percent >= 56) progress.maxLevel = 2;
+    else progress.maxLevel = 1;
+
+    if (!progress.modules) {
+        progress.modules = {
+            1: { unlocked: true, completed: false },
+            2: { unlocked: percent >= 56, completed: false },
+            3: { unlocked: percent >= 71, completed: false },
+            4: { unlocked: percent >= 90, completed: false }
+        };
+    }
+
+    localStorage.setItem("kpk-progress", JSON.stringify(progress));
+
+    // Natija sahifasi
     questionBox.innerHTML = `
-    
         <div class="result-box">
-
-            <div class="result-circle">
-
-                ${finalPercent}%
-
+            <div class="result-circle ${percent >= 70 ? 'success' : 'warning'}">
+                ${percent}%
             </div>
-
-            <h2>
-                Test Yakunlandi
-            </h2>
-
-            <p>
-
-                To'g'ri javoblar:
-                ${score} / ${questions.length}
-
+            
+            <h2>Test Yakunlandi!</h2>
+            <p class="summary">
+                To'g'ri javoblar: <strong>${score} / ${questions.length}</strong>
             </p>
 
-            <button
-                class="btn next-btn"
+            <div class="review-container">
+                ${reviewHTML}
+            </div>
 
-                onclick="
-                window.location.href=
-                'dashboard.html'
-                ">
-
-                Dashboardga o'tish
-
+            <button class="btn btn-success btn-lg mt-4" onclick="window.location.href='dashboard.html'">
+                Dashboardga o'tish →
             </button>
-
         </div>
-
     `;
 
     nextBtn.style.display = "none";
-
     prevBtn.style.display = "none";
-
 }
 
 loadQuestions();
