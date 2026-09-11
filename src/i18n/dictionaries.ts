@@ -1,0 +1,618 @@
+/* ══════════════════════════════════════════════════════════════
+   KPK PLATFORM — TARJIMALAR
+   Original json/uz.json, en.json, ru.json fayllari, shuningdek
+   script.js va firebase.js ichidagi qattiq yozilgan matnlar
+   bitta tiplangan lug'atga birlashtirildi.
+══════════════════════════════════════════════════════════════ */
+
+export const LANGUAGES = ["uz", "en", "ru"] as const;
+export type Language = (typeof LANGUAGES)[number];
+
+export const LANGUAGE_META: Record<Language, { label: string; name: string; flag: string }> = {
+  uz: { label: "UZ", name: "Uzbek", flag: "/images/uz.png" },
+  en: { label: "EN", name: "English", flag: "/images/en.png" },
+  ru: { label: "RU", name: "Русский", flag: "/images/ru.png" },
+};
+
+export const DEFAULT_LANGUAGE: Language = "uz";
+
+const uz = {
+  /* ── Login sahifasi ── */
+  loadingText: "Platforma yuklanmoqda...",
+  badge: "KPK Platform",
+  title: "KPK — Kreativlik. Potentsial. Kasbiy o‘sish",
+  description:
+    "Oliy ta’lim muassasasi talabalaridagi ijodkorlik va salohiyatni amaliy o‘sishga yo‘naltirish.",
+  purposeTitle: "Platformaning maqsadi",
+  purposeText:
+    "Talabalar bilimini, ijodiy fikrlashini va kasbiy rivojlanishini raqamli muhitda qo‘llab-quvvatlash.",
+  welcome: "Dasturga xush kelibsiz",
+  authDesc: "Tizimdan foydalanish uchun Google yoki GitHub akkauntingiz orqali kiring.",
+  signInGoogle: "Google",
+  signInGithub: "Github",
+  languageLabel: "Til",
+
+  /* ── Kirish oynasi ── */
+  modalGoogleTitle: "Google orqali kirish",
+  modalGoogleText: "Google account orqali platformaga kirish jarayoni boshlanadi.",
+  modalGithubTitle: "Github orqali kirish",
+  modalGithubText: "Github account orqali platformaga kirish jarayoni boshlanadi.",
+  modalCancel: "Bekor qilish",
+  modalContinue: "Davom etish",
+  modalLoading: "Kirilmoqda...",
+
+  /* ── Dashboard ── */
+  dashboardTitle: "Dashboard",
+  dashboardDesc: "KPK platformasiga xush kelibsiz",
+  welcomeDashboard: "KPK platformasiga xush kelibsiz",
+  welcomeDashboardText:
+    "Bu yerda talabalar salohiyati, ijodkorlik va kasbiy o‘sish jarayonlari boshqariladi.",
+  logout: "Chiqish",
+  google: "Google orqali kirilgan",
+  github: "Github orqali kirilgan",
+  profile: "Profil",
+  defaultUserName: "Foydalanuvchi",
+  defaultUserEmail: "email@example.com",
+
+  /* ── Modullar ── */
+  module1Title: "1-Bo‘lim",
+  module1Desc: "Boshlang‘ich daraja",
+  module2Title: "2-Bo‘lim",
+  module2Desc: "O‘rta daraja",
+  module3Title: "3-Bo‘lim",
+  module3Desc: "Yuqori daraja",
+  module4Title: "4-Bo‘lim",
+  module4Desc: "Eng yuqori daraja",
+  moduleStart: "Boshlash",
+  moduleLocked: "Yopiq",
+  moduleLockedHint: "Ochish uchun kirish testidan kamida {percent}% to‘plang",
+  moduleBack: "Dashboardga qaytish",
+  moduleComingSoon: "Bu bo‘lim darslari tayyorlanmoqda",
+  moduleComingSoonText:
+    "Bo‘lim materiallari yaqin kunlarda qo‘shiladi. Shu vaqtgacha ochiq bo‘limlarni ko‘rib chiqing.",
+  yourResult: "Kirish testi natijangiz",
+
+  /* ── Baholash testi ── */
+  assessmentTitle: "O‘quvchilar bilimini baholash",
+  assessmentDesc: "Test orqali bilim darajangiz aniqlanadi",
+  remainingTime: "Umumiy vaqt:",
+  questionTime: "Bu savol uchun vaqt:",
+  seconds: "soniya",
+  prev: "Ortga",
+  next: "Keyingi",
+  finish: "Testni yakunlash",
+  questionOf: "{current} / {total}-savol",
+  loadingQuestions: "Savollar yuklanmoqda...",
+
+  /* ── Test natijasi ── */
+  resultTitle: "Test yakunlandi!",
+  resultSummary: "To‘g‘ri javoblar:",
+  resultUserAnswer: "Siz tanlagan:",
+  resultCorrectAnswer: "To‘g‘ri javob:",
+  resultNoAnswer: "Javob tanlanmadi",
+  resultGoDashboard: "Dashboardga o‘tish",
+  resultUnlocked: "Sizga {count} ta bo‘lim ochildi",
+  reviewTitle: "Javoblaringiz tahlili",
+
+  /* ── Yakunlashni tasdiqlash ── */
+  confirmFinishTitle: "Testni yakunlaysizmi?",
+  confirmFinishText:
+    "{unanswered} ta savol javobsiz qoldi. Yakunlagandan keyin javoblarni o‘zgartirib bo‘lmaydi.",
+  confirmFinishTextAll: "Barcha savollarga javob berdingiz. Testni yakunlaymizmi?",
+  confirmFinishCancel: "Testga qaytish",
+  confirmFinishOk: "Ha, yakunlash",
+
+  /* ── Bildirishnomalar ── */
+  loginSuccessTitle: "Kirish tasdiqlandi",
+  loginSuccessText: "Tizimga muvaffaqiyatli kirildi.",
+  logoutSuccessTitle: "Chiqish tasdiqlandi",
+  logoutSuccessText: "Tizimdan muvaffaqiyatli chiqildi.",
+  loginErrorTitle: "Login xatoligi",
+  loginErrorText: "Kirishda xatolik yuz berdi.",
+  logoutErrorTitle: "Chiqish xatoligi",
+  logoutErrorText: "Tizimdan chiqishda xatolik yuz berdi.",
+  accountExistsText: "Bu email boshqa login usuli bilan ulangan.",
+  popupClosedText: "Login oynasi yopildi.",
+  unauthorizedDomainTitle: "Firebase domen xatoligi",
+  unauthorizedDomainText:
+    "Firebase Console → Authentication → Settings → Authorized domains bo‘limiga localhost va 127.0.0.1 ni qo‘shing.",
+  configMissingTitle: "Firebase sozlanmagan",
+  configMissingText:
+    ".env.local faylida NEXT_PUBLIC_FIREBASE_* qiymatlarini to‘ldiring va serverni qayta ishga tushiring.",
+  telegramSendingTitle: "Telegramga yuborilmoqda",
+  telegramLoginSendingText: "User kirish ma’lumotlari Telegram botga yuborilmoqda...",
+  telegramLogoutSendingText: "User chiqish ma’lumotlari Telegram botga yuborilmoqda...",
+  telegramSuccessTitle: "Telegramga yuborildi",
+  telegramLoginText: "User kirish ma’lumotlari Telegram botga muvaffaqiyatli yuborildi.",
+  telegramLogoutText: "User chiqish ma’lumotlari Telegram botga muvaffaqiyatli yuborildi.",
+  telegramErrorTitle: "Telegram xatoligi",
+  telegramLoginFailedText: "Tizimga kirildi, lekin user ma’lumotlari Telegram botga yuborilmadi.",
+  telegramLogoutFailedText: "Tizimdan chiqildi, lekin chiqish ma’lumotlari Telegram botga yuborilmadi.",
+  serverErrorTitle: "Server xatoligi",
+  serverErrorText: "Telegram API bilan ulanishda xatolik yuz berdi.",
+  noEmail: "Email ko‘rsatilmagan",
+  userFallback: "User",
+
+  /* ── Sidebar navigatsiyasi ── */
+  navMain: "Asosiy",
+  navLearning: "Ta'lim",
+  navOverview: "Bosh sahifa",
+  navModules: "Bo‘limlar",
+  navAssessment: "Baholash testi",
+  navMenu: "Menyu",
+  navOpenMenu: "Menyuni ochish",
+  sidebarTagline: "Ta'lim platformasi",
+
+  /* ── Test endi ixtiyoriy ── */
+  testOptionalTitle: "Bilim darajangizni aniqlang",
+  testOptionalText:
+    "Baholash testi ixtiyoriy. Uni topshirsangiz, natijangiz shu yerda ko‘rinadi va darajangizga mos bo‘limlar tavsiya qilinadi.",
+  startTest: "Testni boshlash",
+  retakeTest: "Testni qayta topshirish",
+  testResultTitle: "Kirish testi natijangiz",
+  allModulesOpen: "Barcha bo‘limlar ochiq",
+  overviewGreeting: "Xush kelibsiz, {name}",
+
+  /* ── Dashboard statistikasi ── */
+  statOpenModules: "Ochiq bo‘limlar",
+  statTestScore: "Test natijasi",
+  statLevel: "Sizning darajangiz",
+  statAiChats: "AI bilan suhbat",
+  statNotTaken: "Topshirilmagan",
+  statMessages: "xabar",
+  levelBeginner: "Boshlang‘ich",
+  levelIntermediate: "O‘rta",
+  levelAdvanced: "Yuqori",
+  levelMaster: "Eng yuqori",
+  levelUnknown: "Aniqlanmagan",
+  heroTitle: "Bugun nimadan boshlaymiz?",
+  heroText:
+    "Bo‘limlarni ketma-ket o‘rganing, bilimingizni test bilan tekshiring yoki AI yordamchidan savol so‘rang.",
+  sectionModules: "O‘quv bo‘limlari",
+  sectionModulesText: "Har bir bo‘lim oldingisining ustiga quriladi.",
+  moduleProgress: "Bajarildi",
+
+  /* ── AI yordamchi ── */
+  navAi: "AI yordamchi",
+  aiTitle: "AI yordamchi",
+  aiSubtitle: "Savolingizni yozing — bo‘limlar bo‘yicha tushuntirib beraman",
+  aiCardTitle: "Tushunmadingizmi? AI yordamchidan so‘rang",
+  aiCardText:
+    "Mavzuni oddiy tilda tushuntiradi, misol keltiradi va kodni tahlil qiladi. O‘zbek, ingliz va rus tillarida ishlaydi.",
+  aiCardAction: "Suhbatni boshlash",
+  aiPlaceholder: "Savolingizni yozing...",
+  aiSend: "Yuborish",
+  aiClear: "Suhbatni tozalash",
+  aiThinking: "O‘ylayapti...",
+  aiCopy: "Nusxalash",
+  aiCopied: "Nusxalandi",
+  aiEmptyTitle: "Nimadan boshlaymiz?",
+  aiEmptyText: "Quyidagi savollardan birini tanlang yoki o‘zingiznikini yozing.",
+  aiSuggest1: "HTML va CSS farqi nimada?",
+  aiSuggest2: "JavaScript'da funksiya qanday yoziladi?",
+  aiSuggest3: "React nima uchun kerak?",
+  aiSuggest4: "Menga 1-bo‘limdan boshlash rejasini tuz",
+  aiErrorTitle: "AI javob bermadi",
+  aiErrorText: "Ulanishda xatolik yuz berdi. Birozdan so‘ng qayta urinib ko‘ring.",
+  aiNotConfiguredTitle: "AI sozlanmagan",
+  aiNotConfiguredText:
+    ".env.local faylida ANTHROPIC_API_KEY qiymatini to‘ldiring va serverni qayta ishga tushiring.",
+  aiYou: "Siz",
+  aiAssistant: "AI yordamchi",
+  aiHint: "Enter — yuborish, Shift+Enter — yangi qator",
+
+  /* ── Kirish sahifasi: yangi dizayn ── */
+  heroPill: "Endi AI yordamchi bilan",
+  heroLead: "Bilim. Ijodkorlik. Kasbiy o‘sish.",
+  heroSub:
+    "Talabalar salohiyatini raqamli muhitda ochadigan platforma — to‘rt bosqichli o‘quv yo‘li va yoningizdagi AI yordamchi.",
+  featureAiTitle: "AI yordamchi",
+  featureAiText: "Savolingizga bir zumda javob, uch tilda",
+  featureModulesTitle: "4 bosqichli yo‘l",
+  featureModulesText: "Boshlang‘ichdan eng yuqori darajagacha",
+  featureTestTitle: "Bilim baholash",
+  featureTestText: "Darajangizni test bilan aniqlang",
+  authSecure: "Ma’lumotlaringiz himoyalangan",
+  authNoPassword: "Parol kerak emas",
+
+  /* ── 404 ── */
+  notFoundTitle: "Sahifa topilmadi",
+  notFoundText: "Siz izlagan sahifa mavjud emas yoki ko‘chirilgan.",
+  notFoundAction: "Bosh sahifaga qaytish",
+};
+
+/** Lug'at kalitlari uz obyektidan avtomatik olinadi — yangi kalit qo'shsangiz
+ *  en va ru ham uni majburiy to'ldirishi kerak bo'ladi. */
+export type DictionaryKey = keyof typeof uz;
+export type Dictionary = Record<DictionaryKey, string>;
+
+const en: Dictionary = {
+  loadingText: "Loading platform...",
+  badge: "KPK Platform",
+  title: "KPK — Creativity. Potential. Professional Growth",
+  description:
+    "Directing creativity and potential of higher education students toward practical growth.",
+  purposeTitle: "Platform purpose",
+  purposeText:
+    "To support students’ knowledge, creative thinking and professional development in a digital environment.",
+  welcome: "Welcome to the platform",
+  authDesc: "Sign in using your Google or GitHub account to continue.",
+  signInGoogle: "Google",
+  signInGithub: "Github",
+  languageLabel: "Language",
+
+  modalGoogleTitle: "Sign in with Google",
+  modalGoogleText: "The Google account sign-in process will begin.",
+  modalGithubTitle: "Sign in with Github",
+  modalGithubText: "The Github account sign-in process will begin.",
+  modalCancel: "Cancel",
+  modalContinue: "Continue",
+  modalLoading: "Signing in...",
+
+  dashboardTitle: "Dashboard",
+  dashboardDesc: "Welcome to KPK platform",
+  welcomeDashboard: "Welcome to KPK platform",
+  welcomeDashboardText:
+    "Here, students’ potential, creativity and professional growth processes are managed.",
+  logout: "Logout",
+  google: "Signed in with Google",
+  github: "Signed in with Github",
+  profile: "Profile",
+  defaultUserName: "User",
+  defaultUserEmail: "email@example.com",
+
+  module1Title: "Module 1",
+  module1Desc: "Beginner level",
+  module2Title: "Module 2",
+  module2Desc: "Intermediate level",
+  module3Title: "Module 3",
+  module3Desc: "Advanced level",
+  module4Title: "Module 4",
+  module4Desc: "Master level",
+  moduleStart: "Start",
+  moduleLocked: "Locked",
+  moduleLockedHint: "Score at least {percent}% on the entry test to unlock",
+  moduleBack: "Back to dashboard",
+  moduleComingSoon: "Lessons for this module are being prepared",
+  moduleComingSoonText:
+    "Module materials will be added soon. In the meantime, explore the modules you have unlocked.",
+  yourResult: "Your entry test result",
+
+  assessmentTitle: "Student knowledge assessment",
+  assessmentDesc: "Your knowledge level is determined through this test",
+  remainingTime: "Total time:",
+  questionTime: "Time for this question:",
+  seconds: "seconds",
+  prev: "Back",
+  next: "Next",
+  finish: "Finish test",
+  questionOf: "Question {current} of {total}",
+  loadingQuestions: "Loading questions...",
+
+  resultTitle: "Test completed!",
+  resultSummary: "Correct answers:",
+  resultUserAnswer: "Your answer:",
+  resultCorrectAnswer: "Correct answer:",
+  resultNoAnswer: "No answer selected",
+  resultGoDashboard: "Go to dashboard",
+  resultUnlocked: "{count} modules are now unlocked",
+  reviewTitle: "Review of your answers",
+
+  confirmFinishTitle: "Finish the test?",
+  confirmFinishText:
+    "{unanswered} questions are still unanswered. You cannot change your answers after finishing.",
+  confirmFinishTextAll: "You answered every question. Ready to finish?",
+  confirmFinishCancel: "Back to test",
+  confirmFinishOk: "Yes, finish",
+
+  loginSuccessTitle: "Login confirmed",
+  loginSuccessText: "You have successfully signed in.",
+  logoutSuccessTitle: "Logout confirmed",
+  logoutSuccessText: "You have successfully logged out.",
+  loginErrorTitle: "Login error",
+  loginErrorText: "An error occurred during sign-in.",
+  logoutErrorTitle: "Logout error",
+  logoutErrorText: "An error occurred during logout.",
+  accountExistsText: "This email is linked with another login method.",
+  popupClosedText: "The login window was closed.",
+  unauthorizedDomainTitle: "Firebase domain error",
+  unauthorizedDomainText:
+    "Add localhost and 127.0.0.1 in Firebase Console → Authentication → Settings → Authorized domains.",
+  configMissingTitle: "Firebase is not configured",
+  configMissingText:
+    "Fill in the NEXT_PUBLIC_FIREBASE_* values in .env.local and restart the dev server.",
+  telegramSendingTitle: "Sending to Telegram",
+  telegramLoginSendingText: "User login information is being sent to Telegram bot...",
+  telegramLogoutSendingText: "User logout information is being sent to Telegram bot...",
+  telegramSuccessTitle: "Sent to Telegram",
+  telegramLoginText: "User login information was successfully sent to Telegram bot.",
+  telegramLogoutText: "User logout information was successfully sent to Telegram bot.",
+  telegramErrorTitle: "Telegram error",
+  telegramLoginFailedText: "Login completed, but user information was not sent to Telegram.",
+  telegramLogoutFailedText: "Logout completed, but logout information was not sent to Telegram.",
+  serverErrorTitle: "Server error",
+  serverErrorText: "An error occurred connecting to Telegram API.",
+  noEmail: "Email not provided",
+  userFallback: "User",
+
+  navMain: "Main",
+  navLearning: "Learning",
+  navOverview: "Overview",
+  navModules: "Modules",
+  navAssessment: "Assessment test",
+  navMenu: "Menu",
+  navOpenMenu: "Open menu",
+  sidebarTagline: "Learning platform",
+
+  testOptionalTitle: "Find out your knowledge level",
+  testOptionalText:
+    "The assessment test is optional. Take it and your result appears here, along with modules matched to your level.",
+  startTest: "Start the test",
+  retakeTest: "Retake the test",
+  testResultTitle: "Your entry test result",
+  allModulesOpen: "All modules are open",
+  overviewGreeting: "Welcome, {name}",
+
+  statOpenModules: "Open modules",
+  statTestScore: "Test score",
+  statLevel: "Your level",
+  statAiChats: "AI conversation",
+  statNotTaken: "Not taken",
+  statMessages: "messages",
+  levelBeginner: "Beginner",
+  levelIntermediate: "Intermediate",
+  levelAdvanced: "Advanced",
+  levelMaster: "Master",
+  levelUnknown: "Not set",
+  heroTitle: "What shall we start with today?",
+  heroText:
+    "Work through the modules in order, check your knowledge with the test, or ask the AI assistant a question.",
+  sectionModules: "Learning modules",
+  sectionModulesText: "Each module builds on the one before it.",
+  moduleProgress: "Completed",
+
+  navAi: "AI assistant",
+  aiTitle: "AI assistant",
+  aiSubtitle: "Ask a question — I explain the module topics",
+  aiCardTitle: "Stuck on something? Ask the AI assistant",
+  aiCardText:
+    "It explains topics in plain language, gives examples and reviews your code. Works in Uzbek, English and Russian.",
+  aiCardAction: "Start a conversation",
+  aiPlaceholder: "Type your question...",
+  aiSend: "Send",
+  aiClear: "Clear conversation",
+  aiThinking: "Thinking...",
+  aiCopy: "Copy",
+  aiCopied: "Copied",
+  aiEmptyTitle: "Where shall we begin?",
+  aiEmptyText: "Pick one of the questions below or write your own.",
+  aiSuggest1: "What is the difference between HTML and CSS?",
+  aiSuggest2: "How do I write a function in JavaScript?",
+  aiSuggest3: "Why do we need React?",
+  aiSuggest4: "Make me a study plan starting from module 1",
+  aiErrorTitle: "No answer from AI",
+  aiErrorText: "Something went wrong with the connection. Please try again shortly.",
+  aiNotConfiguredTitle: "AI is not configured",
+  aiNotConfiguredText:
+    "Fill in ANTHROPIC_API_KEY in .env.local and restart the server.",
+  aiYou: "You",
+  aiAssistant: "AI assistant",
+  aiHint: "Enter to send, Shift+Enter for a new line",
+
+  heroPill: "Now with an AI assistant",
+  heroLead: "Knowledge. Creativity. Professional growth.",
+  heroSub:
+    "A platform that unlocks student potential in a digital environment — a four-stage learning path and an AI assistant at your side.",
+  featureAiTitle: "AI assistant",
+  featureAiText: "Instant answers in three languages",
+  featureModulesTitle: "Four-stage path",
+  featureModulesText: "From beginner to master level",
+  featureTestTitle: "Knowledge check",
+  featureTestText: "Find your level with the test",
+  authSecure: "Your data stays protected",
+  authNoPassword: "No password needed",
+
+  notFoundTitle: "Page not found",
+  notFoundText: "The page you are looking for does not exist or has been moved.",
+  notFoundAction: "Back to home",
+};
+
+const ru: Dictionary = {
+  loadingText: "Платформа загружается...",
+  badge: "Платформа KPK",
+  title: "KPK — Креативность. Потенциал. Профессиональный рост",
+  description:
+    "Направление креативности и потенциала студентов высшего учебного заведения на практический рост.",
+  purposeTitle: "Цель платформы",
+  purposeText:
+    "Поддержка знаний, креативного мышления и профессионального развития студентов в цифровой среде.",
+  welcome: "Добро пожаловать",
+  authDesc: "Войдите через Google или GitHub, чтобы продолжить.",
+  signInGoogle: "Google",
+  signInGithub: "Github",
+  languageLabel: "Язык",
+
+  modalGoogleTitle: "Войти через Google",
+  modalGoogleText: "Начнётся процесс входа через аккаунт Google.",
+  modalGithubTitle: "Войти через Github",
+  modalGithubText: "Начнётся процесс входа через аккаунт Github.",
+  modalCancel: "Отмена",
+  modalContinue: "Продолжить",
+  modalLoading: "Выполняется вход...",
+
+  dashboardTitle: "Панель управления",
+  dashboardDesc: "Добро пожаловать на платформу KPK",
+  welcomeDashboard: "Добро пожаловать на платформу KPK",
+  welcomeDashboardText:
+    "Здесь управляются потенциал студентов, креативность и профессиональный рост.",
+  logout: "Выйти",
+  google: "Вход через Google",
+  github: "Вход через Github",
+  profile: "Профиль",
+  defaultUserName: "Пользователь",
+  defaultUserEmail: "email@example.com",
+
+  module1Title: "Раздел 1",
+  module1Desc: "Начальный уровень",
+  module2Title: "Раздел 2",
+  module2Desc: "Средний уровень",
+  module3Title: "Раздел 3",
+  module3Desc: "Продвинутый уровень",
+  module4Title: "Раздел 4",
+  module4Desc: "Высший уровень",
+  moduleStart: "Начать",
+  moduleLocked: "Закрыто",
+  moduleLockedHint: "Наберите минимум {percent}% на вступительном тесте, чтобы открыть",
+  moduleBack: "Вернуться на панель",
+  moduleComingSoon: "Уроки этого раздела готовятся",
+  moduleComingSoonText:
+    "Материалы раздела появятся в ближайшее время. А пока изучите открытые разделы.",
+  yourResult: "Результат вступительного теста",
+
+  assessmentTitle: "Оценка знаний студентов",
+  assessmentDesc: "Ваш уровень знаний определяется по результатам теста",
+  remainingTime: "Общее время:",
+  questionTime: "Время на этот вопрос:",
+  seconds: "секунд",
+  prev: "Назад",
+  next: "Далее",
+  finish: "Завершить тест",
+  questionOf: "Вопрос {current} из {total}",
+  loadingQuestions: "Загрузка вопросов...",
+
+  resultTitle: "Тест завершён!",
+  resultSummary: "Правильные ответы:",
+  resultUserAnswer: "Ваш ответ:",
+  resultCorrectAnswer: "Правильный ответ:",
+  resultNoAnswer: "Ответ не выбран",
+  resultGoDashboard: "Перейти на панель",
+  resultUnlocked: "Вам открыто разделов: {count}",
+  reviewTitle: "Разбор ваших ответов",
+
+  confirmFinishTitle: "Завершить тест?",
+  confirmFinishText:
+    "Без ответа осталось вопросов: {unanswered}. После завершения изменить ответы нельзя.",
+  confirmFinishTextAll: "Вы ответили на все вопросы. Завершаем тест?",
+  confirmFinishCancel: "Вернуться к тесту",
+  confirmFinishOk: "Да, завершить",
+
+  loginSuccessTitle: "Вход подтверждён",
+  loginSuccessText: "Вы успешно вошли в систему.",
+  logoutSuccessTitle: "Выход подтверждён",
+  logoutSuccessText: "Вы успешно вышли из системы.",
+  loginErrorTitle: "Ошибка входа",
+  loginErrorText: "Во время входа произошла ошибка.",
+  logoutErrorTitle: "Ошибка выхода",
+  logoutErrorText: "Во время выхода произошла ошибка.",
+  accountExistsText: "Этот email связан с другим способом входа.",
+  popupClosedText: "Окно входа было закрыто.",
+  unauthorizedDomainTitle: "Ошибка домена Firebase",
+  unauthorizedDomainText:
+    "Добавьте localhost и 127.0.0.1 в Firebase Console → Authentication → Settings → Authorized domains.",
+  configMissingTitle: "Firebase не настроен",
+  configMissingText:
+    "Заполните значения NEXT_PUBLIC_FIREBASE_* в файле .env.local и перезапустите сервер.",
+  telegramSendingTitle: "Отправка в Telegram",
+  telegramLoginSendingText: "Информация о входе пользователя отправляется в Telegram бот...",
+  telegramLogoutSendingText: "Информация о выходе пользователя отправляется в Telegram бот...",
+  telegramSuccessTitle: "Отправлено в Telegram",
+  telegramLoginText: "Информация о входе пользователя успешно отправлена в Telegram бот.",
+  telegramLogoutText: "Информация о выходе пользователя успешно отправлена в Telegram бот.",
+  telegramErrorTitle: "Ошибка Telegram",
+  telegramLoginFailedText: "Вход выполнен, но информация пользователя не отправлена в Telegram.",
+  telegramLogoutFailedText: "Выход выполнен, но информация о выходе не отправлена в Telegram.",
+  serverErrorTitle: "Ошибка сервера",
+  serverErrorText: "Произошла ошибка подключения к Telegram API.",
+  noEmail: "Email не указан",
+  userFallback: "Пользователь",
+
+  navMain: "Главное",
+  navLearning: "Обучение",
+  navOverview: "Обзор",
+  navModules: "Разделы",
+  navAssessment: "Оценочный тест",
+  navMenu: "Меню",
+  navOpenMenu: "Открыть меню",
+  sidebarTagline: "Образовательная платформа",
+
+  testOptionalTitle: "Определите свой уровень знаний",
+  testOptionalText:
+    "Оценочный тест необязателен. Пройдите его — результат появится здесь, а разделы подберутся под ваш уровень.",
+  startTest: "Начать тест",
+  retakeTest: "Пройти тест заново",
+  testResultTitle: "Результат вступительного теста",
+  allModulesOpen: "Все разделы открыты",
+  overviewGreeting: "Добро пожаловать, {name}",
+
+  statOpenModules: "Открытые разделы",
+  statTestScore: "Результат теста",
+  statLevel: "Ваш уровень",
+  statAiChats: "Общение с ИИ",
+  statNotTaken: "Не пройден",
+  statMessages: "сообщений",
+  levelBeginner: "Начальный",
+  levelIntermediate: "Средний",
+  levelAdvanced: "Продвинутый",
+  levelMaster: "Высший",
+  levelUnknown: "Не определён",
+  heroTitle: "С чего начнём сегодня?",
+  heroText:
+    "Изучайте разделы по порядку, проверяйте знания тестом или задайте вопрос ИИ-помощнику.",
+  sectionModules: "Учебные разделы",
+  sectionModulesText: "Каждый раздел опирается на предыдущий.",
+  moduleProgress: "Выполнено",
+
+  navAi: "ИИ-помощник",
+  aiTitle: "ИИ-помощник",
+  aiSubtitle: "Задайте вопрос — объясню темы разделов",
+  aiCardTitle: "Что-то непонятно? Спросите ИИ-помощника",
+  aiCardText:
+    "Объяснит тему простым языком, приведёт примеры и разберёт код. Работает на узбекском, английском и русском.",
+  aiCardAction: "Начать разговор",
+  aiPlaceholder: "Напишите свой вопрос...",
+  aiSend: "Отправить",
+  aiClear: "Очистить разговор",
+  aiThinking: "Думает...",
+  aiCopy: "Копировать",
+  aiCopied: "Скопировано",
+  aiEmptyTitle: "С чего начнём?",
+  aiEmptyText: "Выберите один из вопросов ниже или напишите свой.",
+  aiSuggest1: "В чём разница между HTML и CSS?",
+  aiSuggest2: "Как написать функцию в JavaScript?",
+  aiSuggest3: "Зачем нужен React?",
+  aiSuggest4: "Составь мне план обучения с первого раздела",
+  aiErrorTitle: "ИИ не ответил",
+  aiErrorText: "Произошла ошибка соединения. Попробуйте чуть позже.",
+  aiNotConfiguredTitle: "ИИ не настроен",
+  aiNotConfiguredText:
+    "Заполните ANTHROPIC_API_KEY в файле .env.local и перезапустите сервер.",
+  aiYou: "Вы",
+  aiAssistant: "ИИ-помощник",
+  aiHint: "Enter — отправить, Shift+Enter — новая строка",
+
+  heroPill: "Теперь с ИИ-помощником",
+  heroLead: "Знания. Креативность. Профессиональный рост.",
+  heroSub:
+    "Платформа, раскрывающая потенциал студентов в цифровой среде — четыре ступени обучения и ИИ-помощник рядом с вами.",
+  featureAiTitle: "ИИ-помощник",
+  featureAiText: "Мгновенные ответы на трёх языках",
+  featureModulesTitle: "Четыре ступени",
+  featureModulesText: "От начального до высшего уровня",
+  featureTestTitle: "Оценка знаний",
+  featureTestText: "Определите свой уровень тестом",
+  authSecure: "Ваши данные защищены",
+  authNoPassword: "Пароль не нужен",
+
+  notFoundTitle: "Страница не найдена",
+  notFoundText: "Страница, которую вы ищете, не существует или была перемещена.",
+  notFoundAction: "Вернуться на главную",
+};
+
+export const dictionaries: Record<Language, Dictionary> = { uz, en, ru };
+
+/** "{name}" ko'rinishidagi o'rin egallovchilarni almashtiradi. */
+export function interpolate(template: string, values: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/g, (match, key: string) =>
+    key in values ? String(values[key]) : match
+  );
+}

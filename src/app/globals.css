@@ -1,0 +1,400 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ══════════════════════════════════════════════════════════════
+   KPK DESIGN TOKENS — LIGHT
+══════════════════════════════════════════════════════════════ */
+
+:root {
+  color-scheme: light;
+
+  /* Brend ranglari — mavzudan qat'i nazar o'zgarmaydi */
+  --kpk-blue: #0d6efd;
+  --kpk-cyan: #00b7ff;
+
+  /* Matn */
+  --kpk-primary: #1b3a63;
+  --kpk-text: #1f3552;
+  --kpk-muted: #667a95;
+
+  /* Yuzalar */
+  --kpk-page: #f5f8fd;
+  --kpk-surface: rgba(255, 255, 255, 0.78);
+  --kpk-surface-solid: #ffffff;
+  --kpk-subtle: #f4f7fc;
+  --kpk-border: rgba(27, 58, 99, 0.1);
+  --kpk-hover: rgba(13, 110, 253, 0.06);
+  --kpk-accent-soft: #e9f2ff;
+  --kpk-track: #e6ecf5;
+  --kpk-shadow: 0 18px 50px rgba(27, 58, 99, 0.1);
+  --kpk-shadow-sm: 0 10px 24px rgba(27, 58, 99, 0.07);
+  --kpk-scrim: rgba(15, 23, 42, 0.45);
+
+  /* Holat ranglari — nishonlar, natijalar, ogohlantirishlar */
+  --kpk-ok-bg: #e9f7ef;
+  --kpk-ok-fg: #0f8a4a;
+  --kpk-warn-bg: #fff3cd;
+  --kpk-warn-fg: #a9760b;
+  --kpk-info-bg: #e8f0ff;
+  --kpk-info-fg: #0d6efd;
+  --kpk-pink-bg: #ffeaf4;
+  --kpk-pink-fg: #c92a76;
+  --kpk-danger-fg: #dc3545;
+  --kpk-danger-bg: #fff1f2;
+
+  /* Fon chiziqlari */
+  --kpk-line: rgba(27, 58, 99, 0.09);
+  --kpk-wash-1: rgba(13, 110, 253, 0.14);
+  --kpk-wash-2: rgba(0, 183, 255, 0.12);
+
+  /* shadcn/ui tokenlari */
+  --radius: 1rem;
+
+  --background: #f5f8fd;
+  --foreground: #1f3552;
+  --card: #ffffff;
+  --card-foreground: #1f3552;
+  --popover: #ffffff;
+  --popover-foreground: #1f3552;
+  --primary: #1b3a63;
+  --primary-foreground: #ffffff;
+  --secondary: #e9f2ff;
+  --secondary-foreground: #0d6efd;
+  --muted: #f4f7fc;
+  --muted-foreground: #667a95;
+  --accent: #e9f2ff;
+  --accent-foreground: #0d6efd;
+  --destructive: #dc3545;
+  --destructive-foreground: #ffffff;
+  --border: rgba(27, 58, 99, 0.1);
+  --input: rgba(27, 58, 99, 0.12);
+  --ring: #0d6efd;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DARK
+══════════════════════════════════════════════════════════════ */
+
+.dark {
+  color-scheme: dark;
+
+  --kpk-primary: #e8f0fd;
+  --kpk-text: #dde7f6;
+  --kpk-muted: #8fa3c0;
+
+  --kpk-page: #0e1626;
+  --kpk-surface: rgba(24, 35, 54, 0.72);
+  --kpk-surface-solid: #18233a;
+  --kpk-subtle: rgba(255, 255, 255, 0.04);
+  --kpk-border: rgba(255, 255, 255, 0.09);
+  --kpk-hover: rgba(255, 255, 255, 0.06);
+  --kpk-accent-soft: rgba(13, 110, 253, 0.2);
+  --kpk-track: rgba(255, 255, 255, 0.08);
+  --kpk-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+  --kpk-shadow-sm: 0 10px 24px rgba(0, 0, 0, 0.35);
+  --kpk-scrim: rgba(2, 6, 14, 0.66);
+
+  --kpk-ok-bg: rgba(16, 185, 129, 0.16);
+  --kpk-ok-fg: #4ade80;
+  --kpk-warn-bg: rgba(245, 158, 11, 0.16);
+  --kpk-warn-fg: #fbbf24;
+  --kpk-info-bg: rgba(13, 110, 253, 0.2);
+  --kpk-info-fg: #7cb2ff;
+  --kpk-pink-bg: rgba(214, 51, 132, 0.18);
+  --kpk-pink-fg: #f9a8d4;
+  --kpk-danger-fg: #ff8996;
+  --kpk-danger-bg: rgba(239, 68, 68, 0.14);
+
+  --kpk-line: rgba(255, 255, 255, 0.07);
+  --kpk-wash-1: rgba(13, 110, 253, 0.2);
+  --kpk-wash-2: rgba(0, 183, 255, 0.14);
+
+  --background: #0e1626;
+  --foreground: #dde7f6;
+  --card: #18233a;
+  --card-foreground: #dde7f6;
+  --popover: #18233a;
+  --popover-foreground: #dde7f6;
+  --primary: #e8f0fd;
+  --primary-foreground: #0e1626;
+  --secondary: rgba(13, 110, 253, 0.2);
+  --secondary-foreground: #7cb2ff;
+  --muted: rgba(255, 255, 255, 0.04);
+  --muted-foreground: #8fa3c0;
+  --accent: rgba(13, 110, 253, 0.2);
+  --accent-foreground: #7cb2ff;
+  --destructive: #f26d7a;
+  --destructive-foreground: #0e1626;
+  --border: rgba(255, 255, 255, 0.09);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: #4d94ff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    min-height: 100vh;
+    background: var(--kpk-page);
+    color: var(--kpk-text);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--kpk-blue);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  ::selection {
+    background: rgba(13, 110, 253, 0.18);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   YUZALAR — mavzuga qarab avtomatik o'zgaradi
+══════════════════════════════════════════════════════════════ */
+
+.kpk-card {
+  background: var(--kpk-surface);
+  border: 1px solid var(--kpk-border);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: var(--kpk-shadow);
+}
+
+.kpk-bar {
+  background: var(--kpk-surface);
+  border-color: var(--kpk-border);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.kpk-gradient {
+  background: linear-gradient(135deg, #00b7ff, #0d6efd);
+}
+
+.kpk-gradient-dark {
+  background: linear-gradient(135deg, #334155, #1e293b);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FON — BOG'LANGAN NUQTALAR TARMOG'I
+   Canvas'da chiziladi (page-background.tsx). Bu yerda faqat
+   joylashuv va yumshoq vinyetka.
+══════════════════════════════════════════════════════════════ */
+
+.kpk-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--kpk-page);
+}
+
+.kpk-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* Chekkalarga qarab so'nadi — tarmoq matnga xalaqit bermaydi */
+.kpk-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(80% 68% at 50% 45%, transparent 0%, var(--kpk-page) 98%),
+    radial-gradient(60% 45% at 15% 10%, var(--kpk-wash-1), transparent 60%),
+    radial-gradient(55% 40% at 85% 88%, var(--kpk-wash-2), transparent 60%);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MAVZU ALMASHISHI — TELEGRAM USULIDAGI DOIRA
+
+   Qorong'iga o'tish : yangi (qorong'i) qatlam tugmadan boshlab
+                       doira bo'lib KENGAYADI.
+   Yorug'ga qaytish  : eski (qorong'i) qatlam o'sha nuqtaga
+                       doira bo'lib YIG'ILADI — orqaga qaytgandek.
+
+   Animatsiya CSS'da e'lon qilingan (JS'da emas) — shunda u
+   o'tishning birinchi kadridayoq boshlanadi va "qotib turgan
+   kadr" (qorayib qolish) muammosi bo'lmaydi.
+══════════════════════════════════════════════════════════════ */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Doira markazi va radiusi tugma bosilganda JS tomonidan beriladi */
+:root {
+  --kpk-vt-x: 50%;
+  --kpk-vt-y: 50%;
+  --kpk-vt-r: 150vmax;
+}
+
+/* Doira kengayadi: 0 dan to'liq radiusgacha */
+@keyframes kpkCircleExpand {
+  from { clip-path: circle(0px at var(--kpk-vt-x) var(--kpk-vt-y)); }
+  to   { clip-path: circle(var(--kpk-vt-r) at var(--kpk-vt-x) var(--kpk-vt-y)); }
+}
+
+/* Doira yig'iladi: to'liq radiusdan 0 gacha */
+@keyframes kpkCircleCollapse {
+  from { clip-path: circle(var(--kpk-vt-r) at var(--kpk-vt-x) var(--kpk-vt-y)); }
+  to   { clip-path: circle(0px at var(--kpk-vt-x) var(--kpk-vt-y)); }
+}
+
+/* ── QORONG'IGA O'TISH ──
+   Yangi qorong'i qatlam ustda turadi va kengayib yorug'ni bosadi. */
+html[data-theme-vt="in"]::view-transition-new(root) {
+  z-index: 9999;
+  animation: kpkCircleExpand 560ms cubic-bezier(0.33, 1, 0.68, 1) forwards;
+}
+html[data-theme-vt="in"]::view-transition-old(root) {
+  z-index: 1;
+  animation: none;
+}
+
+/* ── YORUG'GA QAYTISH ──
+   Eski qorong'i qatlam ustda qoladi va yig'ilib, ostidagi
+   yorug' sahifani ochib beradi. */
+html[data-theme-vt="out"]::view-transition-old(root) {
+  z-index: 9999;
+  animation: kpkCircleCollapse 560ms cubic-bezier(0.33, 1, 0.68, 1) forwards;
+}
+html[data-theme-vt="out"]::view-transition-new(root) {
+  z-index: 1;
+  animation: none;
+}
+
+/* O'tish davomida boshqa animatsiyalar ishlamasin — aks holda ikki
+   animatsiya ustma-ust tushib, harakat sekinlashib ko'rinadi. */
+html[data-theme-vt] *,
+html[data-theme-vt] *::before,
+html[data-theme-vt] *::after {
+  transition: none !important;
+  animation-play-state: paused !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LOADER
+══════════════════════════════════════════════════════════════ */
+
+.kpk-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--kpk-page);
+  transition: 0.65s ease;
+}
+
+.kpk-loader[data-hidden="true"] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.kpk-loader-logo {
+  animation: kpkLoaderPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes kpkLoaderPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.06); }
+}
+
+.kpk-loader-line span {
+  display: block;
+  height: 100%;
+  width: 45%;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #00b7ff, #0d6efd);
+  animation: kpkLoaderLine 1.3s ease-in-out infinite;
+}
+
+@keyframes kpkLoaderLine {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(240%); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TOAST PROGRESS
+══════════════════════════════════════════════════════════════ */
+
+.kpk-toast-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  width: 100%;
+  transform-origin: left;
+  animation: kpkToastProgress 4.5s linear forwards;
+}
+
+@keyframes kpkToastProgress {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   HARAKATNI KAMAYTIRISH (accessibility)
+══════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
