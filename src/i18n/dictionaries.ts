@@ -8,6 +8,8 @@
 export const LANGUAGES = ["uz", "en", "ru"] as const;
 export type Language = (typeof LANGUAGES)[number];
 
+/** `flag` maydoni endi ishlatilmaydi — bayroqlar SVG (flag-icon.tsx).
+ *  Moslik uchun qoldirilgan, xohlasangiz olib tashlasa bo'ladi. */
 export const LANGUAGE_META: Record<Language, { label: string; name: string; flag: string }> = {
   uz: { label: "UZ", name: "Uzbek", flag: "/images/uz.png" },
   en: { label: "EN", name: "English", flag: "/images/en.png" },
@@ -196,7 +198,7 @@ const uz = {
   aiErrorText: "Ulanishda xatolik yuz berdi. Birozdan so‘ng qayta urinib ko‘ring.",
   aiNotConfiguredTitle: "AI sozlanmagan",
   aiNotConfiguredText:
-    ".env.local faylida ANTHROPIC_API_KEY qiymatini to‘ldiring va serverni qayta ishga tushiring.",
+    ".env.local faylida OPENAI_API_KEY qiymatini to‘ldiring va serverni qayta ishga tushiring.",
   aiYou: "Siz",
   aiAssistant: "AI yordamchi",
   aiHint: "Enter — yuborish, Shift+Enter — yangi qator",
@@ -214,6 +216,11 @@ const uz = {
   featureTestText: "Darajangizni test bilan aniqlang",
   authSecure: "Ma’lumotlaringiz himoyalangan",
   authNoPassword: "Parol kerak emas",
+
+  /* ── Mavzu ── */
+  themeToggle: "Yorug‘ / qorong‘i rejim",
+  themeLight: "Yorug‘",
+  themeDark: "Qorong‘i",
 
   /* ── 404 ── */
   notFoundTitle: "Sahifa topilmadi",
@@ -393,8 +400,7 @@ const en: Dictionary = {
   aiErrorTitle: "No answer from AI",
   aiErrorText: "Something went wrong with the connection. Please try again shortly.",
   aiNotConfiguredTitle: "AI is not configured",
-  aiNotConfiguredText:
-    "Fill in ANTHROPIC_API_KEY in .env.local and restart the server.",
+  aiNotConfiguredText: "Fill in OPENAI_API_KEY in .env.local and restart the server.",
   aiYou: "You",
   aiAssistant: "AI assistant",
   aiHint: "Enter to send, Shift+Enter for a new line",
@@ -411,6 +417,10 @@ const en: Dictionary = {
   featureTestText: "Find your level with the test",
   authSecure: "Your data stays protected",
   authNoPassword: "No password needed",
+
+  themeToggle: "Light / dark mode",
+  themeLight: "Light",
+  themeDark: "Dark",
 
   notFoundTitle: "Page not found",
   notFoundText: "The page you are looking for does not exist or has been moved.",
@@ -585,7 +595,7 @@ const ru: Dictionary = {
   aiErrorText: "Произошла ошибка соединения. Попробуйте чуть позже.",
   aiNotConfiguredTitle: "ИИ не настроен",
   aiNotConfiguredText:
-    "Заполните ANTHROPIC_API_KEY в файле .env.local и перезапустите сервер.",
+    "Заполните OPENAI_API_KEY в файле .env.local и перезапустите сервер.",
   aiYou: "Вы",
   aiAssistant: "ИИ-помощник",
   aiHint: "Enter — отправить, Shift+Enter — новая строка",
@@ -602,6 +612,10 @@ const ru: Dictionary = {
   featureTestText: "Определите свой уровень тестом",
   authSecure: "Ваши данные защищены",
   authNoPassword: "Пароль не нужен",
+
+  themeToggle: "Светлая / тёмная тема",
+  themeLight: "Светлая",
+  themeDark: "Тёмная",
 
   notFoundTitle: "Страница не найдена",
   notFoundText: "Страница, которую вы ищете, не существует или была перемещена.",

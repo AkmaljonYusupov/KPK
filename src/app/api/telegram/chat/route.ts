@@ -4,15 +4,15 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /* ══════════════════════════════════════════════════════════════
-   AI YORDAMCHI — SERVER TOMONI
+   AI YORDAMCHI — SERVER TOMONI (OpenAI)
 
    API kaliti faqat serverda qoladi va brauzerga hech qachon
    yuborilmaydi. Javob oqim (stream) ko'rinishida qaytariladi —
    foydalanuvchi matnni yozilayotgan paytda ko'radi.
 ══════════════════════════════════════════════════════════════ */
 
-/** Modelni almashtirmoqchi bo'lsangiz shu qatorni o'zgartiring. */
-const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-5";
+/** Modelni almashtirmoqchi bo'lsangiz .env.local dagi OPENAI_MODEL ni o'zgartiring. */
+const MODEL = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 
 const MAX_TOKENS = 1500;
 
@@ -52,7 +52,7 @@ function isValidMessage(value: unknown): value is ChatMessage {
 }
 
 export async function POST(request: Request) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
     return NextResponse.json({ error: "not-configured" }, { status: 503 });
@@ -74,22 +74,25 @@ export async function POST(request: Request) {
   let upstream: Response;
 
   try {
-    upstream = await fetch("https://api.anthropic.com/v1/messages", {
+    upstream = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
+        // OpenAI'da kalit Authorization sarlavhasida yuboriladi
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model: MODEL,
         max_tokens: MAX_TOKENS,
-        system: SYSTEM_PROMPT,
-        messages: messages.map((message) => ({
-          role: message.role,
-          content: message.content,
-        })),
         stream: true,
+        // Tizim ko'rsatmasi ham messages ichida ketadi
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          ...messages.map((message) => ({
+            role: message.role,
+            content: message.content,
+          })),
+        ],
       }),
     });
   } catch {
@@ -127,13 +130,11 @@ export async function POST(request: Request) {
 
             try {
               const event = JSON.parse(raw) as {
-                type?: string;
-                delta?: { type?: string; text?: string };
+                choices?: Array<{ delta?: { content?: string } }>;
               };
 
-              if (event.type === "content_block_delta" && event.delta?.text) {
-                controller.enqueue(encoder.encode(event.delta.text));
-              }
+              const text = event.choices?.[0]?.delta?.content;
+              if (text) controller.enqueue(encoder.encode(text));
             } catch {
               /* to'liq bo'lmagan bo'lak — keyingi aylanishda qo'shiladi */
             }

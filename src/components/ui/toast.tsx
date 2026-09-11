@@ -18,9 +18,12 @@ import {
 import { cn } from "@/lib/utils";
 
 /* ══════════════════════════════════════════════════════════════
-   Original loyihadagi ".modern-toast" ni shadcn/sonner ustida
-   1:1 qayta yaratish: gradient ikon plitkasi, sarlavha, matn,
-   yopish tugmasi va pastda kamayib boruvchi progress chizig'i.
+   KPK bildirishnomasi — sonner ustida.
+
+   Kartochka `kpk-card` sinfidan foydalanadi, matn esa mavzu
+   o'zgaruvchilaridan — shuning uchun light va dark rejimda
+   avtomatik moslashadi. Faqat ikonka plitkasi va progress
+   chizig'i qat'iy rangda: ular gradient va matni oq.
 ══════════════════════════════════════════════════════════════ */
 
 export type ToastType = "info" | "success" | "error";
@@ -93,7 +96,9 @@ function KpkToastCard({
       aria-live="polite"
       className={cn(
         "relative flex w-[380px] max-w-[calc(100vw-28px)] items-start gap-3.5 overflow-hidden p-[18px]",
-        "rounded-[26px] border border-white/95 bg-white/92 shadow-[0_24px_70px_rgba(31,53,82,0.18)] backdrop-blur-[22px]",
+        "kpk-card rounded-[26px]",
+        // Zaxira: CSS o'zgaruvchisi yetib kelmasa ham to'q qoladi
+        "dark:border-white/10 dark:bg-[#18233a]",
         "max-sm:w-[calc(100vw-28px)] max-sm:rounded-[22px]"
       )}
     >
@@ -107,15 +112,15 @@ function KpkToastCard({
       </div>
 
       <div className="min-w-0 flex-1">
-        <h3 className="mb-1 text-[17px] font-extrabold text-[#17375f]">{title}</h3>
-        <p className="text-sm leading-relaxed text-[#5d718b]">{message}</p>
+        <h3 className="mb-1 text-[17px] font-extrabold text-[var(--kpk-primary)]">{title}</h3>
+        <p className="text-sm leading-relaxed text-[var(--kpk-muted)]">{message}</p>
       </div>
 
       <button
         type="button"
         onClick={onDismiss}
         aria-label="Bildirishnomani yopish"
-        className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[rgba(13,110,253,0.08)] text-[var(--kpk-primary)] transition-colors hover:bg-[rgba(13,110,253,0.16)]"
+        className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[var(--kpk-accent-soft)] text-[var(--kpk-primary)] transition-colors hover:bg-[var(--kpk-hover)]"
       >
         <X className="size-4" strokeWidth={2.5} />
       </button>
