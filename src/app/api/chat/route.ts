@@ -98,11 +98,19 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "network" }, { status: 502 });
   }
+ if (!upstream.ok) {
+    const detail = await upstream.text().catch(() => "");
+    console.error(`[api/chat] OpenAI ${upstream.status}:`, detail.slice(0, 500));
 
-  if (!upstream.ok || !upstream.body) {
-    return NextResponse.json({ error: "upstream" }, { status: 502 });
+    return NextResponse.json(
+      { error: "upstream", status: upstream.status },
+      { status: 502 }
+    );
   }
 
+  if (!upstream.body) {
+    return NextResponse.json({ error: "empty-body" }, { status: 502 });
+  }
   /* ── SSE oqimini oddiy matn oqimiga aylantiramiz ── */
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
