@@ -190,6 +190,34 @@
   ::selection {
     background: rgba(13, 110, 253, 0.18);
   }
+
+  /* Sahifaning asosiy skroll chizig'i — brauzerning qo'pol
+     standart chizig'i o'rniga nozik va mavzuga mos. */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--kpk-track) transparent;
+    scrollbar-gutter: stable;
+  }
+
+  html::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  html::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  html::-webkit-scrollbar-thumb {
+    background: var(--kpk-track);
+    border: 3.5px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
+  }
+
+  html::-webkit-scrollbar-thumb:hover {
+    background: var(--kpk-muted);
+    background-clip: content-box;
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -358,6 +386,30 @@ html[data-theme-vt] *::after {
   border: 1px solid var(--kpk-border);
 }
 
+/* Rasm chizilayotganda — ChatGPT kabi yaltirab turuvchi joy egallovchi */
+.kpk-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: var(--kpk-track);
+}
+
+.kpk-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  animation: kpkShimmer 1.6s ease-in-out infinite;
+}
+
+.dark .kpk-shimmer::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+}
+
+@keyframes kpkShimmer {
+  100% { transform: translateX(100%); }
+}
+
 /* Oqim paytida yonib turuvchi kursor */
 .kpk-caret {
   display: inline-block;
@@ -374,7 +426,7 @@ html[data-theme-vt] *::after {
   50%, 100% { opacity: 0; }
 }
 
-/* Nozik skroll chizig'i */
+/* Nozik skroll chizig'i (ichki konteynerlar uchun) */
 .kpk-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--kpk-track) transparent;

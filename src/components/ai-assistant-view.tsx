@@ -32,13 +32,12 @@ import { cn } from "@/lib/utils";
 /* ══════════════════════════════════════════════════════════════
    AI yordamchi.
 
-   • Javob oqim ko'rinishida keladi va markdown sifatida chiziladi
-     (kod bloklari, ro'yxatlar, qalin matn).
+   • Javob oqim ko'rinishida keladi va markdown sifatida chiziladi.
    • Rasm va matn fayllarini biriktirish mumkin.
-   • Rasm chizish rejimi — /api/image orqali.
+   • Rasm chizish rejimi — /api/image orqali, ChatGPT kabi
+     shimmer animatsiyasi bilan.
    • Skroll SAHIFANING o'zida. Foydalanuvchi yuqoriga chiqsa,
      yangi xabar uni pastga tortib ketmaydi.
-   • API kaliti serverda — bu komponent faqat /api/* ga murojaat qiladi.
 ══════════════════════════════════════════════════════════════ */
 
 /** Rasm bo'lsa data-URL, matn bo'lsa fayl mazmuni saqlanadi. */
@@ -46,7 +45,6 @@ interface Attachment {
   id: string;
   name: string;
   kind: "image" | "text";
-  /** image: data:image/...;base64,... | text: fayl matni */
   data: string;
 }
 
@@ -54,10 +52,10 @@ interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
-  /** Faqat ko'rsatish uchun — tarixga saqlanadi, API'ga alohida yuboriladi. */
+  /** Faqat ko'rsatish uchun — API'ga alohida yuboriladi. */
   images?: string[];
   files?: string[];
-  /** AI chizgan rasm (data-URL). Faqat assistant xabarlarida bo'ladi. */
+  /** AI chizgan rasm (data-URL). Faqat assistant xabarlarida. */
   generated?: string;
 }
 
@@ -113,6 +111,8 @@ export function AiAssistantView() {
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
   const [showJump, setShowJump] = React.useState(false);
   const [imageMode, setImageMode] = React.useState(false);
+  /** Qaysi xabar uchun rasm chizilmoqda — shimmer ko'rsatish uchun. */
+  const [drawingId, setDrawingId] = React.useState<string | null>(null);
 
   const abortRef = React.useRef<AbortController | null>(null);
   const bottomRef = React.useRef<HTMLDivElement>(null);
@@ -259,6 +259,7 @@ export function AiAssistantView() {
       setMessages([...history, { id: replyId, role: "assistant", content: "" }]);
       setInput("");
       setIsStreaming(true);
+      setDrawingId(replyId);
       atBottomRef.current = true;
       setShowJump(false);
       scrollToBottom(true);
@@ -280,10 +281,21 @@ export function AiAssistantView() {
           return;
         }
 
-        const result = (await response.json().catch(() => null)) as { image?: string } | null;
+        const result = (await response.json().catch(() => null)) as
+          | { image?: string; message?: string }
+          | null;
 
         if (!response.ok || !result?.image) {
-          kpkToast.error(t("aiImageError"), t("aiImageErrorText"), "warning");
+          // Sababni brauzer konsoliga ham chiqaramiz — terminalga
+          // qaramasdan tashxis qo'yish uchun.
+          console.error("[AI rasm] sabab:", result);
+
+          // OpenAI'ning haqiqiy sababi bo'lsa — o'shani ko'rsatamiz
+          kpkToast.error(
+            t("aiImageError"),
+            result?.message?.trim() || t("aiImageErrorText"),
+            "warning"
+          );
           setMessages(history);
           return;
         }
@@ -303,6 +315,7 @@ export function AiAssistantView() {
       } finally {
         abortRef.current = null;
         setIsStreaming(false);
+        setDrawingId(null);
       }
     },
     [isStreaming, messages, scrollToBottom, t]
@@ -446,7 +459,7 @@ export function AiAssistantView() {
 
   return (
     <DashboardShell user={user} title={t("aiTitle")} subtitle={t("aiSubtitle")}>
-      <div className="mx-auto w-full max-w-3xl">
+      <div className="mx-auto w-full max-w-4xl">
         {/* ── SUHBAT: alohida skroll yo'q, sahifaning o'zi skroll bo'ladi ── */}
         <div className="relative">
           <div className="space-y-5 pb-4">
@@ -493,7 +506,12 @@ export function AiAssistantView() {
                       {isUser ? <User className="size-5" /> : <Sparkles className="size-5" />}
                     </div>
 
-                    <div className={cn("min-w-0 max-w-[82%]", isUser && "flex flex-col items-end")}>
+                    <div
+                      className={cn(
+                        "min-w-0 max-w-[88%] max-md:max-w-[92%]",
+                        isUser && "flex flex-col items-end"
+                      )}
+                    >
                       <p className="mb-1.5 text-xs font-bold text-[var(--kpk-muted)]">
                         {isUser ? t("aiYou") : t("aiAssistant")}
                       </p>
@@ -538,7 +556,15 @@ export function AiAssistantView() {
                             : "kpk-card rounded-tl-lg text-[var(--kpk-text)]"
                         )}
                       >
-                        {isPending ? (
+                        {drawingId === message.id ? (
+                          <div className="space-y-2.5">
+                            <div className="kpk-shimmer aspect-square w-full max-w-[380px] rounded-2xl" />
+                            <p className="flex items-center gap-2 text-[13px] font-semibold text-[var(--kpk-muted)]">
+                              <ImagePlus className="size-4 animate-pulse" />
+                              {t("aiImageDrawing")}
+                            </p>
+                          </div>
+                        ) : isPending ? (
                           <span className="flex items-center gap-2 text-[15px] text-[var(--kpk-muted)]">
                             <span className="flex gap-1">
                               <span className="size-1.5 animate-bounce rounded-full bg-[var(--kpk-blue)] [animation-delay:-0.3s]" />
