@@ -214,6 +214,17 @@ const uz = {
   aiFileUnsupportedText: "Faqat rasm va matn fayllarini yuklash mumkin.",
   aiScrollDown: "Pastga o‘tish",
 
+  /* ── Rasm yaratish ── */
+  aiImageMode: "Rasm chizish rejimi",
+  aiImageOn: "Rasm rejimi yoqildi",
+  aiImageOnText: "Endi yozganingiz bo‘yicha rasm chiziladi.",
+  aiImagePlaceholder: "Qanday rasm chizay?",
+  aiImageDrawing: "Rasm chizilmoqda...",
+  aiImageError: "Rasm chizilmadi",
+  aiImageErrorText: "Rasm yaratishda xatolik yuz berdi. Qayta urinib ko‘ring.",
+  aiImageDownload: "Yuklab olish",
+  aiImageResult: "Chizilgan rasm",
+
   /* ── Kirish sahifasi: yangi dizayn ── */
   heroPill: "Endi AI yordamchi bilan",
   heroLead: "Bilim. Ijodkorlik. Kasbiy o‘sish.",
@@ -425,6 +436,16 @@ const en: Dictionary = {
   aiFileUnsupportedText: "Only images and text files can be uploaded.",
   aiScrollDown: "Scroll to bottom",
 
+  aiImageMode: "Image mode",
+  aiImageOn: "Image mode is on",
+  aiImageOnText: "Your next message will be drawn as an image.",
+  aiImagePlaceholder: "What should I draw?",
+  aiImageDrawing: "Drawing the image...",
+  aiImageError: "Image was not created",
+  aiImageErrorText: "Something went wrong while generating the image. Please try again.",
+  aiImageDownload: "Download",
+  aiImageResult: "Generated image",
+
   heroPill: "Now with an AI assistant",
   heroLead: "Knowledge. Creativity. Professional growth.",
   heroSub:
@@ -627,6 +648,16 @@ const ru: Dictionary = {
   aiFileUnsupported: "Тип файла не поддерживается",
   aiFileUnsupportedText: "Можно загружать только изображения и текстовые файлы.",
   aiScrollDown: "Вниз",
+
+  aiImageMode: "Режим рисования",
+  aiImageOn: "Режим рисования включён",
+  aiImageOnText: "Следующее сообщение будет нарисовано как изображение.",
+  aiImagePlaceholder: "Что нарисовать?",
+  aiImageDrawing: "Рисую изображение...",
+  aiImageError: "Изображение не создано",
+  aiImageErrorText: "При создании изображения произошла ошибка. Попробуйте ещё раз.",
+  aiImageDownload: "Скачать",
+  aiImageResult: "Созданное изображение",
 
   heroPill: "Теперь с ИИ-помощником",
   heroLead: "Знания. Креативность. Профессиональный рост.",

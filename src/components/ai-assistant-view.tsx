@@ -8,7 +8,9 @@ import {
   ArrowUp,
   Check,
   Copy,
+  Download,
   FileText,
+  ImagePlus,
   Paperclip,
   Sparkles,
   Square,
@@ -33,9 +35,10 @@ import { cn } from "@/lib/utils";
    • Javob oqim ko'rinishida keladi va markdown sifatida chiziladi
      (kod bloklari, ro'yxatlar, qalin matn).
    • Rasm va matn fayllarini biriktirish mumkin.
-   • Skroll SAHIFANING o'zida — ichki konteynerda emas. Kiritish
-     maydoni pastda yopishib turadi, topbar esa fixed.
-   • API kaliti serverda — bu komponent faqat /api/chat ga murojaat qiladi.
+   • Rasm chizish rejimi — /api/image orqali.
+   • Skroll SAHIFANING o'zida. Foydalanuvchi yuqoriga chiqsa,
+     yangi xabar uni pastga tortib ketmaydi.
+   • API kaliti serverda — bu komponent faqat /api/* ga murojaat qiladi.
 ══════════════════════════════════════════════════════════════ */
 
 /** Rasm bo'lsa data-URL, matn bo'lsa fayl mazmuni saqlanadi. */
@@ -54,6 +57,8 @@ interface ChatMessage {
   /** Faqat ko'rsatish uchun — tarixga saqlanadi, API'ga alohida yuboriladi. */
   images?: string[];
   files?: string[];
+  /** AI chizgan rasm (data-URL). Faqat assistant xabarlarida bo'ladi. */
+  generated?: string;
 }
 
 const SUGGESTION_KEYS: (keyof Dictionary)[] = [
@@ -76,6 +81,16 @@ function isTextFile(file: File): boolean {
   return TEXT_EXTENSIONS.some((extension) => lower.endsWith(extension));
 }
 
+/** Rasmni yuklab olish. Anchor teg o'rniga JS — JSX soddaroq qoladi. */
+function downloadImage(dataUrl: string) {
+  const link = document.createElement("a");
+  link.href = dataUrl;
+  link.download = `kpk-ai-${Date.now()}.png`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
 function readStoredChat(): ChatMessage[] {
   if (typeof window === "undefined") return [];
   try {
@@ -96,12 +111,18 @@ export function AiAssistantView() {
   const [attachments, setAttachments] = React.useState<Attachment[]>([]);
   const [isStreaming, setIsStreaming] = React.useState(false);
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
-  const [atBottom, setAtBottom] = React.useState(true);
+  const [showJump, setShowJump] = React.useState(false);
+  const [imageMode, setImageMode] = React.useState(false);
 
   const abortRef = React.useRef<AbortController | null>(null);
   const bottomRef = React.useRef<HTMLDivElement>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const fileRef = React.useRef<HTMLInputElement>(null);
+
+  /* Pastdamizmi — REF sifatida saqlanadi, state emas.
+     State bo'lsa har o'zgarishda avtoskroll effekti qayta ishga
+     tushib, foydalanuvchini pastga tortib ketardi. */
+  const atBottomRef = React.useRef(true);
 
   /* ── Kirish nazorati ── */
   React.useEffect(() => {
@@ -119,20 +140,25 @@ export function AiAssistantView() {
     if (messages.length === 0) return;
     try {
       // Rasmlar juda katta — saqlashda ularni tashlab ketamiz.
-      const light = messages.slice(-40).map(({ images, ...rest }) => rest);
+      const light = messages.slice(-40).map(({ images, generated, ...rest }) => rest);
       window.localStorage.setItem(STORAGE_KEYS.aiChat, JSON.stringify(light));
     } catch {
       /* kvota to'lgan bo'lsa jim o'tamiz */
     }
   }, [messages]);
 
-  /* ── Skroll holatini kuzatish: endi oynaning o'zi skroll bo'ladi,
-        ichki konteyner emas. Shuning uchun window'ga quloq solamiz. ── */
+  /* ── Pastga yaqinmi? ── */
+  const isNearBottom = React.useCallback(() => {
+    const doc = document.documentElement;
+    return doc.scrollHeight - window.scrollY - window.innerHeight < 140;
+  }, []);
+
+  /* ── Skroll kuzatuvi: oynaning o'zi skroll bo'ladi ── */
   React.useEffect(() => {
     const onScroll = () => {
-      const distance =
-        document.documentElement.scrollHeight - window.scrollY - window.innerHeight;
-      setAtBottom(distance < 120);
+      const near = isNearBottom();
+      atBottomRef.current = near;
+      setShowJump(!near);
     };
 
     onScroll();
@@ -143,21 +169,26 @@ export function AiAssistantView() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
+  }, [isNearBottom]);
+
+  /* ── Pastga tushirish.
+        scrollIntoView ishlatilmaydi: u eng yaqin skroll konteynerini
+        (masalan kod blokining gorizontal skrollini) ham surib yuboradi
+        va sahifa sakrab ketadi. window.scrollTo aniq va xavfsiz. ── */
+  const scrollToBottom = React.useCallback((smooth = false) => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: smooth ? "smooth" : "auto",
+    });
   }, []);
 
-  /* ── Yangi xabar kelganda pastga tushamiz, lekin faqat foydalanuvchi
-        allaqachon pastda bo'lsa — o'qiyotgan odamni tortib ketmaymiz. ── */
+  /* ── Yangi xabar kelganda pastga tushamiz.
+        Bog'liqlikda FAQAT messages bor — atBottom yo'q. Shuning uchun
+        foydalanuvchi yuqoriga chiqib qaytganda sahifa sakramaydi. ── */
   React.useEffect(() => {
-    if (!atBottom) return;
-    bottomRef.current?.scrollIntoView({ block: "end" });
-  }, [messages, atBottom]);
-
-  /* ── Yuborgandan keyin darhol pastga tushamiz ── */
-  const scrollToBottom = React.useCallback(() => {
-    window.requestAnimationFrame(() =>
-      bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
-    );
-  }, []);
+    if (!atBottomRef.current) return;
+    scrollToBottom(false);
+  }, [messages, scrollToBottom]);
 
   /* ── Textarea balandligini matnga moslash ── */
   React.useEffect(() => {
@@ -211,6 +242,72 @@ export function AiAssistantView() {
   const removeAttachment = (id: string) =>
     setAttachments((previous) => previous.filter((item) => item.id !== id));
 
+  /* ── Rasm chizish: alohida endpoint, oqim yo'q ── */
+  const draw = React.useCallback(
+    async (text: string) => {
+      const prompt = text.trim();
+      if (!prompt || isStreaming) return;
+
+      const userMessage: ChatMessage = {
+        id: `u-${Date.now()}`,
+        role: "user",
+        content: prompt,
+      };
+      const replyId = `a-${Date.now()}`;
+
+      const history = [...messages, userMessage];
+      setMessages([...history, { id: replyId, role: "assistant", content: "" }]);
+      setInput("");
+      setIsStreaming(true);
+      atBottomRef.current = true;
+      setShowJump(false);
+      scrollToBottom(true);
+
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      try {
+        const response = await fetch("/api/image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt }),
+          signal: controller.signal,
+        });
+
+        if (response.status === 503) {
+          kpkToast.error(t("aiNotConfiguredTitle"), t("aiNotConfiguredText"), "shield");
+          setMessages(history);
+          return;
+        }
+
+        const result = (await response.json().catch(() => null)) as { image?: string } | null;
+
+        if (!response.ok || !result?.image) {
+          kpkToast.error(t("aiImageError"), t("aiImageErrorText"), "warning");
+          setMessages(history);
+          return;
+        }
+
+        setMessages((previous) =>
+          previous.map((message) =>
+            message.id === replyId
+              ? { ...message, content: t("aiImageResult"), generated: result.image }
+              : message
+          )
+        );
+      } catch (error) {
+        if ((error as Error).name !== "AbortError") {
+          kpkToast.error(t("aiImageError"), t("aiImageErrorText"), "warning");
+          setMessages(history);
+        }
+      } finally {
+        abortRef.current = null;
+        setIsStreaming(false);
+      }
+    },
+    [isStreaming, messages, scrollToBottom, t]
+  );
+
   /* ── Yuborish ── */
   const send = React.useCallback(
     async (text: string) => {
@@ -243,8 +340,9 @@ export function AiAssistantView() {
       setInput("");
       setAttachments([]);
       setIsStreaming(true);
-      setAtBottom(true);
-      scrollToBottom();
+      atBottomRef.current = true;
+      setShowJump(false);
+      scrollToBottom(true);
 
       const controller = new AbortController();
       abortRef.current = controller;
@@ -337,8 +435,14 @@ export function AiAssistantView() {
     }
   };
 
+  /** Rejimga qarab: matn yoki rasm. */
+  const submit = React.useCallback(
+    (text: string) => (imageMode ? void draw(text) : void send(text)),
+    [draw, imageMode, send]
+  );
+
   const isEmpty = messages.length === 0;
-  const canSend = input.trim() !== "" || attachments.length > 0;
+  const canSend = imageMode ? input.trim() !== "" : input.trim() !== "" || attachments.length > 0;
 
   return (
     <DashboardShell user={user} title={t("aiTitle")} subtitle={t("aiSubtitle")}>
@@ -364,7 +468,7 @@ export function AiAssistantView() {
                     <button
                       key={key}
                       type="button"
-                      onClick={() => void send(t(key))}
+                      onClick={() => submit(t(key))}
                       className="rounded-2xl border border-[var(--kpk-border)] bg-[var(--kpk-surface-solid)] px-4 py-3 text-sm font-semibold text-[var(--kpk-text)] transition-all hover:-translate-y-0.5 hover:border-[var(--kpk-blue)] hover:bg-[var(--kpk-hover)]"
                     >
                       {t(key)}
@@ -441,10 +545,30 @@ export function AiAssistantView() {
                               <span className="size-1.5 animate-bounce rounded-full bg-[var(--kpk-blue)] [animation-delay:-0.15s]" />
                               <span className="size-1.5 animate-bounce rounded-full bg-[var(--kpk-blue)]" />
                             </span>
-                            {t("aiThinking")}
+                            {imageMode ? t("aiImageDrawing") : t("aiThinking")}
                           </span>
                         ) : isUser ? (
                           <span className="whitespace-pre-wrap break-words">{message.content}</span>
+                        ) : message.generated ? (
+                          <div className="space-y-2">
+                            <Image
+                              src={message.generated}
+                              alt={message.content}
+                              width={512}
+                              height={512}
+                              unoptimized
+                              className="w-full max-w-[420px] rounded-2xl border border-[var(--kpk-border)]"
+                            />
+
+                            <button
+                              type="button"
+                              onClick={() => downloadImage(message.generated!)}
+                              className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-bold text-[var(--kpk-muted)] transition-colors hover:bg-[var(--kpk-hover)] hover:text-[var(--kpk-blue)]"
+                            >
+                              <Download className="size-3.5" />
+                              {t("aiImageDownload")}
+                            </button>
+                          </div>
                         ) : (
                           <>
                             <MarkdownMessage content={message.content} />
@@ -456,7 +580,7 @@ export function AiAssistantView() {
                         )}
                       </div>
 
-                      {!isUser && message.content !== "" && (
+                      {!isUser && message.content !== "" && !message.generated && (
                         <button
                           type="button"
                           onClick={() => void copyMessage(message)}
@@ -486,11 +610,15 @@ export function AiAssistantView() {
         </div>
 
         {/* Pastga qaytish tugmasi — kiritish maydoni ustida suzib turadi */}
-        {!atBottom && !isEmpty && (
+        {showJump && !isEmpty && (
           <button
             type="button"
             aria-label={t("aiScrollDown")}
-            onClick={() => bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })}
+            onClick={() => {
+              atBottomRef.current = true;
+              setShowJump(false);
+              scrollToBottom(true);
+            }}
             className="kpk-card sticky bottom-[104px] left-1/2 z-10 flex size-10 -translate-x-1/2 items-center justify-center rounded-full text-[var(--kpk-primary)] transition-transform hover:scale-105"
           >
             <ArrowDown className="size-4" strokeWidth={2.5} />
@@ -548,15 +676,38 @@ export function AiAssistantView() {
               }}
             />
 
+            {/* Fayl biriktirish faqat matn rejimida mantiqli */}
+            {!imageMode && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-11 shrink-0 rounded-2xl"
+                onClick={() => fileRef.current?.click()}
+                aria-label={t("aiAttach")}
+                title={t("aiAttachHint")}
+              >
+                <Paperclip className="size-5" />
+              </Button>
+            )}
+
+            {/* Rasm chizish rejimi */}
             <Button
-              variant="ghost"
+              variant={imageMode ? "gradient" : "ghost"}
               size="icon"
               className="size-11 shrink-0 rounded-2xl"
-              onClick={() => fileRef.current?.click()}
-              aria-label={t("aiAttach")}
-              title={t("aiAttachHint")}
+              aria-pressed={imageMode}
+              aria-label={t("aiImageMode")}
+              title={t("aiImageMode")}
+              onClick={() => {
+                const next = !imageMode;
+                setImageMode(next);
+                if (next) {
+                  setAttachments([]);
+                  kpkToast.info(t("aiImageOn"), t("aiImageOnText"), "check");
+                }
+              }}
             >
-              <Paperclip className="size-5" />
+              <ImagePlus className="size-5" />
             </Button>
 
             <textarea
@@ -566,7 +717,7 @@ export function AiAssistantView() {
               onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey) {
                   event.preventDefault();
-                  void send(input);
+                  submit(input);
                 }
               }}
               onPaste={(event) => {
@@ -575,8 +726,8 @@ export function AiAssistantView() {
                 if (files && files.length > 0) void addFiles(files);
               }}
               rows={1}
-              placeholder={t("aiPlaceholder")}
-              aria-label={t("aiPlaceholder")}
+              placeholder={imageMode ? t("aiImagePlaceholder") : t("aiPlaceholder")}
+              aria-label={imageMode ? t("aiImagePlaceholder") : t("aiPlaceholder")}
               className="kpk-scroll min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-[15px] leading-relaxed text-[var(--kpk-text)] outline-none placeholder:text-[var(--kpk-muted)]"
             />
 
@@ -595,7 +746,7 @@ export function AiAssistantView() {
                 variant="gradient"
                 size="icon"
                 className="size-11 shrink-0 rounded-2xl"
-                onClick={() => void send(input)}
+                onClick={() => submit(input)}
                 disabled={!canSend}
                 aria-label={t("aiSend")}
               >

@@ -44,14 +44,6 @@
   --kpk-danger-fg: #dc3545;
   --kpk-danger-bg: #fff1f2;
 
-   --kpk-code-bg: #f6f8fc;
-  --kpk-code-fg: #243b53;
-  --kpk-tok-comment: #8496ad;
-  --kpk-tok-string: #0a7d4e;
-  --kpk-tok-keyword: #b3288a;
-  --kpk-tok-number: #b8681a;
-  --kpk-tok-fn: #1a62c9;
-
   /* Fon chiziqlari */
   --kpk-line: rgba(27, 58, 99, 0.09);
   --kpk-wash-1: rgba(13, 110, 253, 0.14);
@@ -114,15 +106,6 @@
   --kpk-pink-fg: #f9a8d4;
   --kpk-danger-fg: #ff8996;
   --kpk-danger-bg: rgba(239, 68, 68, 0.14);
-
-    /* Kod oynasi */
-  --kpk-code-bg: rgba(8, 14, 26, 0.7);
-  --kpk-code-fg: #d6e2f5;
-  --kpk-tok-comment: #6b7f9c;
-  --kpk-tok-string: #82e0a8;
-  --kpk-tok-keyword: #f292d4;
-  --kpk-tok-number: #ffc178;
-  --kpk-tok-fn: #79bbff;
 
   --kpk-line: rgba(255, 255, 255, 0.07);
   --kpk-wash-1: rgba(13, 110, 253, 0.2);
