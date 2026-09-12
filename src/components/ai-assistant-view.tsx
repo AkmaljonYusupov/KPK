@@ -14,6 +14,7 @@ import {
   ImagePlus,
   Maximize2,
   Paperclip,
+  Pencil,
   Sparkles,
   Square,
   Trash2,
@@ -63,6 +64,8 @@ interface ChatMessage {
   files?: string[];
   /** AI chizgan rasm (data-URL). Faqat assistant xabarlarida bo'ladi. */
   generated?: string;
+  /** Foydalanuvchi xabari qaysi rejimda yuborilgan — tahrirlashda shu rejim bilan qayta yuboriladi. */
+  mode?: "chat" | "image";
 }
 
 const SUGGESTION_KEYS: (keyof Dictionary)[] = [
@@ -121,6 +124,9 @@ export function AiAssistantView() {
   const [drawingId, setDrawingId] = React.useState<string | null>(null);
   /** Kattalashtirilgan rasm (lightbox). */
   const [lightbox, setLightbox] = React.useState<string | null>(null);
+  /** Hozir tahrirlanayotgan foydalanuvchi xabarining id'si va uning matni. */
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [editText, setEditText] = React.useState("");
   /* `fixed` elementlarni portal orqali document.body'ga chiqarish uchun —
      shunda ota-elementlardagi transform/filter ularni "qamab qolmaydi". */
   const [mounted, setMounted] = React.useState(false);
@@ -128,6 +134,7 @@ export function AiAssistantView() {
   const abortRef = React.useRef<AbortController | null>(null);
   const bottomRef = React.useRef<HTMLDivElement>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+  const editTextareaRef = React.useRef<HTMLTextAreaElement>(null);
   const fileRef = React.useRef<HTMLInputElement>(null);
   /** Kontent ustunining o'zi — chap panel (sidebar) kengligini hisobga
       olib, pastki panelni aynan shu ustunga moslab markazlashtirish uchun. */
@@ -279,6 +286,23 @@ export function AiAssistantView() {
     element.style.height = `${Math.min(element.scrollHeight, 180)}px`;
   }, [input]);
 
+  /* ── Tahrirlash maydonini ham matnga moslab o'stiramiz,
+        va tahrirlash boshlanganda darhol fokus beramiz. ── */
+  React.useEffect(() => {
+    const element = editTextareaRef.current;
+    if (!element) return;
+    element.style.height = "auto";
+    element.style.height = `${Math.min(element.scrollHeight, 220)}px`;
+  }, [editText, editingId]);
+
+  React.useEffect(() => {
+    if (!editingId) return;
+    const element = editTextareaRef.current;
+    if (!element) return;
+    element.focus();
+    element.setSelectionRange(element.value.length, element.value.length);
+  }, [editingId]);
+
   const stop = React.useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
@@ -323,20 +347,25 @@ export function AiAssistantView() {
   const removeAttachment = (id: string) =>
     setAttachments((previous) => previous.filter((item) => item.id !== id));
 
-  /* ── Rasm chizish: alohida endpoint, oqim yo'q ── */
+  /* ── Rasm chizish: alohida endpoint, oqim yo'q ──
+        `historyBase` berilsa (xabar tahrirlanganda), suhbat undan
+        davom etadi — asl xabar va undan keyingi javob o'chiriladi. */
   const draw = React.useCallback(
-    async (text: string) => {
+    async (text: string, options?: { historyBase?: ChatMessage[] }) => {
       const prompt = text.trim();
       if (!prompt || isStreaming) return;
+
+      const baseHistory = options?.historyBase ?? messages;
 
       const userMessage: ChatMessage = {
         id: `u-${Date.now()}`,
         role: "user",
         content: prompt,
+        mode: "image",
       };
       const replyId = `a-${Date.now()}`;
 
-      const history = [...messages, userMessage];
+      const history = [...baseHistory, userMessage];
       setMessages([...history, { id: replyId, role: "assistant", content: "" }]);
       setInput("");
       setIsStreaming(true);
@@ -391,14 +420,19 @@ export function AiAssistantView() {
     [isStreaming, messages, scrollToBottom, t]
   );
 
-  /* ── Yuborish ── */
+  /* ── Yuborish ──
+        `historyBase` va `filesOverride` tahrirlangan xabarni qayta
+        yuborishda ishlatiladi: suhbat asl xabardan oldingi holatga
+        qaytariladi va unga bog'langan rasmlar saqlab qolinadi. */
   const send = React.useCallback(
-    async (text: string) => {
+    async (text: string, options?: { historyBase?: ChatMessage[]; filesOverride?: Attachment[] }) => {
       const question = text.trim();
-      const files = attachments;
+      const isEdit = options?.filesOverride !== undefined;
+      const files = options?.filesOverride ?? attachments;
 
       if ((!question && files.length === 0) || isStreaming) return;
 
+      const baseHistory = options?.historyBase ?? messages;
       const images = files.filter((f) => f.kind === "image");
       const texts = files.filter((f) => f.kind === "text");
 
@@ -415,13 +449,14 @@ export function AiAssistantView() {
         content: question || files.map((f) => f.name).join(", "),
         images: images.map((f) => f.data),
         files: texts.map((f) => f.name),
+        mode: "chat",
       };
       const replyId = `a-${Date.now()}`;
 
-      const history = [...messages, userMessage];
+      const history = [...baseHistory, userMessage];
       setMessages([...history, { id: replyId, role: "assistant", content: "" }]);
       setInput("");
-      setAttachments([]);
+      if (!isEdit) setAttachments([]);
       setIsStreaming(true);
       atBottomRef.current = true;
       setShowJump(false);
@@ -432,7 +467,7 @@ export function AiAssistantView() {
 
       // API uchun: oldingi xabarlar oddiy matn, oxirgisi matn + rasm
       const apiMessages = [
-        ...messages.map(({ role, content }) => ({ role, content })),
+        ...baseHistory.map(({ role, content }) => ({ role, content })),
         images.length > 0
           ? {
               role: "user" as const,
@@ -525,6 +560,54 @@ export function AiAssistantView() {
     [draw, imageMode, send]
   );
 
+  /* ── Xabarni tahrirlash ── */
+  const startEdit = React.useCallback(
+    (message: ChatMessage) => {
+      if (isStreaming) return;
+      setEditingId(message.id);
+      setEditText(message.content);
+    },
+    [isStreaming]
+  );
+
+  const cancelEdit = React.useCallback(() => {
+    setEditingId(null);
+    setEditText("");
+  }, []);
+
+  /* Tahrirlangan xabarni saqlaydi: undan keyingi butun suhbat
+     (shu jumladan eski javob) o'chiriladi va yangi matn bilan
+     asl rejim (matn yoki rasm) saqlangan holda qayta yuboriladi. */
+  const saveEdit = React.useCallback(() => {
+    const id = editingId;
+    const newText = editText.trim();
+    if (!id || !newText || isStreaming) return;
+
+    const index = messages.findIndex((message) => message.id === id);
+    if (index === -1) return;
+
+    const original = messages[index];
+    const historyBase = messages.slice(0, index);
+
+    setEditingId(null);
+    setEditText("");
+
+    if (original.mode === "image") {
+      void draw(newText, { historyBase });
+      return;
+    }
+
+    // Asl xabarga biriktirilgan rasmlar saqlab qolinadi.
+    const filesOverride: Attachment[] = (original.images ?? []).map((data, i) => ({
+      id: `edit-${id}-img-${i}`,
+      name: `image-${i + 1}`,
+      kind: "image" as const,
+      data,
+    }));
+
+    void send(newText, { historyBase, filesOverride });
+  }, [draw, editText, editingId, isStreaming, messages, send]);
+
   const isEmpty = messages.length === 0;
   const canSend = imageMode ? input.trim() !== "" : input.trim() !== "" || attachments.length > 0;
 
@@ -565,6 +648,7 @@ export function AiAssistantView() {
                 const isUser = message.role === "user";
                 const isPending = !isUser && message.content === "" && isStreaming;
                 const isDrawingThis = drawingId === message.id;
+                const isEditingThis = isUser && editingId === message.id;
                 const isLive =
                   !isUser &&
                   (isPending || isDrawingThis || (isStreaming && message.id === messages[messages.length - 1]?.id));
@@ -585,9 +669,15 @@ export function AiAssistantView() {
                       {isUser ? <User className="size-5" /> : <Sparkles className="size-5" />}
                     </div>
 
-                    <div className={cn("min-w-0 max-w-[82%]", isUser && "flex flex-col items-end")}>
+                    <div
+                      className={cn(
+                        "min-w-0",
+                        isUser && "flex flex-col items-end",
+                        isEditingThis ? "w-full max-w-[440px]" : "max-w-[82%]"
+                      )}
+                    >
                       <p className="mb-1.5 text-xs font-bold text-[var(--kpk-muted)]">
-                        {isUser ? t("aiYou") : t("aiAssistant")}
+                        {isEditingThis ? t("aiEditMessage") : isUser ? t("aiYou") : t("aiAssistant")}
                       </p>
 
                       {/* Biriktirilgan rasmlar */}
@@ -625,12 +715,61 @@ export function AiAssistantView() {
                       <div
                         className={cn(
                           "inline-block max-w-full rounded-3xl px-5 py-3.5 text-left",
-                          isUser
-                            ? "rounded-tr-lg bg-[#2563eb] text-[15px] leading-relaxed text-white"
-                            : "kpk-card rounded-tl-lg text-[var(--kpk-text)]"
+                          isEditingThis
+                            ? "kpk-card w-full min-w-[260px] rounded-tr-lg ring-1 ring-[var(--kpk-blue)]/25 sm:min-w-[380px]"
+                            : isUser
+                              ? "rounded-tr-lg bg-[#2563eb] text-[15px] leading-relaxed text-white"
+                              : "kpk-card rounded-tl-lg text-[var(--kpk-text)]"
                         )}
                       >
-                        {drawingId === message.id ? (
+                        {isEditingThis ? (
+                          <div className="w-full">
+                            <textarea
+                              ref={editTextareaRef}
+                              value={editText}
+                              onChange={(event) => setEditText(event.target.value)}
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter" && !event.shiftKey) {
+                                  event.preventDefault();
+                                  saveEdit();
+                                }
+                                if (event.key === "Escape") {
+                                  event.preventDefault();
+                                  cancelEdit();
+                                }
+                              }}
+                              rows={1}
+                              aria-label={t("aiEditMessage")}
+                              className="kpk-scroll w-full resize-none bg-transparent text-[15px] leading-relaxed text-[var(--kpk-text)] outline-none placeholder:text-[var(--kpk-muted)]"
+                            />
+
+                            <div className="mt-2.5 flex items-center justify-between gap-3 border-t border-[var(--kpk-border)] pt-2.5">
+                              <p className="text-[11px] text-[var(--kpk-muted)]">{t("aiHint")}</p>
+
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={cancelEdit}
+                                  aria-label={t("aiEditCancel")}
+                                  title={t("aiEditCancel")}
+                                  className="flex size-8 items-center justify-center rounded-full text-[var(--kpk-muted)] transition-colors hover:bg-[var(--kpk-hover)] hover:text-[var(--kpk-text)]"
+                                >
+                                  <X className="size-4" strokeWidth={2.5} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={saveEdit}
+                                  disabled={!editText.trim()}
+                                  aria-label={t("aiEditSave")}
+                                  title={t("aiEditSave")}
+                                  className="kpk-gradient flex size-8 items-center justify-center rounded-full text-white shadow-[0_6px_16px_rgba(13,110,253,0.32)] transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+                                >
+                                  <ArrowUp className="size-4" strokeWidth={2.5} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ) : drawingId === message.id ? (
                           <div className="space-y-2.5">
                             {/* Aylanuvchi gradient ramka ichida yaltirab turuvchi maydon —
                                 ustida skanerlovchi nur va chaqnovchi uchqunlar bilan */}
@@ -729,6 +868,17 @@ export function AiAssistantView() {
                               {t("aiCopy")}
                             </>
                           )}
+                        </button>
+                      )}
+
+                      {isUser && !isEditingThis && !isStreaming && (
+                        <button
+                          type="button"
+                          onClick={() => startEdit(message)}
+                          className="mt-1.5 flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-bold text-[var(--kpk-muted)] transition-colors hover:bg-[var(--kpk-hover)] hover:text-[var(--kpk-blue)]"
+                        >
+                          <Pencil className="size-3.5" />
+                          {t("aiEdit")}
                         </button>
                       )}
                     </div>

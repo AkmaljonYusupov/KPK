@@ -227,6 +227,12 @@ const uz = {
   aiImageOpen: "Kattalashtirish",     // uz
   aiImageClose: "Yopish",
 
+  /* ── Xabarni tahrirlash ── */
+  aiEdit: "Tahrirlash",
+  aiEditMessage: "Xabarni tahrirlash",
+  aiEditCancel: "Bekor qilish",
+  aiEditSave: "Yuborish",
+
   /* ── Kirish sahifasi: yangi dizayn ── */
   heroPill: "Endi AI yordamchi bilan",
   heroLead: "Bilim. Ijodkorlik. Kasbiy o‘sish.",
@@ -450,6 +456,12 @@ const en: Dictionary = {
   aiImageOpen: "Enlarge",             // en
   aiImageClose: "Close",
 
+  /* ── Edit message ── */
+  aiEdit: "Edit",
+  aiEditMessage: "Edit message",
+  aiEditCancel: "Cancel",
+  aiEditSave: "Send",
+
   heroPill: "Now with an AI assistant",
   heroLead: "Knowledge. Creativity. Professional growth.",
   heroSub:
@@ -664,6 +676,12 @@ const ru: Dictionary = {
   aiImageResult: "Созданное изображение",
   aiImageOpen: "Увеличить",           // ru
   aiImageClose: "Закрыть",
+
+  /* ── Редактирование сообщения ── */
+  aiEdit: "Изменить",
+  aiEditMessage: "Изменить сообщение",
+  aiEditCancel: "Отмена",
+  aiEditSave: "Отправить",
 
   heroPill: "Теперь с ИИ-помощником",
   heroLead: "Знания. Креативность. Профессиональный рост.",
