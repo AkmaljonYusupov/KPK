@@ -20,7 +20,7 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/s
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/i18n/language-provider";
 import type { KpkUser } from "@/lib/types";
-import { getInitials } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 
 interface DashboardShellProps {
   user: KpkUser | null;
@@ -33,13 +33,13 @@ interface DashboardShellProps {
  * Admin ko'rinishidagi karkas: chapda sidebar, o'ngda topbar + main.
  *
  *   ┌────────────┬────────────────────────────────┐
- *   │            │  topbar (sarlavha, mavzu, til) │
+ *   │            │  topbar — FIXED, qimirlamaydi  │
  *   │  sidebar   ├────────────────────────────────┤
  *   │            │  main (sahifa tarkibi)         │
  *   └────────────┴────────────────────────────────┘
  *
+ * Skroll sahifaning o'zida bo'ladi — ichki konteynerlar emas.
  * 1024px dan tor ekranlarda sidebar drawer sifatida ochiladi.
- * Barcha ranglar mavzu o'zgaruvchilaridan olinadi.
  */
 export function DashboardShell({ user, title, subtitle, children }: DashboardShellProps) {
   const { t } = useLanguage();
@@ -67,13 +67,20 @@ export function DashboardShell({ user, title, subtitle, children }: DashboardShe
       {/* ── ASOSIY USTUN ── */}
       <div className="relative z-[1] lg:pl-[280px]">
         {/* TOPBAR */}
-        <header className="kpk-bar sticky top-0 z-20 flex min-h-[95px] items-center gap-4 border-b px-8 py-4 max-md:px-4">
+        <header
+          className={cn(
+            // FIXED: sahifa skroll bo'lganda ham joyida qoladi.
+            // Chap chekka sidebar kengligiga teng — u bilan ustma-ust tushmaydi.
+            "kpk-bar fixed inset-x-0 top-0 z-20 flex min-h-[95px] items-center gap-4",
+            "border-b px-8 py-4 max-md:px-4 lg:left-[280px]"
+          )}
+        >
           {/* Mobil menyu tugmasi */}
           {user && (
             <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
               <SheetTrigger
                 aria-label={t("navOpenMenu")}
-                className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--kpk-border)] bg-[var(--kpk-surface-solid)] text-[var(--kpk-primary)] outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+                className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--kpk-border)] bg-[var(--kpk-surface-solid)] text-[var(--kpk-primary)] shadow-[var(--kpk-shadow-sm)] outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
               >
                 <Menu className="size-5" />
               </SheetTrigger>
@@ -145,8 +152,10 @@ export function DashboardShell({ user, title, subtitle, children }: DashboardShe
           </div>
         </header>
 
-        {/* MAIN */}
-        <main className="px-8 py-8 max-md:px-4 max-md:py-5">{children}</main>
+        {/* MAIN — fixed header o'rni pt bilan qoplanadi */}
+        <main className="px-8 pb-8 pt-[119px] max-md:px-4 max-md:pb-5 max-md:pt-[111px]">
+          {children}
+        </main>
       </div>
     </div>
   );

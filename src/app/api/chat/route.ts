@@ -9,6 +9,9 @@ export const dynamic = "force-dynamic";
    API kaliti faqat serverda qoladi va brauzerga hech qachon
    yuborilmaydi. Javob oqim (stream) ko'rinishida qaytariladi —
    foydalanuvchi matnni yozilayotgan paytda ko'radi.
+
+   Rasm yuborish qo'llab-quvvatlanadi: xabar mazmuni matn o'rniga
+   bo'laklar massivi bo'lishi mumkin (OpenAI "vision" formati).
 ══════════════════════════════════════════════════════════════ */
 
 /** Modelni almashtirmoqchi bo'lsangiz .env.local dagi OPENAI_MODEL ni o'zgartiring. */
@@ -27,14 +30,19 @@ JavaScript, React va veb-dasturlash asoslari.
 Qoidalar:
 - Foydalanuvchi qaysi tilda yozsa, o'sha tilda javob ber (o'zbek, ingliz yoki rus).
 - Talaba darajasiga mos, sodda va aniq tushuntir. Ortiqcha atamalardan qoch.
-- Iloji boricha qisqa kod misoli keltir.
+- Kod yozganda uni doim \`\`\` blokiga ol va tilni ko'rsat (masalan \`\`\`tsx).
 - Javobni bo'limlarga ajrat, lekin uzun matn yozma — 250 so'zdan oshirma.
 - Bilmasang, to'qib chiqarma, bilmasligingni ayt.
 - Dasturlashga aloqasi yo'q savollarga qisqa javob berib, mavzuga qaytar.`;
 
+/** Matn yoki rasm bo'lagi — OpenAI "vision" formati. */
+type ContentPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } };
+
 interface ChatMessage {
   role: "user" | "assistant";
-  content: string;
+  content: string | ContentPart[];
 }
 
 interface ChatPayload {
@@ -44,11 +52,29 @@ interface ChatPayload {
 function isValidMessage(value: unknown): value is ChatMessage {
   if (typeof value !== "object" || value === null) return false;
   const message = value as ChatMessage;
-  return (
-    (message.role === "user" || message.role === "assistant") &&
-    typeof message.content === "string" &&
-    message.content.trim().length > 0
-  );
+
+  if (message.role !== "user" && message.role !== "assistant") return false;
+
+  // Oddiy matn
+  if (typeof message.content === "string") {
+    return message.content.trim().length > 0;
+  }
+
+  // Matn + rasm bo'laklari
+  if (Array.isArray(message.content)) {
+    return (
+      message.content.length > 0 &&
+      message.content.every((part) => {
+        if (part?.type === "text") return typeof part.text === "string";
+        if (part?.type === "image_url") {
+          return typeof part.image_url?.url === "string" && part.image_url.url.startsWith("data:");
+        }
+        return false;
+      })
+    );
+  }
+
+  return false;
 }
 
 export async function POST(request: Request) {
@@ -98,19 +124,20 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "network" }, { status: 502 });
   }
- if (!upstream.ok) {
+
+  // OpenAI xato qaytarsa — sababini serverga yozamiz va klientga
+  // qisqa kod beramiz. Aks holda "nega ishlamayapti" noma'lum qoladi.
+  if (!upstream.ok) {
     const detail = await upstream.text().catch(() => "");
     console.error(`[api/chat] OpenAI ${upstream.status}:`, detail.slice(0, 500));
 
-    return NextResponse.json(
-      { error: "upstream", status: upstream.status },
-      { status: 502 }
-    );
+    return NextResponse.json({ error: "upstream", status: upstream.status }, { status: 502 });
   }
 
   if (!upstream.body) {
     return NextResponse.json({ error: "empty-body" }, { status: 502 });
   }
+
   /* ── SSE oqimini oddiy matn oqimiga aylantiramiz ── */
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();

@@ -44,6 +44,14 @@
   --kpk-danger-fg: #dc3545;
   --kpk-danger-bg: #fff1f2;
 
+   --kpk-code-bg: #f6f8fc;
+  --kpk-code-fg: #243b53;
+  --kpk-tok-comment: #8496ad;
+  --kpk-tok-string: #0a7d4e;
+  --kpk-tok-keyword: #b3288a;
+  --kpk-tok-number: #b8681a;
+  --kpk-tok-fn: #1a62c9;
+
   /* Fon chiziqlari */
   --kpk-line: rgba(27, 58, 99, 0.09);
   --kpk-wash-1: rgba(13, 110, 253, 0.14);
@@ -106,6 +114,15 @@
   --kpk-pink-fg: #f9a8d4;
   --kpk-danger-fg: #ff8996;
   --kpk-danger-bg: rgba(239, 68, 68, 0.14);
+
+    /* Kod oynasi */
+  --kpk-code-bg: rgba(8, 14, 26, 0.7);
+  --kpk-code-fg: #d6e2f5;
+  --kpk-tok-comment: #6b7f9c;
+  --kpk-tok-string: #82e0a8;
+  --kpk-tok-keyword: #f292d4;
+  --kpk-tok-number: #ffc178;
+  --kpk-tok-fn: #79bbff;
 
   --kpk-line: rgba(255, 255, 255, 0.07);
   --kpk-wash-1: rgba(13, 110, 253, 0.2);
@@ -318,6 +335,85 @@ html[data-theme-vt] *::before,
 html[data-theme-vt] *::after {
   transition: none !important;
   animation-play-state: paused !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   KOD BLOKLARI (AI javoblari)
+
+   Kod oynasi HAR IKKALA mavzuda ham to'q fonda — muharrir
+   taassurotini beradi va matndan aniq ajralib turadi.
+══════════════════════════════════════════════════════════════ */
+
+.kpk-code {
+  background: #0b1220;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.kpk-code-bar {
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.kpk-code pre code {
+  color: #d6e2f5;
+}
+
+/* Kod oynasi doim to'q, shuning uchun token ranglari ham qat'iy */
+.kpk-tok-comment { color: #5d7290; font-style: italic; }
+.kpk-tok-string  { color: #7ee0a4; }
+.kpk-tok-keyword { color: #ff9ae0; font-weight: 600; }
+.kpk-tok-number  { color: #ffc178; }
+.kpk-tok-fn      { color: #74b9ff; }
+.kpk-tok-tag     { color: #ff9ae0; }
+.kpk-tok-attr    { color: #74b9ff; }
+
+/* Matn ichidagi `kod` — mavzuga moslashadi */
+.kpk-inline-code {
+  background: var(--kpk-accent-soft);
+  color: var(--kpk-blue);
+  border: 1px solid var(--kpk-border);
+}
+
+/* Oqim paytida yonib turuvchi kursor */
+.kpk-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--kpk-blue);
+  animation: kpkCaret 1s steps(2) infinite;
+}
+
+@keyframes kpkCaret {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* Nozik skroll chizig'i */
+.kpk-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--kpk-track) transparent;
+}
+.kpk-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+.kpk-scroll::-webkit-scrollbar-track { background: transparent; }
+.kpk-scroll::-webkit-scrollbar-thumb {
+  background: var(--kpk-track);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+.kpk-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--kpk-muted);
+  background-clip: content-box;
+}
+
+/* Kod oynasi ichidagi skroll — to'q fonga mos */
+.kpk-code .kpk-scroll::-webkit-scrollbar-thumb,
+.kpk-code.kpk-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  background-clip: content-box;
 }
 
 /* ══════════════════════════════════════════════════════════════

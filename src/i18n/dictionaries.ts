@@ -9,7 +9,7 @@ export const LANGUAGES = ["uz", "en", "ru"] as const;
 export type Language = (typeof LANGUAGES)[number];
 
 /** `flag` maydoni endi ishlatilmaydi — bayroqlar SVG (flag-icon.tsx).
- *  Moslik uchun qoldirilgan, xohlasangiz olib tashlasa bo'ladi. */
+ *  Moslik uchun qoldirilgan. */
 export const LANGUAGE_META: Record<Language, { label: string; name: string; flag: string }> = {
   uz: { label: "UZ", name: "Uzbek", flag: "/images/uz.png" },
   en: { label: "EN", name: "English", flag: "/images/en.png" },
@@ -129,7 +129,8 @@ const uz = {
   telegramLogoutText: "User chiqish ma’lumotlari Telegram botga muvaffaqiyatli yuborildi.",
   telegramErrorTitle: "Telegram xatoligi",
   telegramLoginFailedText: "Tizimga kirildi, lekin user ma’lumotlari Telegram botga yuborilmadi.",
-  telegramLogoutFailedText: "Tizimdan chiqildi, lekin chiqish ma’lumotlari Telegram botga yuborilmadi.",
+  telegramLogoutFailedText:
+    "Tizimdan chiqildi, lekin chiqish ma’lumotlari Telegram botga yuborilmadi.",
   serverErrorTitle: "Server xatoligi",
   serverErrorText: "Telegram API bilan ulanishda xatolik yuz berdi.",
   noEmail: "Email ko‘rsatilmagan",
@@ -202,6 +203,16 @@ const uz = {
   aiYou: "Siz",
   aiAssistant: "AI yordamchi",
   aiHint: "Enter — yuborish, Shift+Enter — yangi qator",
+
+  /* ── Fayl biriktirish va skroll ── */
+  aiAttach: "Fayl biriktirish",
+  aiAttachHint: "Rasm yoki matn fayli",
+  aiRemoveFile: "Faylni olib tashlash",
+  aiFileTooBig: "Fayl juda katta",
+  aiFileTooBigText: "{name} — 5 MB dan katta fayllarni yuklab bo‘lmaydi.",
+  aiFileUnsupported: "Fayl turi qo‘llab-quvvatlanmaydi",
+  aiFileUnsupportedText: "Faqat rasm va matn fayllarini yuklash mumkin.",
+  aiScrollDown: "Pastga o‘tish",
 
   /* ── Kirish sahifasi: yangi dizayn ── */
   heroPill: "Endi AI yordamchi bilan",
@@ -405,6 +416,15 @@ const en: Dictionary = {
   aiAssistant: "AI assistant",
   aiHint: "Enter to send, Shift+Enter for a new line",
 
+  aiAttach: "Attach a file",
+  aiAttachHint: "Image or text file",
+  aiRemoveFile: "Remove file",
+  aiFileTooBig: "File is too large",
+  aiFileTooBigText: "{name} — files larger than 5 MB cannot be uploaded.",
+  aiFileUnsupported: "Unsupported file type",
+  aiFileUnsupportedText: "Only images and text files can be uploaded.",
+  aiScrollDown: "Scroll to bottom",
+
   heroPill: "Now with an AI assistant",
   heroLead: "Knowledge. Creativity. Professional growth.",
   heroSub:
@@ -594,11 +614,19 @@ const ru: Dictionary = {
   aiErrorTitle: "ИИ не ответил",
   aiErrorText: "Произошла ошибка соединения. Попробуйте чуть позже.",
   aiNotConfiguredTitle: "ИИ не настроен",
-  aiNotConfiguredText:
-    "Заполните OPENAI_API_KEY в файле .env.local и перезапустите сервер.",
+  aiNotConfiguredText: "Заполните OPENAI_API_KEY в файле .env.local и перезапустите сервер.",
   aiYou: "Вы",
   aiAssistant: "ИИ-помощник",
   aiHint: "Enter — отправить, Shift+Enter — новая строка",
+
+  aiAttach: "Прикрепить файл",
+  aiAttachHint: "Изображение или текстовый файл",
+  aiRemoveFile: "Удалить файл",
+  aiFileTooBig: "Файл слишком большой",
+  aiFileTooBigText: "{name} — файлы больше 5 МБ загрузить нельзя.",
+  aiFileUnsupported: "Тип файла не поддерживается",
+  aiFileUnsupportedText: "Можно загружать только изображения и текстовые файлы.",
+  aiScrollDown: "Вниз",
 
   heroPill: "Теперь с ИИ-помощником",
   heroLead: "Знания. Креативность. Профессиональный рост.",
