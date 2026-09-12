@@ -464,6 +464,119 @@ html[data-theme-vt] *::after {
   50%, 100% { opacity: 0; }
 }
 
+/* ══════════════════════════════════════════════════════════════
+   AI NAFASI — sun'iy intellekt "tirikligini" bildiruvchi nozik
+   nafas olish effekti. Faqat AI hozir ish ustida bo'lganda
+   (javob yozayotganda, chizayotganda) ishlaydi — tinch turgan
+   xabarlarda emas, shunda diqqatni chalg'itmaydi.
+══════════════════════════════════════════════════════════════ */
+
+.kpk-ai-avatar {
+  animation: kpkAiBreathe 3.2s ease-in-out infinite;
+}
+
+@keyframes kpkAiBreathe {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 183, 255, 0), 0 18px 40px rgba(13, 110, 253, 0.24);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 20px 6px rgba(0, 183, 255, 0.38), 0 18px 40px rgba(13, 110, 253, 0.24);
+  }
+}
+
+/* AI o'ylayotganda/chizayotganda matnda yuguruvchi nur — "jonli" taassurot */
+.kpk-ai-thinking-text {
+  background: linear-gradient(90deg, var(--kpk-muted) 0%, var(--kpk-blue) 45%, var(--kpk-cyan) 55%, var(--kpk-muted) 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: kpkThinkingShimmer 2.2s linear infinite;
+}
+
+@keyframes kpkThinkingShimmer {
+  to { background-position: -220% center; }
+}
+
+/* Yangi xabar chatga chiqqanda bir martalik yumshoq kirish */
+.kpk-msg-enter {
+  animation: kpkMsgEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes kpkMsgEnter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RASM CHIZISH ANIMATSIYASI — skanerlovchi nur, uchqunlar va
+   tayyor rasmning yumshoq ochilishi.
+══════════════════════════════════════════════════════════════ */
+
+/* Yuqoridan pastga yuguruvchi yorug' chiziq — "skanerlash" hissi */
+.kpk-scan {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.kpk-scan::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 45%;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(0, 183, 255, 0.4),
+    rgba(13, 110, 253, 0.18),
+    transparent
+  );
+  animation: kpkScanMove 2.4s ease-in-out infinite;
+}
+
+@keyframes kpkScanMove {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(320%); }
+}
+
+/* Chizish paytida chaqnab turuvchi mayda uchqunlar */
+.kpk-sparkle {
+  position: absolute;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.9);
+  animation: kpkSparkleTwinkle 1.9s ease-in-out infinite;
+}
+
+@keyframes kpkSparkleTwinkle {
+  0%, 100% { opacity: 0; transform: scale(0.3); }
+  50%      { opacity: 1; transform: scale(1); }
+}
+
+/* Tayyor rasm paydo bo'lganda — yumshoq kattalashib, tiniqlashib ochiladi */
+.kpk-image-reveal {
+  animation: kpkImageReveal 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes kpkImageReveal {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
 /* Nozik skroll chizig'i (ichki konteynerlar uchun) */
 .kpk-scroll {
   scrollbar-width: thin;

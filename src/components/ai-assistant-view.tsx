@@ -536,7 +536,7 @@ export function AiAssistantView() {
           <div className="space-y-5 pb-4">
             {isEmpty ? (
               <div className="kpk-card rounded-[28px] p-8 text-center max-md:p-6">
-                <div className="kpk-gradient mx-auto mb-4 flex size-16 items-center justify-center rounded-3xl text-white shadow-[0_18px_40px_rgba(13,110,253,0.24)]">
+                <div className="kpk-gradient kpk-ai-avatar mx-auto mb-4 flex size-16 items-center justify-center rounded-3xl text-white">
                   <Sparkles className="size-8" />
                 </div>
 
@@ -564,13 +564,21 @@ export function AiAssistantView() {
               messages.map((message) => {
                 const isUser = message.role === "user";
                 const isPending = !isUser && message.content === "" && isStreaming;
+                const isDrawingThis = drawingId === message.id;
+                const isLive =
+                  !isUser &&
+                  (isPending || isDrawingThis || (isStreaming && message.id === messages[messages.length - 1]?.id));
 
                 return (
-                  <article key={message.id} className={cn("flex gap-3", isUser && "flex-row-reverse")}>
+                  <article
+                    key={message.id}
+                    className={cn("kpk-msg-enter flex gap-3", isUser && "flex-row-reverse")}
+                  >
                     <div
                       className={cn(
                         "flex size-10 shrink-0 items-center justify-center rounded-2xl text-white",
-                        isUser ? "bg-[#2563eb]" : "kpk-gradient"
+                        isUser ? "bg-[#2563eb]" : "kpk-gradient",
+                        isLive && "kpk-ai-avatar"
                       )}
                       aria-hidden
                     >
@@ -624,14 +632,22 @@ export function AiAssistantView() {
                       >
                         {drawingId === message.id ? (
                           <div className="space-y-2.5">
-                            {/* Aylanuvchi gradient ramka ichida yaltirab turuvchi maydon */}
+                            {/* Aylanuvchi gradient ramka ichida yaltirab turuvchi maydon —
+                                ustida skanerlovchi nur va chaqnovchi uchqunlar bilan */}
                             <div className="kpk-drawing w-full max-w-[380px]">
-                              <div className="kpk-shimmer aspect-square w-full rounded-2xl" />
+                              <div className="kpk-shimmer relative aspect-square w-full rounded-2xl">
+                                <div className="kpk-scan" aria-hidden />
+                                <span className="kpk-sparkle left-[18%] top-[28%] size-1.5 [animation-delay:0s]" aria-hidden />
+                                <span className="kpk-sparkle left-[72%] top-[22%] size-1 [animation-delay:0.5s]" aria-hidden />
+                                <span className="kpk-sparkle left-[34%] top-[68%] size-1 [animation-delay:0.9s]" aria-hidden />
+                                <span className="kpk-sparkle left-[78%] top-[64%] size-1.5 [animation-delay:1.3s]" aria-hidden />
+                                <span className="kpk-sparkle left-[52%] top-[45%] size-1 [animation-delay:1.7s]" aria-hidden />
+                              </div>
                             </div>
 
-                            <p className="flex items-center gap-2 text-[13px] font-semibold text-[var(--kpk-muted)]">
+                            <p className="flex items-center gap-2 text-[13px] font-semibold">
                               <Sparkles className="size-4 animate-pulse text-[var(--kpk-blue)]" />
-                              {t("aiImageDrawing")}
+                              <span className="kpk-ai-thinking-text">{t("aiImageDrawing")}</span>
                               <span className="flex gap-1">
                                 <span className="size-1 animate-bounce rounded-full bg-[var(--kpk-blue)] [animation-delay:-0.3s]" />
                                 <span className="size-1 animate-bounce rounded-full bg-[var(--kpk-blue)] [animation-delay:-0.15s]" />
@@ -640,24 +656,25 @@ export function AiAssistantView() {
                             </p>
                           </div>
                         ) : isPending ? (
-                          <span className="flex items-center gap-2 text-[15px] text-[var(--kpk-muted)]">
+                          <span className="flex items-center gap-2 text-[15px]">
                             <span className="flex gap-1">
                               <span className="size-1.5 animate-bounce rounded-full bg-[var(--kpk-blue)] [animation-delay:-0.3s]" />
                               <span className="size-1.5 animate-bounce rounded-full bg-[var(--kpk-blue)] [animation-delay:-0.15s]" />
                               <span className="size-1.5 animate-bounce rounded-full bg-[var(--kpk-blue)]" />
                             </span>
-                            {t("aiThinking")}
+                            <span className="kpk-ai-thinking-text font-semibold">{t("aiThinking")}</span>
                           </span>
                         ) : isUser ? (
                           <span className="whitespace-pre-wrap break-words">{message.content}</span>
                         ) : message.generated ? (
                           <div className="space-y-2">
-                            {/* Bosilganda to'liq ekranda ochiladi */}
+                            {/* Bosilganda to'liq ekranda ochiladi — paydo bo'lishi
+                                yumshoq kattalashib-tiniqlashib ochilish bilan */}
                             <button
                               type="button"
                               onClick={() => setLightbox(message.generated!)}
                               aria-label={t("aiImageOpen")}
-                              className="group relative block w-full max-w-[420px] overflow-hidden rounded-2xl border border-[var(--kpk-border)]"
+                              className="kpk-image-reveal group relative block w-full max-w-[420px] overflow-hidden rounded-2xl border border-[var(--kpk-border)]"
                             >
                               <Image
                                 src={message.generated}
@@ -756,9 +773,18 @@ export function AiAssistantView() {
                     sidebar'dan keyingi chat ustuni bilan bir xil. ── */}
               <div
                 style={{ left: barBox.left, width: barBox.width }}
-                className="fixed bottom-0 z-20 md:bottom-4"
+                className="fixed bottom-0 z-20 px-0 md:bottom-4 md:px-4"
               >
-                <div className="kpk-card w-full rounded-none p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:rounded-[26px] md:pb-3">
+                {/* Kiritish paneli — shishasimon (glass/blur) effektsiz, to'liq
+                    oq fon. Fokus holatida yupqa ko'k-binafsha gradient nur
+                    (AI xarakteri) uyg'onadi, aks holda tinch va neytral. */}
+                <div className="group relative mx-auto w-full">
+                  <div className="pointer-events-none absolute -inset-px rounded-none bg-gradient-to-r from-[#2563eb] via-[#4f7df0] to-[#7c6ef0] opacity-0 blur-[6px] transition-opacity duration-300 group-focus-within:opacity-40 md:-inset-[3px] md:rounded-[28px] md:blur-md" />
+
+                  <div className="relative w-full border-t border-[var(--kpk-border)] bg-[var(--kpk-surface-solid)] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-6px_24px_rgba(15,23,42,0.06)] transition-shadow duration-300 sm:p-3.5 md:rounded-[28px] md:border md:pb-3.5 md:shadow-[0_10px_36px_rgba(15,23,42,0.10)] md:group-focus-within:shadow-[0_14px_40px_rgba(37,99,235,0.16)]">
+                    {/* Yupqa gradient chiziq — AI panelini imzolaydi */}
+                    <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#2563eb]/40 to-transparent md:inset-x-8" />
+
                   {/* Biriktirilgan fayllar ro'yxati */}
           {attachments.length > 0 && (
             <div className="mb-2 flex flex-wrap gap-2 px-1">
@@ -795,7 +821,7 @@ export function AiAssistantView() {
             </div>
           )}
 
-          <div className="flex items-end gap-2">
+          <div className="flex items-end gap-1.5 sm:gap-2">
             <input
               ref={fileRef}
               type="file"
@@ -813,12 +839,12 @@ export function AiAssistantView() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-11 shrink-0 rounded-2xl"
+                className="size-10 shrink-0 rounded-2xl sm:size-11"
                 onClick={() => fileRef.current?.click()}
                 aria-label={t("aiAttach")}
                 title={t("aiAttachHint")}
               >
-                <Paperclip className="size-5" />
+                <Paperclip className="size-[18px] sm:size-5" />
               </Button>
             )}
 
@@ -826,7 +852,7 @@ export function AiAssistantView() {
             <Button
               variant={imageMode ? "gradient" : "ghost"}
               size="icon"
-              className="size-11 shrink-0 rounded-2xl"
+              className="size-10 shrink-0 rounded-2xl sm:size-11"
               aria-pressed={imageMode}
               aria-label={t("aiImageMode")}
               title={t("aiImageMode")}
@@ -839,7 +865,7 @@ export function AiAssistantView() {
                 }
               }}
             >
-              <ImagePlus className="size-5" />
+              <ImagePlus className="size-[18px] sm:size-5" />
             </Button>
 
             <textarea
@@ -860,14 +886,14 @@ export function AiAssistantView() {
               rows={1}
               placeholder={imageMode ? t("aiImagePlaceholder") : t("aiPlaceholder")}
               aria-label={imageMode ? t("aiImagePlaceholder") : t("aiPlaceholder")}
-              className="kpk-scroll min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-[15px] leading-relaxed text-[var(--kpk-text)] outline-none placeholder:text-[var(--kpk-muted)]"
+              className="kpk-scroll min-h-10 flex-1 resize-none bg-transparent px-1.5 py-2 text-[14px] leading-relaxed text-[var(--kpk-text)] outline-none placeholder:text-[var(--kpk-muted)] sm:min-h-11 sm:px-2 sm:py-2.5 sm:text-[15px]"
             />
 
             {isStreaming ? (
               <Button
                 variant="secondary"
                 size="icon"
-                className="size-11 shrink-0 rounded-2xl"
+                className="size-10 shrink-0 rounded-2xl sm:size-11"
                 onClick={stop}
                 aria-label={t("aiThinking")}
               >
@@ -877,12 +903,12 @@ export function AiAssistantView() {
               <Button
                 variant="gradient"
                 size="icon"
-                className="size-11 shrink-0 rounded-2xl"
+                className="size-10 shrink-0 rounded-2xl transition-transform active:scale-95 sm:size-11"
                 onClick={() => submit(input)}
                 disabled={!canSend}
                 aria-label={t("aiSend")}
               >
-                <ArrowUp className="size-5" strokeWidth={2.5} />
+                <ArrowUp className="size-[18px] sm:size-5" strokeWidth={2.5} />
               </Button>
             )}
           </div>
@@ -903,7 +929,8 @@ export function AiAssistantView() {
               </button>
             )}
           </div>
-          </div>
+                  </div>
+                </div>
               </div>
             </>,
             document.body
