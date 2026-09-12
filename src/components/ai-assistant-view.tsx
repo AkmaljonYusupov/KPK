@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
@@ -120,11 +121,19 @@ export function AiAssistantView() {
   const [drawingId, setDrawingId] = React.useState<string | null>(null);
   /** Kattalashtirilgan rasm (lightbox). */
   const [lightbox, setLightbox] = React.useState<string | null>(null);
+  /* `fixed` elementlarni portal orqali document.body'ga chiqarish uchun —
+     shunda ota-elementlardagi transform/filter ularni "qamab qolmaydi". */
+  const [mounted, setMounted] = React.useState(false);
 
   const abortRef = React.useRef<AbortController | null>(null);
   const bottomRef = React.useRef<HTMLDivElement>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const fileRef = React.useRef<HTMLInputElement>(null);
+  /** Kontent ustunining o'zi — chap panel (sidebar) kengligini hisobga
+      olib, pastki panelni aynan shu ustunga moslab markazlashtirish uchun. */
+  const contentRef = React.useRef<HTMLDivElement>(null);
+  /** Pastki panel egallashi kerak bo'lgan aniq chap chekka va kenglik. */
+  const [barBox, setBarBox] = React.useState<{ left: number; width: number } | null>(null);
 
   /* Pastdamizmi — REF sifatida saqlanadi, state emas.
      State bo'lsa har o'zgarishda avtoskroll effekti qayta ishga
@@ -136,6 +145,42 @@ export function AiAssistantView() {
     if (isLoading) return;
     if (!user) router.replace("/");
   }, [isLoading, user, router]);
+
+  /* ── Portal faqat brauzerda ishlaydi ── */
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  /* ── Pastki panel qayerga joylashishini o'lchash.
+        Mobil'da (sidebar yashiringan holatda) butun ekran eniga,
+        desktopda esa kontent ustuniga (sidebar'dan keyingi qismga)
+        moslab markazlashtiramiz — DashboardShell'ning sidebar
+        kengligi qanday bo'lishidan qat'i nazar ishlaydi. ── */
+  React.useEffect(() => {
+    const measure = () => {
+      const isDesktop = window.innerWidth >= 768;
+
+      if (!isDesktop) {
+        setBarBox({ left: 0, width: window.innerWidth });
+        return;
+      }
+
+      const rect = contentRef.current?.getBoundingClientRect();
+      if (rect) setBarBox({ left: rect.left, width: rect.width });
+    };
+
+    measure();
+    window.addEventListener("resize", measure);
+
+    const el = contentRef.current;
+    const observer = el ? new ResizeObserver(measure) : null;
+    if (el && observer) observer.observe(el);
+
+    return () => {
+      window.removeEventListener("resize", measure);
+      observer?.disconnect();
+    };
+  }, []);
 
   /* ── Saqlangan suhbatni tiklash: matn localStorage'dan,
         rasmlar esa IndexedDB'dan (ular juda katta). ── */
@@ -485,7 +530,7 @@ export function AiAssistantView() {
 
   return (
     <DashboardShell user={user} title={t("aiTitle")} subtitle={t("aiSubtitle")}>
-      <div className="mx-auto w-full max-w-3xl pb-[calc(120px+env(safe-area-inset-bottom))] md:pb-28">
+      <div ref={contentRef} className="mx-auto w-full max-w-3xl pb-[calc(120px+env(safe-area-inset-bottom))] md:pb-28">
         {/* ── SUHBAT: alohida skroll yo'q, sahifaning o'zi skroll bo'ladi ── */}
         <div className="relative">
           <div className="space-y-5 pb-4">
@@ -679,30 +724,42 @@ export function AiAssistantView() {
           </div>
         </div>
 
-        {/* Pastga qaytish tugmasi — kiritish maydoni ustida suzib turadi.
-              `fixed` — ekranga bog'langan, shuning uchun suhbat qisqa
-              bo'lsa ham kesilib yoki panel ostida qolib qolmaydi. */}
-        {showJump && !isEmpty && (
-          <button
-            type="button"
-            aria-label={t("aiScrollDown")}
-            onClick={() => {
-              atBottomRef.current = true;
-              setShowJump(false);
-              scrollToBottom(true);
-            }}
-            className="kpk-card fixed inset-x-0 z-30 mx-auto flex size-10 items-center justify-center rounded-full text-[var(--kpk-primary)] transition-transform hover:scale-105 bottom-[calc(104px+env(safe-area-inset-bottom))] md:bottom-[104px]"
-          >
-            <ArrowDown className="size-4" strokeWidth={2.5} />
-          </button>
-        )}
+        {/* Pastga qaytish tugmasi va kiritish paneli — ikkalasi ham
+              document.body'ga portal orqali chiqariladi (transform/filter'li
+              ota-wrapper'lar ularni "qamab qolmasligi" uchun), va kontent
+              ustunining o'lchangan chap chekkasi/kengligiga (barBox)
+              moslab joylashtiriladi — shunda sidebar bo'lsa ham panel
+              haqiqiy chat ustuniga nisbatan markazda turadi. */}
+        {mounted &&
+          barBox &&
+          createPortal(
+            <>
+              {showJump && !isEmpty && (
+                <button
+                  type="button"
+                  aria-label={t("aiScrollDown")}
+                  onClick={() => {
+                    atBottomRef.current = true;
+                    setShowJump(false);
+                    scrollToBottom(true);
+                  }}
+                  style={{ left: barBox.left + barBox.width / 2 }}
+                  className="kpk-card fixed z-30 flex size-10 -translate-x-1/2 items-center justify-center rounded-full text-[var(--kpk-primary)] transition-transform hover:scale-105 bottom-[calc(104px+env(safe-area-inset-bottom))] md:bottom-[104px]"
+                >
+                  <ArrowDown className="size-4" strokeWidth={2.5} />
+                </button>
+              )}
 
-        {/* ── KIRITISH MAYDONI: pastda yopishib turadi.
-              Mobil'da konteyner kengligidan chiqib, ekranning butun
-              enига yopishadi va burchaklari to'g'rilanadi (radius yo'q). ── */}
-        <div className="fixed inset-x-0 bottom-0 z-20 flex justify-center md:bottom-4">
-          <div className="kpk-card w-full rounded-none p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:max-w-3xl md:rounded-[26px] md:pb-3">
-            {/* Biriktirilgan fayllar ro'yxati */}
+              {/* ── KIRITISH MAYDONI: pastda yopishib turadi, aynan
+                    kontent ustuni (barBox) kengligida — mobil'da bu
+                    butun ekran (sidebar yashiringan), desktopda esa
+                    sidebar'dan keyingi chat ustuni bilan bir xil. ── */}
+              <div
+                style={{ left: barBox.left, width: barBox.width }}
+                className="fixed bottom-0 z-20 md:bottom-4"
+              >
+                <div className="kpk-card w-full rounded-none p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:rounded-[26px] md:pb-3">
+                  {/* Biriktirilgan fayllar ro'yxati */}
           {attachments.length > 0 && (
             <div className="mb-2 flex flex-wrap gap-2 px-1">
               {attachments.map((item) => (
@@ -847,7 +904,10 @@ export function AiAssistantView() {
             )}
           </div>
           </div>
-        </div>
+              </div>
+            </>,
+            document.body
+          )}
       </div>
 
       {/* ── RASMNI TO'LIQ EKRANDA KO'RISH ── */}
