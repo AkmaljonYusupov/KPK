@@ -410,6 +410,44 @@ html[data-theme-vt] *::after {
   100% { transform: translateX(100%); }
 }
 
+/* Chizilayotgan rasm atrofida aylanuvchi gradient ramka */
+.kpk-drawing {
+  position: relative;
+  border-radius: 18px;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--kpk-drawing-angle, 0deg),
+    #00b7ff,
+    #0d6efd,
+    #7c5cff,
+    #00b7ff
+  );
+  animation: kpkSpinBorder 2.4s linear infinite;
+}
+
+@property --kpk-drawing-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes kpkSpinBorder {
+  to { --kpk-drawing-angle: 360deg; }
+}
+
+/* @property'ni qo'llab-quvvatlamaydigan brauzerlarda ramka
+   shunchaki nafas oladi — effekt yo'qolmaydi. */
+@supports not (background: conic-gradient(from var(--x, 0deg), red, blue)) {
+  .kpk-drawing {
+    animation: kpkPulseBorder 1.8s ease-in-out infinite;
+  }
+}
+
+@keyframes kpkPulseBorder {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
+
 /* Oqim paytida yonib turuvchi kursor */
 .kpk-caret {
   display: inline-block;

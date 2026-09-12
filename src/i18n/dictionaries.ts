@@ -224,6 +224,8 @@ const uz = {
   aiImageErrorText: "Rasm yaratishda xatolik yuz berdi. Qayta urinib ko‘ring.",
   aiImageDownload: "Yuklab olish",
   aiImageResult: "Chizilgan rasm",
+  aiImageOpen: "Kattalashtirish",     // uz
+  aiImageClose: "Yopish",
 
   /* ── Kirish sahifasi: yangi dizayn ── */
   heroPill: "Endi AI yordamchi bilan",
@@ -445,6 +447,8 @@ const en: Dictionary = {
   aiImageErrorText: "Something went wrong while generating the image. Please try again.",
   aiImageDownload: "Download",
   aiImageResult: "Generated image",
+  aiImageOpen: "Enlarge",             // en
+  aiImageClose: "Close",
 
   heroPill: "Now with an AI assistant",
   heroLead: "Knowledge. Creativity. Professional growth.",
@@ -658,6 +662,8 @@ const ru: Dictionary = {
   aiImageErrorText: "При создании изображения произошла ошибка. Попробуйте ещё раз.",
   aiImageDownload: "Скачать",
   aiImageResult: "Созданное изображение",
+  aiImageOpen: "Увеличить",           // ru
+  aiImageClose: "Закрыть",
 
   heroPill: "Теперь с ИИ-помощником",
   heroLead: "Знания. Креативность. Профессиональный рост.",

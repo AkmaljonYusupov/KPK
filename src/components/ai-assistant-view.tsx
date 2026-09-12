@@ -11,6 +11,7 @@ import {
   Download,
   FileText,
   ImagePlus,
+  Maximize2,
   Paperclip,
   Sparkles,
   Square,
@@ -23,21 +24,24 @@ import { useAuth } from "@/components/auth-provider";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { MarkdownMessage } from "@/components/markdown-message";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { kpkToast } from "@/components/ui/toast";
 import { useLanguage } from "@/i18n/language-provider";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { STORAGE_KEYS } from "@/lib/constants";
+import { clearImages, loadAllImages, saveImages } from "@/lib/image-store";
 import { cn } from "@/lib/utils";
 
 /* ══════════════════════════════════════════════════════════════
    AI yordamchi.
 
-   • Javob oqim ko'rinishida keladi va markdown sifatida chiziladi.
+   • Javob oqim ko'rinishida keladi va markdown sifatida chiziladi
+     (kod bloklari, ro'yxatlar, qalin matn).
    • Rasm va matn fayllarini biriktirish mumkin.
-   • Rasm chizish rejimi — /api/image orqali, ChatGPT kabi
-     shimmer animatsiyasi bilan.
+   • Rasm chizish rejimi — /api/image orqali.
    • Skroll SAHIFANING o'zida. Foydalanuvchi yuqoriga chiqsa,
      yangi xabar uni pastga tortib ketmaydi.
+   • API kaliti serverda — bu komponent faqat /api/* ga murojaat qiladi.
 ══════════════════════════════════════════════════════════════ */
 
 /** Rasm bo'lsa data-URL, matn bo'lsa fayl mazmuni saqlanadi. */
@@ -45,6 +49,7 @@ interface Attachment {
   id: string;
   name: string;
   kind: "image" | "text";
+  /** image: data:image/...;base64,... | text: fayl matni */
   data: string;
 }
 
@@ -52,10 +57,10 @@ interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
-  /** Faqat ko'rsatish uchun — API'ga alohida yuboriladi. */
+  /** Faqat ko'rsatish uchun — tarixga saqlanadi, API'ga alohida yuboriladi. */
   images?: string[];
   files?: string[];
-  /** AI chizgan rasm (data-URL). Faqat assistant xabarlarida. */
+  /** AI chizgan rasm (data-URL). Faqat assistant xabarlarida bo'ladi. */
   generated?: string;
 }
 
@@ -111,8 +116,10 @@ export function AiAssistantView() {
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
   const [showJump, setShowJump] = React.useState(false);
   const [imageMode, setImageMode] = React.useState(false);
-  /** Qaysi xabar uchun rasm chizilmoqda — shimmer ko'rsatish uchun. */
+  /** Hozir chizilayotgan assistant xabarining id'si. */
   const [drawingId, setDrawingId] = React.useState<string | null>(null);
+  /** Kattalashtirilgan rasm (lightbox). */
+  const [lightbox, setLightbox] = React.useState<string | null>(null);
 
   const abortRef = React.useRef<AbortController | null>(null);
   const bottomRef = React.useRef<HTMLDivElement>(null);
@@ -130,20 +137,49 @@ export function AiAssistantView() {
     if (!user) router.replace("/");
   }, [isLoading, user, router]);
 
-  /* ── Saqlangan suhbatni tiklash ── */
+  /* ── Saqlangan suhbatni tiklash: matn localStorage'dan,
+        rasmlar esa IndexedDB'dan (ular juda katta). ── */
   React.useEffect(() => {
-    setMessages(readStoredChat());
+    const stored = readStoredChat();
+    setMessages(stored);
+
+    if (stored.length === 0) return;
+
+    void loadAllImages().then((store) => {
+      if (Object.keys(store).length === 0) return;
+
+      setMessages((previous) =>
+        previous.map((message) => {
+          const saved = store[message.id];
+          if (!saved || saved.length === 0) return message;
+
+          // Birinchi element — AI chizgan rasm, qolganlari biriktirilganlar
+          return message.role === "assistant"
+            ? { ...message, generated: saved[0] }
+            : { ...message, images: saved };
+        })
+      );
+    });
   }, []);
 
   /* ── Har o'zgarishda saqlash ── */
   React.useEffect(() => {
     if (messages.length === 0) return;
+
+    const recent = messages.slice(-40);
+
     try {
-      // Rasmlar juda katta — saqlashda ularni tashlab ketamiz.
-      const light = messages.slice(-40).map(({ images, generated, ...rest }) => rest);
+      // localStorage'ga faqat matn — rasmlar uning kvotasiga sig'maydi.
+      const light = recent.map(({ images, generated, ...rest }) => rest);
       window.localStorage.setItem(STORAGE_KEYS.aiChat, JSON.stringify(light));
     } catch {
       /* kvota to'lgan bo'lsa jim o'tamiz */
+    }
+
+    // Rasmlar IndexedDB'ga — u yerda joy ancha ko'p.
+    for (const message of recent) {
+      const files = message.generated ? [message.generated] : message.images;
+      if (files && files.length > 0) void saveImages(message.id, files);
     }
   }, [messages]);
 
@@ -281,21 +317,10 @@ export function AiAssistantView() {
           return;
         }
 
-        const result = (await response.json().catch(() => null)) as
-          | { image?: string; message?: string }
-          | null;
+        const result = (await response.json().catch(() => null)) as { image?: string } | null;
 
         if (!response.ok || !result?.image) {
-          // Sababni brauzer konsoliga ham chiqaramiz — terminalga
-          // qaramasdan tashxis qo'yish uchun.
-          console.error("[AI rasm] sabab:", result);
-
-          // OpenAI'ning haqiqiy sababi bo'lsa — o'shani ko'rsatamiz
-          kpkToast.error(
-            t("aiImageError"),
-            result?.message?.trim() || t("aiImageErrorText"),
-            "warning"
-          );
+          kpkToast.error(t("aiImageError"), t("aiImageErrorText"), "warning");
           setMessages(history);
           return;
         }
@@ -436,6 +461,7 @@ export function AiAssistantView() {
     setMessages([]);
     setAttachments([]);
     window.localStorage.removeItem(STORAGE_KEYS.aiChat);
+    void clearImages();
   };
 
   const copyMessage = async (message: ChatMessage) => {
@@ -459,7 +485,7 @@ export function AiAssistantView() {
 
   return (
     <DashboardShell user={user} title={t("aiTitle")} subtitle={t("aiSubtitle")}>
-      <div className="mx-auto w-full max-w-4xl">
+      <div className="mx-auto w-full max-w-3xl pb-[calc(120px+env(safe-area-inset-bottom))] md:pb-28">
         {/* ── SUHBAT: alohida skroll yo'q, sahifaning o'zi skroll bo'ladi ── */}
         <div className="relative">
           <div className="space-y-5 pb-4">
@@ -506,12 +532,7 @@ export function AiAssistantView() {
                       {isUser ? <User className="size-5" /> : <Sparkles className="size-5" />}
                     </div>
 
-                    <div
-                      className={cn(
-                        "min-w-0 max-w-[88%] max-md:max-w-[92%]",
-                        isUser && "flex flex-col items-end"
-                      )}
-                    >
+                    <div className={cn("min-w-0 max-w-[82%]", isUser && "flex flex-col items-end")}>
                       <p className="mb-1.5 text-xs font-bold text-[var(--kpk-muted)]">
                         {isUser ? t("aiYou") : t("aiAssistant")}
                       </p>
@@ -558,10 +579,19 @@ export function AiAssistantView() {
                       >
                         {drawingId === message.id ? (
                           <div className="space-y-2.5">
-                            <div className="kpk-shimmer aspect-square w-full max-w-[380px] rounded-2xl" />
+                            {/* Aylanuvchi gradient ramka ichida yaltirab turuvchi maydon */}
+                            <div className="kpk-drawing w-full max-w-[380px]">
+                              <div className="kpk-shimmer aspect-square w-full rounded-2xl" />
+                            </div>
+
                             <p className="flex items-center gap-2 text-[13px] font-semibold text-[var(--kpk-muted)]">
-                              <ImagePlus className="size-4 animate-pulse" />
+                              <Sparkles className="size-4 animate-pulse text-[var(--kpk-blue)]" />
                               {t("aiImageDrawing")}
+                              <span className="flex gap-1">
+                                <span className="size-1 animate-bounce rounded-full bg-[var(--kpk-blue)] [animation-delay:-0.3s]" />
+                                <span className="size-1 animate-bounce rounded-full bg-[var(--kpk-blue)] [animation-delay:-0.15s]" />
+                                <span className="size-1 animate-bounce rounded-full bg-[var(--kpk-blue)]" />
+                              </span>
                             </p>
                           </div>
                         ) : isPending ? (
@@ -571,20 +601,34 @@ export function AiAssistantView() {
                               <span className="size-1.5 animate-bounce rounded-full bg-[var(--kpk-blue)] [animation-delay:-0.15s]" />
                               <span className="size-1.5 animate-bounce rounded-full bg-[var(--kpk-blue)]" />
                             </span>
-                            {imageMode ? t("aiImageDrawing") : t("aiThinking")}
+                            {t("aiThinking")}
                           </span>
                         ) : isUser ? (
                           <span className="whitespace-pre-wrap break-words">{message.content}</span>
                         ) : message.generated ? (
                           <div className="space-y-2">
-                            <Image
-                              src={message.generated}
-                              alt={message.content}
-                              width={512}
-                              height={512}
-                              unoptimized
-                              className="w-full max-w-[420px] rounded-2xl border border-[var(--kpk-border)]"
-                            />
+                            {/* Bosilganda to'liq ekranda ochiladi */}
+                            <button
+                              type="button"
+                              onClick={() => setLightbox(message.generated!)}
+                              aria-label={t("aiImageOpen")}
+                              className="group relative block w-full max-w-[420px] overflow-hidden rounded-2xl border border-[var(--kpk-border)]"
+                            >
+                              <Image
+                                src={message.generated}
+                                alt={message.content}
+                                width={512}
+                                height={512}
+                                unoptimized
+                                className="w-full transition-transform duration-300 group-hover:scale-[1.03]"
+                              />
+
+                              <span className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-300 group-hover:bg-black/25 group-hover:opacity-100">
+                                <span className="flex size-11 items-center justify-center rounded-full bg-white/90 text-[#1b3a63]">
+                                  <Maximize2 className="size-5" />
+                                </span>
+                              </span>
+                            </button>
 
                             <button
                               type="button"
@@ -635,7 +679,9 @@ export function AiAssistantView() {
           </div>
         </div>
 
-        {/* Pastga qaytish tugmasi — kiritish maydoni ustida suzib turadi */}
+        {/* Pastga qaytish tugmasi — kiritish maydoni ustida suzib turadi.
+              `fixed` — ekranga bog'langan, shuning uchun suhbat qisqa
+              bo'lsa ham kesilib yoki panel ostida qolib qolmaydi. */}
         {showJump && !isEmpty && (
           <button
             type="button"
@@ -645,15 +691,18 @@ export function AiAssistantView() {
               setShowJump(false);
               scrollToBottom(true);
             }}
-            className="kpk-card sticky bottom-[104px] left-1/2 z-10 flex size-10 -translate-x-1/2 items-center justify-center rounded-full text-[var(--kpk-primary)] transition-transform hover:scale-105"
+            className="kpk-card fixed inset-x-0 z-30 mx-auto flex size-10 items-center justify-center rounded-full text-[var(--kpk-primary)] transition-transform hover:scale-105 bottom-[calc(104px+env(safe-area-inset-bottom))] md:bottom-[104px]"
           >
             <ArrowDown className="size-4" strokeWidth={2.5} />
           </button>
         )}
 
-        {/* ── KIRITISH MAYDONI: pastda yopishib turadi ── */}
-        <div className="kpk-card sticky bottom-4 z-10 rounded-[26px] p-3">
-          {/* Biriktirilgan fayllar ro'yxati */}
+        {/* ── KIRITISH MAYDONI: pastda yopishib turadi.
+              Mobil'da konteyner kengligidan chiqib, ekranning butun
+              enига yopishadi va burchaklari to'g'rilanadi (radius yo'q). ── */}
+        <div className="fixed inset-x-0 bottom-0 z-20 flex justify-center md:bottom-4">
+          <div className="kpk-card w-full rounded-none p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:max-w-3xl md:rounded-[26px] md:pb-3">
+            {/* Biriktirilgan fayllar ro'yxati */}
           {attachments.length > 0 && (
             <div className="mb-2 flex flex-wrap gap-2 px-1">
               {attachments.map((item) => (
@@ -788,15 +837,45 @@ export function AiAssistantView() {
               <button
                 type="button"
                 onClick={clearChat}
-                className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-bold text-[var(--kpk-muted)] transition-colors hover:bg-[var(--kpk-danger-bg)] hover:text-[var(--kpk-danger-fg)]"
+                aria-label={t("aiClear")}
+                title={t("aiClear")}
+                className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-bold text-[var(--kpk-muted)] transition-colors hover:bg-[var(--kpk-danger-bg)] hover:text-[var(--kpk-danger-fg)] max-md:p-2"
               >
                 <Trash2 className="size-3.5" />
-                {t("aiClear")}
+                <span className="max-md:hidden">{t("aiClear")}</span>
               </button>
             )}
           </div>
+          </div>
         </div>
       </div>
+
+      {/* ── RASMNI TO'LIQ EKRANDA KO'RISH ── */}
+      <Dialog open={lightbox !== null} onOpenChange={(open) => !open && setLightbox(null)}>
+        <DialogContent className="w-[min(900px,calc(100vw-32px))] max-w-none rounded-[24px] p-4">
+          <DialogTitle className="sr-only">{t("aiImageResult")}</DialogTitle>
+
+          {lightbox && (
+            <div className="space-y-3">
+              <Image
+                src={lightbox}
+                alt={t("aiImageResult")}
+                width={1024}
+                height={1024}
+                unoptimized
+                className="max-h-[72vh] w-full rounded-2xl object-contain"
+              />
+
+              <div className="flex justify-center">
+                <Button variant="outline" size="lg" onClick={() => downloadImage(lightbox)}>
+                  <Download className="size-4" />
+                  {t("aiImageDownload")}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardShell>
   );
 }
