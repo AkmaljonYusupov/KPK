@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 
 import { AuthProvider } from "@/components/auth-provider";
+import { SidebarProvider } from "@/components/sidebar-provider";
 import { THEME_SCRIPT, ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toast";
 import { LanguageProvider } from "@/i18n/language-provider";
@@ -52,8 +53,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <LanguageProvider>
             <AuthProvider>
-              {children}
-              <Toaster />
+              <SidebarProvider>
+                {children}
+                <Toaster />
+              </SidebarProvider>
             </AuthProvider>
           </LanguageProvider>
         </ThemeProvider>

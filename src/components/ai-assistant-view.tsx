@@ -180,12 +180,28 @@ export function AiAssistantView() {
     window.addEventListener("resize", measure);
 
     const el = contentRef.current;
-    const observer = el ? new ResizeObserver(measure) : null;
-    if (el && observer) observer.observe(el);
+    const observer = new ResizeObserver(measure);
+
+    if (el) {
+      observer.observe(el);
+
+      /* MUHIM: ota-elementni ham kuzatamiz.
+
+         ResizeObserver faqat O'LCHAMNI kuzatadi, joylashuvni emas.
+         Sidebar yig'ilganda kontent ustuni chapga siljiydi, lekin
+         max-w-3xl tufayli kengligi o'zgarmaydi — shuning uchun
+         observer ishga tushmaydi va barBox.left eski qiymatda
+         qolib ketadi (panel ~100px o'ngga siljib ko'rinadi).
+
+         <main> ning kengligi esa sidebar bilan birga o'zgaradi,
+         shuning uchun uni kuzatish siljishni ham ushlaydi. */
+      const parent = el.closest("main") ?? el.parentElement;
+      if (parent) observer.observe(parent);
+    }
 
     return () => {
       window.removeEventListener("resize", measure);
-      observer?.disconnect();
+      observer.disconnect();
     };
   }, []);
 

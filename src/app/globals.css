@@ -44,6 +44,7 @@
   --kpk-danger-fg: #dc3545;
   --kpk-danger-bg: #fff1f2;
 
+
   /* Fon chiziqlari */
   --kpk-line: rgba(27, 58, 99, 0.09);
   --kpk-wash-1: rgba(13, 110, 253, 0.14);
@@ -106,6 +107,7 @@
   --kpk-pink-fg: #f9a8d4;
   --kpk-danger-fg: #ff8996;
   --kpk-danger-bg: rgba(239, 68, 68, 0.14);
+
 
   --kpk-line: rgba(255, 255, 255, 0.07);
   --kpk-wash-1: rgba(13, 110, 253, 0.2);
@@ -386,6 +388,89 @@ html[data-theme-vt] *::after {
   border: 1px solid var(--kpk-border);
 }
 
+/* ══════════════════════════════════════════════════════════════
+   SIDEBAR KENGLIGI
+
+   --kpk-rail-w JS'dan karkas elementiga inline beriladi. CSS
+   o'zgaruvchilari faqat PASTGA meros bo'ladi, shuning uchun
+   --kpk-rail ham o'sha elementda e'lon qilinadi (:root da emas).
+
+   Mobilda panel drawer bo'lgani uchun chekka 0; haqiqiy kenglik
+   faqat lg (1024px) dan boshlab qo'llanadi.
+══════════════════════════════════════════════════════════════ */
+
+.kpk-rail-wrap {
+  --kpk-rail: 0px;
+}
+
+@media (min-width: 1024px) {
+  .kpk-rail-wrap {
+    --kpk-rail: var(--kpk-rail-w, 280px);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TOOLTIP (yig'ilgan sidebar uchun)
+══════════════════════════════════════════════════════════════ */
+
+.kpk-tooltip {
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 50%;
+  z-index: 60;
+  transform: translateY(-50%) translateX(-6px);
+  padding: 7px 12px;
+  border-radius: 12px;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  color: #ffffff;
+  background: #1b2940;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s;
+}
+
+.dark .kpk-tooltip {
+  background: #2b3b57;
+}
+
+/* Chap tomondagi uchburchak */
+.kpk-tooltip::before {
+  content: "";
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 6px solid transparent;
+  border-right-color: #1b2940;
+}
+
+.dark .kpk-tooltip::before {
+  border-right-color: #2b3b57;
+}
+
+.group\/tt:hover .kpk-tooltip,
+.group\/tt:focus-within .kpk-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Oqim paytida yonib turuvchi kursor */
+.kpk-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--kpk-blue);
+  animation: kpkCaret 1s steps(2) infinite;
+}
+
 /* Rasm chizilayotganda — ChatGPT kabi yaltirab turuvchi joy egallovchi */
 .kpk-shimmer {
   position: relative;
@@ -398,12 +483,22 @@ html[data-theme-vt] *::after {
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
   animation: kpkShimmer 1.6s ease-in-out infinite;
 }
 
 .dark .kpk-shimmer::after {
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.08),
+    transparent
+  );
 }
 
 @keyframes kpkShimmer {
@@ -448,136 +543,12 @@ html[data-theme-vt] *::after {
   50%      { opacity: 0.55; }
 }
 
-/* Oqim paytida yonib turuvchi kursor */
-.kpk-caret {
-  display: inline-block;
-  width: 2px;
-  height: 1.05em;
-  margin-left: 2px;
-  vertical-align: text-bottom;
-  background: var(--kpk-blue);
-  animation: kpkCaret 1s steps(2) infinite;
-}
-
 @keyframes kpkCaret {
   0%, 49%   { opacity: 1; }
   50%, 100% { opacity: 0; }
 }
 
-/* ══════════════════════════════════════════════════════════════
-   AI NAFASI — sun'iy intellekt "tirikligini" bildiruvchi nozik
-   nafas olish effekti. Faqat AI hozir ish ustida bo'lganda
-   (javob yozayotganda, chizayotganda) ishlaydi — tinch turgan
-   xabarlarda emas, shunda diqqatni chalg'itmaydi.
-══════════════════════════════════════════════════════════════ */
-
-.kpk-ai-avatar {
-  animation: kpkAiBreathe 3.2s ease-in-out infinite;
-}
-
-@keyframes kpkAiBreathe {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(0, 183, 255, 0), 0 18px 40px rgba(13, 110, 253, 0.24);
-  }
-  50% {
-    transform: scale(1.06);
-    box-shadow: 0 0 20px 6px rgba(0, 183, 255, 0.38), 0 18px 40px rgba(13, 110, 253, 0.24);
-  }
-}
-
-/* AI o'ylayotganda/chizayotganda matnda yuguruvchi nur — "jonli" taassurot */
-.kpk-ai-thinking-text {
-  background: linear-gradient(90deg, var(--kpk-muted) 0%, var(--kpk-blue) 45%, var(--kpk-cyan) 55%, var(--kpk-muted) 100%);
-  background-size: 220% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: kpkThinkingShimmer 2.2s linear infinite;
-}
-
-@keyframes kpkThinkingShimmer {
-  to { background-position: -220% center; }
-}
-
-/* Yangi xabar chatga chiqqanda bir martalik yumshoq kirish */
-.kpk-msg-enter {
-  animation: kpkMsgEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes kpkMsgEnter {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ══════════════════════════════════════════════════════════════
-   RASM CHIZISH ANIMATSIYASI — skanerlovchi nur, uchqunlar va
-   tayyor rasmning yumshoq ochilishi.
-══════════════════════════════════════════════════════════════ */
-
-/* Yuqoridan pastga yuguruvchi yorug' chiziq — "skanerlash" hissi */
-.kpk-scan {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  border-radius: inherit;
-  pointer-events: none;
-}
-
-.kpk-scan::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 45%;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    rgba(0, 183, 255, 0.4),
-    rgba(13, 110, 253, 0.18),
-    transparent
-  );
-  animation: kpkScanMove 2.4s ease-in-out infinite;
-}
-
-@keyframes kpkScanMove {
-  0%   { transform: translateY(-100%); }
-  100% { transform: translateY(320%); }
-}
-
-/* Chizish paytida chaqnab turuvchi mayda uchqunlar */
-.kpk-sparkle {
-  position: absolute;
-  border-radius: 999px;
-  background: #ffffff;
-  box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.9);
-  animation: kpkSparkleTwinkle 1.9s ease-in-out infinite;
-}
-
-@keyframes kpkSparkleTwinkle {
-  0%, 100% { opacity: 0; transform: scale(0.3); }
-  50%      { opacity: 1; transform: scale(1); }
-}
-
-/* Tayyor rasm paydo bo'lganda — yumshoq kattalashib, tiniqlashib ochiladi */
-.kpk-image-reveal {
-  animation: kpkImageReveal 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes kpkImageReveal {
-  from {
-    opacity: 0;
-    transform: scale(0.94);
-    filter: blur(8px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-    filter: blur(0);
-  }
-}
-
-/* Nozik skroll chizig'i (ichki konteynerlar uchun) */
+/* Nozik skroll chizig'i */
 .kpk-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--kpk-track) transparent;

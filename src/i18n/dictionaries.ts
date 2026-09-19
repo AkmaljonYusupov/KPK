@@ -8,8 +8,6 @@
 export const LANGUAGES = ["uz", "en", "ru"] as const;
 export type Language = (typeof LANGUAGES)[number];
 
-/** `flag` maydoni endi ishlatilmaydi — bayroqlar SVG (flag-icon.tsx).
- *  Moslik uchun qoldirilgan. */
 export const LANGUAGE_META: Record<Language, { label: string; name: string; flag: string }> = {
   uz: { label: "UZ", name: "Uzbek", flag: "/images/uz.png" },
   en: { label: "EN", name: "English", flag: "/images/en.png" },
@@ -129,8 +127,7 @@ const uz = {
   telegramLogoutText: "User chiqish ma’lumotlari Telegram botga muvaffaqiyatli yuborildi.",
   telegramErrorTitle: "Telegram xatoligi",
   telegramLoginFailedText: "Tizimga kirildi, lekin user ma’lumotlari Telegram botga yuborilmadi.",
-  telegramLogoutFailedText:
-    "Tizimdan chiqildi, lekin chiqish ma’lumotlari Telegram botga yuborilmadi.",
+  telegramLogoutFailedText: "Tizimdan chiqildi, lekin chiqish ma’lumotlari Telegram botga yuborilmadi.",
   serverErrorTitle: "Server xatoligi",
   serverErrorText: "Telegram API bilan ulanishda xatolik yuz berdi.",
   noEmail: "Email ko‘rsatilmagan",
@@ -144,6 +141,8 @@ const uz = {
   navAssessment: "Baholash testi",
   navMenu: "Menyu",
   navOpenMenu: "Menyuni ochish",
+  navCollapse: "Panelni yig‘ish",
+  navExpand: "Panelni yoyish",
   sidebarTagline: "Ta'lim platformasi",
 
   /* ── Test endi ixtiyoriy ── */
@@ -199,10 +198,24 @@ const uz = {
   aiErrorText: "Ulanishda xatolik yuz berdi. Birozdan so‘ng qayta urinib ko‘ring.",
   aiNotConfiguredTitle: "AI sozlanmagan",
   aiNotConfiguredText:
-    ".env.local faylida OPENAI_API_KEY qiymatini to‘ldiring va serverni qayta ishga tushiring.",
+    ".env.local faylida ANTHROPIC_API_KEY qiymatini to‘ldiring va serverni qayta ishga tushiring.",
   aiYou: "Siz",
   aiAssistant: "AI yordamchi",
   aiHint: "Enter — yuborish, Shift+Enter — yangi qator",
+
+  /* ── Kirish sahifasi: yangi dizayn ── */
+  heroPill: "Endi AI yordamchi bilan",
+  heroLead: "Bilim. Ijodkorlik. Kasbiy o‘sish.",
+  heroSub:
+    "Talabalar salohiyatini raqamli muhitda ochadigan platforma — to‘rt bosqichli o‘quv yo‘li va yoningizdagi AI yordamchi.",
+  featureAiTitle: "AI yordamchi",
+  featureAiText: "Savolingizga bir zumda javob, uch tilda",
+  featureModulesTitle: "4 bosqichli yo‘l",
+  featureModulesText: "Boshlang‘ichdan eng yuqori darajagacha",
+  featureTestTitle: "Bilim baholash",
+  featureTestText: "Darajangizni test bilan aniqlang",
+  authSecure: "Ma’lumotlaringiz himoyalangan",
+  authNoPassword: "Parol kerak emas",
 
   /* ── Fayl biriktirish va skroll ── */
   aiAttach: "Fayl biriktirish",
@@ -224,28 +237,8 @@ const uz = {
   aiImageErrorText: "Rasm yaratishda xatolik yuz berdi. Qayta urinib ko‘ring.",
   aiImageDownload: "Yuklab olish",
   aiImageResult: "Chizilgan rasm",
-  aiImageOpen: "Kattalashtirish",     // uz
+  aiImageOpen: "Kattalashtirish",
   aiImageClose: "Yopish",
-
-  /* ── Xabarni tahrirlash ── */
-  aiEdit: "Tahrirlash",
-  aiEditMessage: "Xabarni tahrirlash",
-  aiEditCancel: "Bekor qilish",
-  aiEditSave: "Yuborish",
-
-  /* ── Kirish sahifasi: yangi dizayn ── */
-  heroPill: "Endi AI yordamchi bilan",
-  heroLead: "Bilim. Ijodkorlik. Kasbiy o‘sish.",
-  heroSub:
-    "Talabalar salohiyatini raqamli muhitda ochadigan platforma — to‘rt bosqichli o‘quv yo‘li va yoningizdagi AI yordamchi.",
-  featureAiTitle: "AI yordamchi",
-  featureAiText: "Savolingizga bir zumda javob, uch tilda",
-  featureModulesTitle: "4 bosqichli yo‘l",
-  featureModulesText: "Boshlang‘ichdan eng yuqori darajagacha",
-  featureTestTitle: "Bilim baholash",
-  featureTestText: "Darajangizni test bilan aniqlang",
-  authSecure: "Ma’lumotlaringiz himoyalangan",
-  authNoPassword: "Parol kerak emas",
 
   /* ── Mavzu ── */
   themeToggle: "Yorug‘ / qorong‘i rejim",
@@ -379,6 +372,8 @@ const en: Dictionary = {
   navAssessment: "Assessment test",
   navMenu: "Menu",
   navOpenMenu: "Open menu",
+  navCollapse: "Collapse sidebar",
+  navExpand: "Expand sidebar",
   sidebarTagline: "Learning platform",
 
   testOptionalTitle: "Find out your knowledge level",
@@ -430,10 +425,24 @@ const en: Dictionary = {
   aiErrorTitle: "No answer from AI",
   aiErrorText: "Something went wrong with the connection. Please try again shortly.",
   aiNotConfiguredTitle: "AI is not configured",
-  aiNotConfiguredText: "Fill in OPENAI_API_KEY in .env.local and restart the server.",
+  aiNotConfiguredText:
+    "Fill in ANTHROPIC_API_KEY in .env.local and restart the server.",
   aiYou: "You",
   aiAssistant: "AI assistant",
   aiHint: "Enter to send, Shift+Enter for a new line",
+
+  heroPill: "Now with an AI assistant",
+  heroLead: "Knowledge. Creativity. Professional growth.",
+  heroSub:
+    "A platform that unlocks student potential in a digital environment — a four-stage learning path and an AI assistant at your side.",
+  featureAiTitle: "AI assistant",
+  featureAiText: "Instant answers in three languages",
+  featureModulesTitle: "Four-stage path",
+  featureModulesText: "From beginner to master level",
+  featureTestTitle: "Knowledge check",
+  featureTestText: "Find your level with the test",
+  authSecure: "Your data stays protected",
+  authNoPassword: "No password needed",
 
   aiAttach: "Attach a file",
   aiAttachHint: "Image or text file",
@@ -453,27 +462,8 @@ const en: Dictionary = {
   aiImageErrorText: "Something went wrong while generating the image. Please try again.",
   aiImageDownload: "Download",
   aiImageResult: "Generated image",
-  aiImageOpen: "Enlarge",             // en
+  aiImageOpen: "Enlarge",
   aiImageClose: "Close",
-
-  /* ── Edit message ── */
-  aiEdit: "Edit",
-  aiEditMessage: "Edit message",
-  aiEditCancel: "Cancel",
-  aiEditSave: "Send",
-
-  heroPill: "Now with an AI assistant",
-  heroLead: "Knowledge. Creativity. Professional growth.",
-  heroSub:
-    "A platform that unlocks student potential in a digital environment — a four-stage learning path and an AI assistant at your side.",
-  featureAiTitle: "AI assistant",
-  featureAiText: "Instant answers in three languages",
-  featureModulesTitle: "Four-stage path",
-  featureModulesText: "From beginner to master level",
-  featureTestTitle: "Knowledge check",
-  featureTestText: "Find your level with the test",
-  authSecure: "Your data stays protected",
-  authNoPassword: "No password needed",
 
   themeToggle: "Light / dark mode",
   themeLight: "Light",
@@ -600,6 +590,8 @@ const ru: Dictionary = {
   navAssessment: "Оценочный тест",
   navMenu: "Меню",
   navOpenMenu: "Открыть меню",
+  navCollapse: "Свернуть панель",
+  navExpand: "Развернуть панель",
   sidebarTagline: "Образовательная платформа",
 
   testOptionalTitle: "Определите свой уровень знаний",
@@ -651,10 +643,24 @@ const ru: Dictionary = {
   aiErrorTitle: "ИИ не ответил",
   aiErrorText: "Произошла ошибка соединения. Попробуйте чуть позже.",
   aiNotConfiguredTitle: "ИИ не настроен",
-  aiNotConfiguredText: "Заполните OPENAI_API_KEY в файле .env.local и перезапустите сервер.",
+  aiNotConfiguredText:
+    "Заполните ANTHROPIC_API_KEY в файле .env.local и перезапустите сервер.",
   aiYou: "Вы",
   aiAssistant: "ИИ-помощник",
   aiHint: "Enter — отправить, Shift+Enter — новая строка",
+
+  heroPill: "Теперь с ИИ-помощником",
+  heroLead: "Знания. Креативность. Профессиональный рост.",
+  heroSub:
+    "Платформа, раскрывающая потенциал студентов в цифровой среде — четыре ступени обучения и ИИ-помощник рядом с вами.",
+  featureAiTitle: "ИИ-помощник",
+  featureAiText: "Мгновенные ответы на трёх языках",
+  featureModulesTitle: "Четыре ступени",
+  featureModulesText: "От начального до высшего уровня",
+  featureTestTitle: "Оценка знаний",
+  featureTestText: "Определите свой уровень тестом",
+  authSecure: "Ваши данные защищены",
+  authNoPassword: "Пароль не нужен",
 
   aiAttach: "Прикрепить файл",
   aiAttachHint: "Изображение или текстовый файл",
@@ -674,27 +680,8 @@ const ru: Dictionary = {
   aiImageErrorText: "При создании изображения произошла ошибка. Попробуйте ещё раз.",
   aiImageDownload: "Скачать",
   aiImageResult: "Созданное изображение",
-  aiImageOpen: "Увеличить",           // ru
+  aiImageOpen: "Увеличить",
   aiImageClose: "Закрыть",
-
-  /* ── Редактирование сообщения ── */
-  aiEdit: "Изменить",
-  aiEditMessage: "Изменить сообщение",
-  aiEditCancel: "Отмена",
-  aiEditSave: "Отправить",
-
-  heroPill: "Теперь с ИИ-помощником",
-  heroLead: "Знания. Креативность. Профессиональный рост.",
-  heroSub:
-    "Платформа, раскрывающая потенциал студентов в цифровой среде — четыре ступени обучения и ИИ-помощник рядом с вами.",
-  featureAiTitle: "ИИ-помощник",
-  featureAiText: "Мгновенные ответы на трёх языках",
-  featureModulesTitle: "Четыре ступени",
-  featureModulesText: "От начального до высшего уровня",
-  featureTestTitle: "Оценка знаний",
-  featureTestText: "Определите свой уровень тестом",
-  authSecure: "Ваши данные защищены",
-  authNoPassword: "Пароль не нужен",
 
   themeToggle: "Светлая / тёмная тема",
   themeLight: "Светлая",

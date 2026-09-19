@@ -3,42 +3,57 @@ import { NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/* ══════════════════════════════════════════════════════════════
-   AI YORDAMCHI — SERVER TOMONI (OpenAI)
+/* =========================================================
+   AI CHAT — OPENAI
+   ========================================================= */
 
-   API kaliti faqat serverda qoladi va brauzerga hech qachon
-   yuborilmaydi. Javob oqim (stream) ko'rinishida qaytariladi —
-   foydalanuvchi matnni yozilayotgan paytda ko'radi.
-
-   Rasm yuborish qo'llab-quvvatlanadi: xabar mazmuni matn o'rniga
-   bo'laklar massivi bo'lishi mumkin (OpenAI "vision" formati).
-══════════════════════════════════════════════════════════════ */
-
-/** Modelni almashtirmoqchi bo'lsangiz .env.local dagi OPENAI_MODEL ni o'zgartiring. */
 const MODEL = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 
 const MAX_TOKENS = 1500;
-
-/** Suhbat tarixidan nechta xabar yuboriladi (kontekstni cheklab turamiz). */
 const HISTORY_LIMIT = 20;
 
 const SYSTEM_PROMPT = `Sen KPK Platform ta'lim platformasining AI yordamchisisan.
-Platformada 4 ta bo'lim bor: 1-bo'lim boshlang'ich, 2-bo'lim o'rta,
-3-bo'lim yuqori, 4-bo'lim eng yuqori daraja. Mavzular: HTML, CSS,
-JavaScript, React va veb-dasturlash asoslari.
+
+Platformada 4 ta bo'lim bor:
+1-bo'lim — boshlang'ich
+2-bo'lim — o'rta
+3-bo'lim — yuqori
+4-bo'lim — eng yuqori daraja
+
+Mavzular:
+HTML, CSS, JavaScript, React va veb-dasturlash asoslari.
 
 Qoidalar:
-- Foydalanuvchi qaysi tilda yozsa, o'sha tilda javob ber (o'zbek, ingliz yoki rus).
-- Talaba darajasiga mos, sodda va aniq tushuntir. Ortiqcha atamalardan qoch.
-- Kod yozganda uni doim \`\`\` blokiga ol va tilni ko'rsat (masalan \`\`\`tsx).
-- Javobni bo'limlarga ajrat, lekin uzun matn yozma — 250 so'zdan oshirma.
-- Bilmasang, to'qib chiqarma, bilmasligingni ayt.
-- Dasturlashga aloqasi yo'q savollarga qisqa javob berib, mavzuga qaytar.`;
+- Foydalanuvchi qaysi tilda yozsa, o'sha tilda javob ber.
+- O'zbek, ingliz yoki rus tilida javob ber.
+- Talaba darajasiga mos, sodda va aniq tushuntir.
+- Ortiqcha atamalardan qoch.
+- Kod yozganda doim markdown code block ishlat.
+- Masalan: \`\`\`tsx
+- Javobni bo'limlarga ajrat.
+- 250 so'zdan oshirma.
+- Bilmasang, to'qib chiqarma.
+- Dasturlashga aloqasi yo'q savollarga qisqa javob ber.
+`;
 
-/** Matn yoki rasm bo'lagi — OpenAI "vision" formati. */
-type ContentPart =
-  | { type: "text"; text: string }
-  | { type: "image_url"; image_url: { url: string } };
+/* =========================================================
+   TYPES
+   ========================================================= */
+
+type TextPart = {
+  type: "text";
+  text: string;
+};
+
+type ImagePart = {
+  type: "image_url";
+  image_url: {
+    url: string;
+    detail?: "auto" | "low" | "high";
+  };
+};
+
+type ContentPart = TextPart | ImagePart;
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -46,137 +61,424 @@ interface ChatMessage {
 }
 
 interface ChatPayload {
-  messages?: ChatMessage[];
+  messages?: unknown;
 }
 
-function isValidMessage(value: unknown): value is ChatMessage {
-  if (typeof value !== "object" || value === null) return false;
-  const message = value as ChatMessage;
+/* =========================================================
+   IMAGE URL VALIDATION
+   ========================================================= */
 
-  if (message.role !== "user" && message.role !== "assistant") return false;
+function isAllowedImageUrl(url: unknown): url is string {
+  if (typeof url !== "string") return false;
 
-  // Oddiy matn
+  return (
+    url.startsWith("data:image/") ||
+    url.startsWith("https://") ||
+    url.startsWith("http://")
+  );
+}
+
+/* =========================================================
+   NORMALIZE MESSAGE
+   ========================================================= */
+
+function normalizeMessage(value: unknown): ChatMessage | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const message = value as any;
+
+  if (
+    message.role !== "user" &&
+    message.role !== "assistant"
+  ) {
+    return null;
+  }
+
+  /* -------------------------------------------------------
+     SIMPLE TEXT
+     ------------------------------------------------------- */
+
   if (typeof message.content === "string") {
-    return message.content.trim().length > 0;
+    const text = message.content.trim();
+
+    if (!text) return null;
+
+    return {
+      role: message.role,
+      content: text,
+    };
   }
 
-  // Matn + rasm bo'laklari
+  /* -------------------------------------------------------
+     CONTENT PARTS
+     ------------------------------------------------------- */
+
   if (Array.isArray(message.content)) {
-    return (
-      message.content.length > 0 &&
-      message.content.every((part) => {
-        if (part?.type === "text") return typeof part.text === "string";
-        if (part?.type === "image_url") {
-          return typeof part.image_url?.url === "string" && part.image_url.url.startsWith("data:");
+    const parts: ContentPart[] = [];
+
+    for (const part of message.content) {
+      if (!part || typeof part !== "object") {
+        continue;
+      }
+
+      /* TEXT */
+
+      if (
+        part.type === "text" &&
+        typeof part.text === "string" &&
+        part.text.trim()
+      ) {
+        parts.push({
+          type: "text",
+          text: part.text,
+        });
+
+        continue;
+      }
+
+      /* IMAGE */
+
+      if (
+        part.type === "image_url" &&
+        part.image_url &&
+        isAllowedImageUrl(part.image_url.url)
+      ) {
+        /*
+         IMPORTANT:
+         Image inputni faqat USER messagega yuboramiz.
+        */
+
+        if (message.role === "user") {
+          parts.push({
+            type: "image_url",
+            image_url: {
+              url: part.image_url.url,
+              detail: part.image_url.detail ?? "auto",
+            },
+          });
         }
-        return false;
-      })
-    );
+
+        continue;
+      }
+    }
+
+    if (parts.length === 0) {
+      return null;
+    }
+
+    /*
+     Assistant message ichida image yubormaymiz.
+     Faqat text qoldiramiz.
+    */
+
+    if (message.role === "assistant") {
+      const textParts = parts.filter(
+        (part): part is TextPart =>
+          part.type === "text"
+      );
+
+      if (textParts.length === 0) {
+        return null;
+      }
+
+      return {
+        role: "assistant",
+        content: textParts,
+      };
+    }
+
+    return {
+      role: "user",
+      content: parts,
+    };
   }
 
-  return false;
+  return null;
 }
+
+/* =========================================================
+   POST
+   ========================================================= */
 
 export async function POST(request: Request) {
   const apiKey = process.env.OPENAI_API_KEY;
 
+  /* -------------------------------------------------------
+     API KEY
+     ------------------------------------------------------- */
+
   if (!apiKey) {
-    return NextResponse.json({ error: "not-configured" }, { status: 503 });
+    console.error(
+      "[api/chat] OPENAI_API_KEY mavjud emas"
+    );
+
+    return NextResponse.json(
+      {
+        error: "not-configured",
+      },
+      {
+        status: 503,
+      }
+    );
   }
+
+  /* -------------------------------------------------------
+     JSON
+     ------------------------------------------------------- */
 
   let payload: ChatPayload;
+
   try {
     payload = (await request.json()) as ChatPayload;
-  } catch {
-    return NextResponse.json({ error: "invalid-json" }, { status: 400 });
+  } catch (error) {
+    console.error(
+      "[api/chat] JSON parse error:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        error: "invalid-json",
+      },
+      {
+        status: 400,
+      }
+    );
   }
 
-  const messages = (payload.messages ?? []).filter(isValidMessage).slice(-HISTORY_LIMIT);
+  /* -------------------------------------------------------
+     MESSAGES
+     ------------------------------------------------------- */
+
+  const rawMessages = Array.isArray(payload.messages)
+    ? payload.messages
+    : [];
+
+  const messages = rawMessages
+    .map(normalizeMessage)
+    .filter(
+      (message): message is ChatMessage =>
+        message !== null
+    )
+    .slice(-HISTORY_LIMIT);
+
+  /* -------------------------------------------------------
+     EMPTY
+     ------------------------------------------------------- */
 
   if (messages.length === 0) {
-    return NextResponse.json({ error: "empty-messages" }, { status: 400 });
+    console.error(
+      "[api/chat] Valid messages topilmadi:",
+      JSON.stringify(payload).slice(0, 2000)
+    );
+
+    return NextResponse.json(
+      {
+        error: "empty-messages",
+        message: "Valid chat message topilmadi.",
+      },
+      {
+        status: 400,
+      }
+    );
   }
+
+  /* -------------------------------------------------------
+     OPENAI REQUEST
+     ------------------------------------------------------- */
 
   let upstream: Response;
 
   try {
-    upstream = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // OpenAI'da kalit Authorization sarlavhasida yuboriladi
-        Authorization: `Bearer ${apiKey}`,
+    upstream = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+
+        body: JSON.stringify({
+          model: MODEL,
+
+          messages: [
+            {
+              role: "system",
+              content: SYSTEM_PROMPT,
+            },
+
+            ...messages.map((message) => ({
+              role: message.role,
+              content: message.content,
+            })),
+          ],
+
+          max_tokens: MAX_TOKENS,
+
+          stream: true,
+        }),
+      }
+    );
+  } catch (error) {
+    console.error(
+      "[api/chat] Network error:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        error: "network",
       },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: MAX_TOKENS,
-        stream: true,
-        // Tizim ko'rsatmasi ham messages ichida ketadi
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          ...messages.map((message) => ({
-            role: message.role,
-            content: message.content,
-          })),
-        ],
-      }),
-    });
-  } catch {
-    return NextResponse.json({ error: "network" }, { status: 502 });
+      {
+        status: 502,
+      }
+    );
   }
 
-  // OpenAI xato qaytarsa — sababini serverga yozamiz va klientga
-  // qisqa kod beramiz. Aks holda "nega ishlamayapti" noma'lum qoladi.
+  /* -------------------------------------------------------
+     OPENAI ERROR
+     ------------------------------------------------------- */
+
   if (!upstream.ok) {
-    const detail = await upstream.text().catch(() => "");
-    console.error(`[api/chat] OpenAI ${upstream.status}:`, detail.slice(0, 500));
+    const detail = await upstream
+      .text()
+      .catch(() => "");
 
-    return NextResponse.json({ error: "upstream", status: upstream.status }, { status: 502 });
+    console.error(
+      `\n[api/chat] =========================`
+    );
+
+    console.error(
+      `[api/chat] OpenAI ERROR: ${upstream.status}`
+    );
+
+    console.error(
+      `[api/chat] MODEL: ${MODEL}`
+    );
+
+    console.error(
+      `[api/chat] DETAIL: ${detail.slice(0, 3000)}`
+    );
+
+    console.error(
+      `[api/chat] =========================\n`
+    );
+
+    return NextResponse.json(
+      {
+        error: "upstream",
+        status: upstream.status,
+
+        ...(process.env.NODE_ENV === "development"
+          ? {
+              detail: detail.slice(0, 3000),
+            }
+          : {}),
+      },
+      {
+        status: 502,
+      }
+    );
   }
+
+  /* -------------------------------------------------------
+     STREAM BODY
+     ------------------------------------------------------- */
 
   if (!upstream.body) {
-    return NextResponse.json({ error: "empty-body" }, { status: 502 });
+    return NextResponse.json(
+      {
+        error: "empty-body",
+      },
+      {
+        status: 502,
+      }
+    );
   }
 
-  /* ── SSE oqimini oddiy matn oqimiga aylantiramiz ── */
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const reader = upstream.body!.getReader();
+      const reader =
+        upstream.body!.getReader();
+
       let buffer = "";
 
       try {
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done) break;
+        while (true) {
+          const {
+            done,
+            value,
+          } = await reader.read();
 
-          buffer += decoder.decode(value, { stream: true });
+          if (done) {
+            break;
+          }
 
-          const lines = buffer.split("\n");
-          buffer = lines.pop() ?? "";
+          buffer += decoder.decode(value, {
+            stream: true,
+          });
+
+          const lines =
+            buffer.split("\n");
+
+          buffer =
+            lines.pop() ?? "";
 
           for (const line of lines) {
-            if (!line.startsWith("data:")) continue;
+            if (!line.startsWith("data:")) {
+              continue;
+            }
 
-            const raw = line.slice(5).trim();
-            if (!raw || raw === "[DONE]") continue;
+            const raw =
+              line.slice(5).trim();
+
+            if (
+              !raw ||
+              raw === "[DONE]"
+            ) {
+              continue;
+            }
 
             try {
-              const event = JSON.parse(raw) as {
-                choices?: Array<{ delta?: { content?: string } }>;
-              };
+              const event =
+                JSON.parse(raw) as {
+                  choices?: Array<{
+                    delta?: {
+                      content?: string;
+                    };
+                  }>;
+                };
 
-              const text = event.choices?.[0]?.delta?.content;
-              if (text) controller.enqueue(encoder.encode(text));
+              const text =
+                event
+                  .choices?.[0]
+                  ?.delta?.content;
+
+              if (text) {
+                controller.enqueue(
+                  encoder.encode(text)
+                );
+              }
             } catch {
-              /* to'liq bo'lmagan bo'lak — keyingi aylanishda qo'shiladi */
+              /*
+               Incomplete SSE chunk.
+               Keyingi chunkda davom etadi.
+              */
             }
           }
         }
-      } catch {
-        /* ulanish uzildi — oqimni shunchaki yopamiz */
+      } catch (error) {
+        console.error(
+          "[api/chat] Stream error:",
+          error
+        );
       } finally {
         controller.close();
         reader.releaseLock();
@@ -184,10 +486,19 @@ export async function POST(request: Request) {
     },
   });
 
+  /* -------------------------------------------------------
+     RESPONSE
+     ------------------------------------------------------- */
+
   return new Response(stream, {
     headers: {
-      "Content-Type": "text/plain; charset=utf-8",
-      "Cache-Control": "no-store, no-transform",
+      "Content-Type":
+        "text/plain; charset=utf-8",
+
+      "Cache-Control":
+        "no-store, no-transform",
+
+      "X-Model": MODEL,
     },
   });
 }

@@ -9,6 +9,7 @@ export const STORAGE_KEYS = {
   lang: "kpk-lang",
   currentModule: "current-module",
   aiChat: "kpk-ai-chat",
+  sidebar: "kpk-sidebar",
 } as const;
 
 /** Kirish testi sozlamalari (original assessment.js bilan bir xil). */
