@@ -10,6 +10,7 @@ export const STORAGE_KEYS = {
   currentModule: "current-module",
   aiChat: "kpk-ai-chat",
   sidebar: "kpk-sidebar",
+  quizSession: "kpk-quiz-session",
 } as const;
 
 /** Bilimni baholash testi sozlamalari. */

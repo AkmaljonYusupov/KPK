@@ -29,6 +29,10 @@ export interface InitialTestResult {
   finishedAt?: string;
   /** Nechanchi urinish ekani. */
   attempt?: number;
+  /** Test davomida qayd etilgan qoida buzilishlari soni. */
+  violations?: number;
+  /** Chegaradan oshgani uchun avtomatik yakunlanganmi. */
+  autoSubmitted?: boolean;
 }
 
 /** localStorage("kpk-progress") ichida saqlanadigan progress. */

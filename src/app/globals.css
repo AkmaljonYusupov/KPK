@@ -574,6 +574,50 @@ html[data-theme-vt] *::after {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   TEST REJIMI — yaxlitlikni himoya qilish
+
+   Bu qoidalar faqat test davom etayotganda (body.kpk-exam-lock)
+   qo'llanadi. Ular qasddan nusxa olishni to'xtata olmaydi, lekin
+   tasodifiy harakatlarning oldini oladi.
+══════════════════════════════════════════════════════════════ */
+
+.kpk-exam-lock,
+.kpk-exam-lock * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Chop etishga urinilsa — sahifa o'rniga ogohlantirish chiqadi.
+   Ctrl+P bloklangan bo'lsa ham brauzer menyusidan chaqirish mumkin. */
+@media print {
+  body.kpk-exam-lock * {
+    visibility: hidden !important;
+  }
+
+  body.kpk-exam-lock::after {
+    content: "Test davomida chop etish taqiqlanadi.";
+    visibility: visible;
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: #000;
+  }
+}
+
+/* Oyna fokusdan chiqqanda savol matni xiralashadi — boshqa
+   oynadan turib suratga olish qiyinlashadi. */
+.kpk-exam-blur {
+  filter: blur(14px);
+  transition: filter 0.15s ease;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════════════════════
    LOADER
 ══════════════════════════════════════════════════════════════ */
 
