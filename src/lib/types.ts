@@ -23,7 +23,12 @@ export interface InitialTestResult {
   completed: boolean;
   /** Qaysi savolga qaysi variant tanlangani (indeks). */
   answers?: (number | null)[];
+  /** Shu urinishda tushgan savollarning bazadagi id'lari —
+      natijani qayta ko'rsatishda aynan o'sha savollar kerak. */
+  questionIds?: number[];
   finishedAt?: string;
+  /** Nechanchi urinish ekani. */
+  attempt?: number;
 }
 
 /** localStorage("kpk-progress") ichida saqlanadigan progress. */

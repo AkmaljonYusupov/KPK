@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { questions } from "@/data/questions";
+import { pickRandomQuestions, type Question } from "@/data/questions";
 import { useLanguage } from "@/i18n/language-provider";
 import { ASSESSMENT } from "@/lib/constants";
 import { buildProgress } from "@/lib/progress";
@@ -37,12 +37,16 @@ import { cn, formatTime } from "@/lib/utils";
 type Phase = "checking" | "running" | "finished";
 
 /**
- * Baholash testi — IXTIYORIY.
- *   • 20 daqiqalik umumiy vaqt
- *   • har bir savol uchun 30 soniya, tugasa avtomatik keyingisiga o'tadi
- *   • istalgan vaqtda qayta topshirsa bo'ladi
- * Qo'shimchalar: savollar xaritasi, klaviatura yorliqlari,
- * yakunlashni tasdiqlash va sahifadan chiqishdan ogohlantirish.
+ * Bilimni baholash testi.
+ *
+ *   • 150 talik bazadan har safar TASODIFIY 15 ta savol tanlanadi
+ *   • har bir savolga 1 daqiqa; vaqt tugasa avtomatik keyingisiga o'tadi
+ *   • umumiy vaqt = 15 daqiqa
+ *   • testni istalgan vaqtda qayta topshirish mumkin
+ *
+ * Savollar to'plami komponent birinchi marta chizilganda bir marta
+ * tanlanadi va state'da saqlanadi — aks holda har qayta chizishda
+ * savollar almashib ketardi.
  */
 export function AssessmentView() {
   const router = useRouter();
@@ -50,21 +54,27 @@ export function AssessmentView() {
   const { user, isLoading } = useAuth();
 
   const [phase, setPhase] = React.useState<Phase>("checking");
+  /* Savollar bir marta tanlanadi. useState'ning lazy initializer'i
+     faqat birinchi renderda ishlaydi, shuning uchun qayta chizishda
+     savollar o'zgarmaydi. */
+  const [quizQuestions, setQuizQuestions] = React.useState<Question[]>(() =>
+    pickRandomQuestions(ASSESSMENT.questionCount)
+  );
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const [answers, setAnswers] = React.useState<(number | null)[]>(() =>
-    questions.map(() => null)
+    Array.from({ length: ASSESSMENT.questionCount }, () => null)
   );
   const [totalTime, setTotalTime] = React.useState<number>(ASSESSMENT.totalSeconds);
   const [questionTime, setQuestionTime] = React.useState<number>(ASSESSMENT.questionSeconds);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [result, setResult] = React.useState<KpkProgress["initialTest"] | null>(null);
 
-  const total = questions.length;
+  const total = quizQuestions.length;
   const isLast = currentIndex === total - 1;
   const answeredCount = answers.filter((value) => value !== null).length;
   const unanswered = total - answeredCount;
 
-  /* ── Kirish nazorati: faqat mehmon login sahifasiga qaytariladi ── */
+  /* ── Kirish nazorati: mehmon → login, test topshirilgan → dashboard ── */
   React.useEffect(() => {
     if (isLoading) return;
 
@@ -82,24 +92,32 @@ export function AssessmentView() {
     setPhase((previous) => {
       if (previous !== "running") return previous;
 
-      const score = questions.reduce(
+      const score = quizQuestions.reduce(
         (sum, question, index) => (answers[index] === question.correct ? sum + 1 : sum),
         0
       );
 
+      const previousProgress = getStoredProgress();
+
       const progress = buildProgress({
-        previous: getStoredProgress(),
+        previous: previousProgress,
         score,
         total,
         answers,
       });
+
+      // Qaysi savollar tushgani va nechanchi urinish ekani ham saqlanadi.
+      if (progress.initialTest) {
+        progress.initialTest.questionIds = quizQuestions.map((question) => question.id);
+        progress.initialTest.attempt = (previousProgress.initialTest?.attempt ?? 0) + 1;
+      }
 
       setStoredProgress(progress);
       setResult(progress.initialTest ?? null);
 
       return "finished";
     });
-  }, [answers, total]);
+  }, [answers, quizQuestions, total]);
 
   /* ── Umumiy taymer ── */
   React.useEffect(() => {
@@ -171,7 +189,7 @@ export function AssessmentView() {
     const handler = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLElement && event.target.tagName === "INPUT") return;
 
-      const optionCount = questions[currentIndex].options[lang].length;
+      const optionCount = quizQuestions[currentIndex].options.length;
       const numeric = Number.parseInt(event.key, 10);
 
       if (!Number.isNaN(numeric) && numeric >= 1 && numeric <= optionCount) {
@@ -207,7 +225,7 @@ export function AssessmentView() {
   /* ── Yuklanish holati ── */
   if (phase === "checking") {
     return (
-      <div className="mx-auto w-full max-w-[620px] rounded-[20px] border border-[#e2e8f0] bg-white p-7 px-9 shadow-[0_10px_35px_rgba(0,0,0,0.08)] max-[640px]:px-6 max-[640px]:py-6">
+      <div className="mx-auto w-full max-w-[620px] rounded-[20px] border border-[var(--kpk-border)] bg-[var(--kpk-surface-solid)] p-7 px-9 shadow-[var(--kpk-shadow)] max-[640px]:px-6 max-[640px]:py-6">
         <div className="mb-5 flex items-center gap-3">
           <Skeleton className="size-12 rounded-[14px]" />
           <div className="flex-1 space-y-2">
@@ -230,16 +248,16 @@ export function AssessmentView() {
 
   /* ── Natija ── */
   if (phase === "finished" && result) {
-    return <AssessmentResult result={result} answers={answers} />;
+    return <AssessmentResult result={result} answers={answers} quizQuestions={quizQuestions} />;
   }
 
-  const question = questions[currentIndex];
+  const question = quizQuestions[currentIndex];
   const percent = ((currentIndex + 1) / total) * 100;
   const questionTimeLow = questionTime <= 5;
 
   return (
     <>
-      <div className="mx-auto w-full max-w-[620px] rounded-[20px] border border-[#e2e8f0] bg-white p-7 px-9 shadow-[0_10px_35px_rgba(0,0,0,0.08)] max-[640px]:px-6 max-[640px]:py-6">
+      <div className="mx-auto w-full max-w-[620px] rounded-[20px] border border-[var(--kpk-border)] bg-[var(--kpk-surface-solid)] p-7 px-9 shadow-[var(--kpk-shadow)] max-[640px]:px-6 max-[640px]:py-6">
         {/* HEADER */}
         <div className="mb-5 flex items-center gap-3">
           <div className="kpk-gradient flex size-12 shrink-0 items-center justify-center rounded-[14px] text-white">
@@ -247,10 +265,10 @@ export function AssessmentView() {
           </div>
 
           <div className="min-w-0 flex-1">
-            <h1 className="text-[22px] font-bold leading-tight text-[#1e293b] max-[640px]:text-lg">
+            <h1 className="text-[22px] font-bold leading-tight text-[var(--kpk-text)] max-[640px]:text-lg">
               {t("assessmentTitle")}
             </h1>
-            <p className="text-sm text-[#64748b]">{t("assessmentDesc")}</p>
+            <p className="text-sm text-[var(--kpk-muted)]">{t("assessmentDesc")}</p>
           </div>
 
           <LanguageSwitcher />
@@ -264,13 +282,13 @@ export function AssessmentView() {
         </Button>
 
         {/* UMUMIY TAYMER */}
-        <div className="mb-[18px] flex items-center gap-2.5 rounded-[14px] bg-[#f8fafc] px-4 py-2.5">
-          <Timer className="size-[18px] text-[#64748b]" />
-          <span className="text-sm text-[#64748b]">{t("remainingTime")}</span>
+        <div className="mb-[18px] flex items-center gap-2.5 rounded-[14px] bg-[var(--kpk-subtle)] px-4 py-2.5">
+          <Timer className="size-[18px] text-[var(--kpk-muted)]" />
+          <span className="text-sm text-[var(--kpk-muted)]">{t("remainingTime")}</span>
           <strong
             className={cn(
               "ml-auto text-[22px] font-bold tabular-nums",
-              totalTime <= 60 ? "text-[#dc2626]" : "text-[#1e293b]"
+              totalTime <= 60 ? "text-[var(--kpk-danger-fg)]" : "text-[var(--kpk-text)]"
             )}
             aria-live="polite"
           >
@@ -287,7 +305,7 @@ export function AssessmentView() {
 
         {/* SAVOLLAR XARITASI */}
         <div className="mb-6 flex flex-wrap gap-2">
-          {questions.map((item, index) => {
+          {quizQuestions.map((item, index) => {
             const isCurrent = index === currentIndex;
             const isAnswered = answers[index] !== null;
 
@@ -303,8 +321,8 @@ export function AssessmentView() {
                   isCurrent
                     ? "border-[#0d6efd] bg-[#0d6efd] text-white"
                     : isAnswered
-                      ? "border-[#bfdbfe] bg-[#e0f2fe] text-[#0d6efd]"
-                      : "border-[#e2e8f0] bg-[#f8fafc] text-[#94a3b8] hover:border-[#94a3b8]"
+                      ? "border-[var(--kpk-border)] bg-[var(--kpk-info-bg)] text-[var(--kpk-info-fg)]"
+                      : "border-[var(--kpk-border)] bg-[var(--kpk-subtle)] text-[var(--kpk-muted)] hover:border-[var(--kpk-blue)]"
                 )}
               >
                 {index + 1}
@@ -315,12 +333,12 @@ export function AssessmentView() {
 
         {/* SAVOL */}
         <div key={question.id} className="animate-in fade-in-0 slide-in-from-right-2 duration-300">
-          <h2 className="mb-[22px] text-xl font-semibold leading-[1.45] text-[#1e293b]">
-            {currentIndex + 1}. {question.question[lang]}
+          <h2 className="mb-[22px] text-xl font-semibold leading-[1.45] text-[var(--kpk-text)]">
+            {currentIndex + 1}. {question.question}
           </h2>
 
-          <div role="radiogroup" aria-label={question.question[lang]}>
-            {question.options[lang].map((option, index) => {
+          <div role="radiogroup" aria-label={question.question}>
+            {question.options.map((option, index) => {
               const isSelected = answers[currentIndex] === index;
 
               return (
@@ -334,13 +352,15 @@ export function AssessmentView() {
                     "mb-2.5 flex w-full items-center gap-3 rounded-[14px] border-2 px-[18px] py-3.5 text-left text-[15.8px] transition-all duration-200",
                     isSelected
                       ? "border-[#0d6efd] bg-[#0d6efd] text-white"
-                      : "border-[#e2e8f0] bg-[#f8fafc] hover:border-[#94a3b8] hover:bg-[#f0f7ff]"
+                      : "border-[var(--kpk-border)] bg-[var(--kpk-subtle)] hover:border-[var(--kpk-blue)] hover:bg-[var(--kpk-hover)]"
                   )}
                 >
                   <span
                     className={cn(
                       "flex size-6 shrink-0 items-center justify-center rounded-lg text-xs font-bold",
-                      isSelected ? "bg-white/20 text-white" : "bg-white text-[#94a3b8]"
+                      isSelected
+                        ? "bg-white/20 text-white"
+                        : "bg-[var(--kpk-surface-solid)] text-[var(--kpk-muted)]"
                     )}
                     aria-hidden
                   >
@@ -354,18 +374,18 @@ export function AssessmentView() {
         </div>
 
         {/* SAVOL TAYMERI */}
-        <div className="my-4 flex items-center gap-2 text-sm text-[#64748b]">
-          <Hourglass className={cn("size-4", questionTimeLow && "text-[#dc2626]")} />
+        <div className="my-4 flex items-center gap-2 text-sm text-[var(--kpk-muted)]">
+          <Hourglass className={cn("size-4", questionTimeLow && "text-[var(--kpk-danger-fg)]")} />
           <span>{t("questionTime")}</span>
           <strong
-            className={cn("tabular-nums", questionTimeLow ? "text-[#dc2626]" : "text-[#1e293b]")}
+            className={cn("tabular-nums", questionTimeLow ? "text-[var(--kpk-danger-fg)]" : "text-[var(--kpk-text)]")}
             aria-live="polite"
           >
             {questionTime}
           </strong>
           <span>{t("seconds")}</span>
 
-          <span className="ml-auto text-xs text-[#94a3b8]">
+          <span className="ml-auto text-xs text-[var(--kpk-muted)]">
             {answeredCount} / {total}
           </span>
         </div>

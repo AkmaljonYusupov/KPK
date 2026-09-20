@@ -25,7 +25,7 @@ interface ModuleMeta {
   descKey: keyof Dictionary;
   /** Kartochkaning yuqori chekkasidagi rangli chiziq va ikonka foni. */
   accent: string;
-  /** Nishon (badge) ranglari — mavzuga moslashadi. */
+  /** Nishon (badge) ranglari. */
   chip: string;
 }
 
@@ -72,9 +72,12 @@ export const MODULES: ModuleMeta[] = [
 interface ModuleCardProps {
   module: ModuleMeta;
   unlocked: boolean;
+  /** Qulflangan kartochka bosilganda chaqiriladi — dashboard
+      modal oynani ochadi. Berilmasa kartochka shunchaki jim turadi. */
+  onLockedClick?: (moduleId: number) => void;
 }
 
-export function ModuleCard({ module, unlocked }: ModuleCardProps) {
+export function ModuleCard({ module, unlocked, onLockedClick }: ModuleCardProps) {
   const { t } = useLanguage();
   const Icon = module.icon;
   const threshold = MODULE_THRESHOLDS[module.id] ?? 0;
@@ -82,8 +85,10 @@ export function ModuleCard({ module, unlocked }: ModuleCardProps) {
   return (
     <article
       className={cn(
-        "kpk-card group relative overflow-hidden rounded-[28px] transition-all duration-300",
-        unlocked ? "hover:-translate-y-1" : "shadow-none"
+        "group relative overflow-hidden rounded-[28px] kpk-card transition-all duration-300",
+        unlocked
+          ? "hover:-translate-y-1"
+          : "shadow-none"
       )}
     >
       {/* Yuqori rangli chiziq — daraja rangini bildiradi */}
@@ -111,8 +116,7 @@ export function ModuleCard({ module, unlocked }: ModuleCardProps) {
           </span>
         </div>
 
-        {/* Bo'lim raqami nozik fon sifatida — ketma-ketlikni ko'rsatadi.
-            --kpk-track ikkala mavzuda ham ko'rinadigan neytral rang. */}
+        {/* Bo'lim raqami nozik fon sifatida — ketma-ketlikni ko'rsatadi */}
         <span
           className="pointer-events-none absolute right-5 top-16 text-[80px] font-black leading-none text-[var(--kpk-track)] opacity-60"
           aria-hidden
@@ -135,10 +139,7 @@ export function ModuleCard({ module, unlocked }: ModuleCardProps) {
             <span>0%</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--kpk-track)]">
-            <div
-              className={cn("h-full rounded-full bg-gradient-to-r", module.accent)}
-              style={{ width: "0%" }}
-            />
+            <div className={cn("h-full rounded-full bg-gradient-to-r", module.accent)} style={{ width: "0%" }} />
           </div>
         </div>
 
@@ -153,8 +154,8 @@ export function ModuleCard({ module, unlocked }: ModuleCardProps) {
           <Button
             variant="soft"
             size="lg"
-            className="w-full cursor-not-allowed rounded-2xl bg-[var(--kpk-track)] text-[var(--kpk-muted)] hover:bg-[var(--kpk-track)]"
-            disabled
+            className="w-full rounded-2xl bg-[var(--kpk-track)] text-[var(--kpk-muted)]"
+            onClick={() => onLockedClick?.(module.id)}
           >
             <Lock className="size-4" />
             {t("moduleLocked")}
@@ -162,15 +163,19 @@ export function ModuleCard({ module, unlocked }: ModuleCardProps) {
         )}
       </div>
 
+      {/* Qulf qoplamasi butun kartochkani yopadi va bosiladi —
+          shunda foydalanuvchi nima qilish kerakligini biladi. */}
       {unlocked ? null : (
-        <div
-          className="absolute inset-0 flex items-center justify-center bg-[var(--kpk-surface)] backdrop-blur-[3px]"
-          aria-hidden
+        <button
+          type="button"
+          onClick={() => onLockedClick?.(module.id)}
+          aria-label={`${t(module.titleKey)} — ${t("moduleLocked")}`}
+          className="absolute inset-0 flex items-center justify-center bg-[var(--kpk-surface)] backdrop-blur-[3px] transition-colors hover:bg-[var(--kpk-surface-solid)]/70"
         >
-          <div className="flex size-16 items-center justify-center rounded-2xl bg-[var(--kpk-surface-solid)] shadow-lg">
+          <span className="flex size-16 items-center justify-center rounded-2xl bg-[var(--kpk-surface-solid)] shadow-lg transition-transform duration-200 hover:scale-105">
             <Lock className="size-7 text-[var(--kpk-muted)]" strokeWidth={2} />
-          </div>
-        </div>
+          </span>
+        </button>
       )}
     </article>
   );

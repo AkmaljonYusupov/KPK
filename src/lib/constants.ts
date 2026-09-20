@@ -12,12 +12,16 @@ export const STORAGE_KEYS = {
   sidebar: "kpk-sidebar",
 } as const;
 
-/** Kirish testi sozlamalari (original assessment.js bilan bir xil). */
+/** Bilimni baholash testi sozlamalari. */
 export const ASSESSMENT = {
-  /** Umumiy vaqt — 20 daqiqa. */
-  totalSeconds: 1200,
-  /** Har bir savol uchun vaqt — 30 soniya. */
-  questionSeconds: 30,
+  /** 150 talik bazadan har safar tasodifiy shuncha savol tanlanadi. */
+  questionCount: 15,
+  /** Har bir savol uchun vaqt — 1 daqiqa. */
+  questionSeconds: 60,
+  /** Umumiy vaqt = savollar soni × savol vaqti. */
+  get totalSeconds() {
+    return this.questionCount * this.questionSeconds;
+  },
 } as const;
 
 /** Bo'limlarni ochish uchun kerakli minimal foiz. */

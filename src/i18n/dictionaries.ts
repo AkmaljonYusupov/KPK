@@ -240,6 +240,19 @@ const uz = {
   aiImageOpen: "Kattalashtirish",
   aiImageClose: "Yopish",
 
+  /* ── Bo'limni ochish modali ── */
+  gateTitle: "Avval bilimingizni tekshiring",
+  gateText:
+    "Bu bo'limni boshlash uchun bilimni baholash testini yechishingiz kerak. Testda {count} ta savol bo'ladi, har biriga {minutes} daqiqa beriladi.",
+  gateTextLocked:
+    "Bu bo'lim hali ochilmagan. Uni ochish uchun baholash testidan kamida {percent}% to'plashingiz kerak. Hozirgi natijangiz — {current}%.",
+  gateStart: "Testni yechish",
+  gateRetake: "Testni qayta yechish",
+  gateLater: "Keyinroq",
+  gateQuestions: "{count} ta savol",
+  gateMinutes: "{minutes} daqiqa",
+  gateAttempt: "Urinish: {count}",
+
   /* ── Mavzu ── */
   themeToggle: "Yorug‘ / qorong‘i rejim",
   themeLight: "Yorug‘",
@@ -465,6 +478,18 @@ const en: Dictionary = {
   aiImageOpen: "Enlarge",
   aiImageClose: "Close",
 
+  gateTitle: "Check your knowledge first",
+  gateText:
+    "To start this module you need to take the assessment test. It has {count} questions with {minutes} minute each.",
+  gateTextLocked:
+    "This module is still locked. Score at least {percent}% on the assessment to open it. Your current result is {current}%.",
+  gateStart: "Take the test",
+  gateRetake: "Retake the test",
+  gateLater: "Later",
+  gateQuestions: "{count} questions",
+  gateMinutes: "{minutes} minutes",
+  gateAttempt: "Attempt: {count}",
+
   themeToggle: "Light / dark mode",
   themeLight: "Light",
   themeDark: "Dark",
@@ -682,6 +707,18 @@ const ru: Dictionary = {
   aiImageResult: "Созданное изображение",
   aiImageOpen: "Увеличить",
   aiImageClose: "Закрыть",
+
+  gateTitle: "Сначала проверьте свои знания",
+  gateText:
+    "Чтобы начать этот раздел, пройдите оценочный тест. В нём {count} вопросов, на каждый даётся {minutes} минута.",
+  gateTextLocked:
+    "Этот раздел пока закрыт. Чтобы открыть его, наберите минимум {percent}% в оценочном тесте. Ваш текущий результат — {current}%.",
+  gateStart: "Пройти тест",
+  gateRetake: "Пройти заново",
+  gateLater: "Позже",
+  gateQuestions: "{count} вопросов",
+  gateMinutes: "{minutes} минут",
+  gateAttempt: "Попытка: {count}",
 
   themeToggle: "Светлая / тёмная тема",
   themeLight: "Светлая",

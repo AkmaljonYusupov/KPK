@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowRight,
   ClipboardCheck,
@@ -15,6 +15,7 @@ import {
 
 import { useAuth } from "@/components/auth-provider";
 import { DashboardShell } from "@/components/dashboard-shell";
+import { ModuleGateDialog } from "@/components/module-gate-dialog";
 import { MODULES, ModuleCard } from "@/components/module-card";
 import { StatTile } from "@/components/stat-tile";
 import { Button } from "@/components/ui/button";
@@ -56,11 +57,21 @@ function countAiMessages(): number {
  */
 export function DashboardView() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t } = useLanguage();
   const { user, isLoading } = useAuth();
 
   const [progress, setProgress] = React.useState<KpkProgress | null>(null);
   const [aiMessages, setAiMessages] = React.useState(0);
+  /** Qulflangan qaysi bo'lim bosilgani — modal shunga qarab ochiladi. */
+  const [gateModule, setGateModule] = React.useState<number | null>(null);
+
+  /** Progressni localStorage'dan qayta o'qiydi — test modal ichida
+      yakunlangach chaqiriladi, shunda ochilgan bo'limlar darhol ko'rinadi. */
+  const refresh = React.useCallback(() => {
+    setProgress(getStoredProgress());
+    setAiMessages(countAiMessages());
+  }, []);
 
   React.useEffect(() => {
     if (isLoading) return;
@@ -70,15 +81,20 @@ export function DashboardView() {
       return;
     }
 
-    setProgress(getStoredProgress());
-    setAiMessages(countAiMessages());
-  }, [isLoading, user, router]);
+    refresh();
+  }, [isLoading, user, router, refresh]);
+
+  /* Sidebar'dagi "Baholash testi" havolasi /dashboard?test=1 ga
+     olib keladi — shunda modal darhol ochiladi. */
+  React.useEffect(() => {
+    if (searchParams.get("test") === "1") setGateModule(1);
+  }, [searchParams]);
 
   const testResult = progress?.initialTest;
   const hasTest = testResult?.completed === true;
   const percent = testResult?.percent ?? 0;
 
-  const unlockedCount = hasTest ? getUnlockedCount(percent) : MODULE_COUNT;
+  const unlockedCount = getUnlockedCount(percent, hasTest);
   const levelKey = hasTest ? LEVEL_KEYS[progress?.maxLevel ?? 1] : undefined;
   const firstName = user?.name?.split(/\s+/)[0] ?? "";
 
@@ -181,8 +197,7 @@ export function DashboardView() {
                 asChild
                 size="xl"
                 variant="ghost"
-                // Banner doim to'q ko'k, shuning uchun matn rangi qat'iy —
-                // mavzuga bog'lasak, dark rejimda oq ustida oq bo'lib qoladi.
+                // Banner doim to'q ko'k, shuning uchun matn rangi qat'iy — mavzuga bog'liq emas
                 className="shrink-0 rounded-2xl bg-white text-[#1b3a63] hover:bg-white/90 max-md:w-full"
               >
                 <Link href="/ai">
@@ -208,10 +223,26 @@ export function DashboardView() {
                   key={module.id}
                   module={module}
                   unlocked={isModuleUnlocked(module.id, percent, hasTest)}
+                  onLockedClick={setGateModule}
                 />
               ))}
             </div>
           </section>
+          {/* Qulflangan bo'lim bosilganda chiqadigan modal */}
+          <ModuleGateDialog
+            moduleId={gateModule}
+            hasTest={hasTest}
+            percent={percent}
+            attempt={testResult?.attempt}
+            onOpenChange={(open) => {
+              if (open) return;
+              setGateModule(null);
+              // Manzildan ?test=1 ni olib tashlaymiz — aks holda
+              // sahifa yangilanganda modal yana ochilardi.
+              if (searchParams.get("test") === "1") router.replace("/dashboard");
+            }}
+            onCompleted={refresh}
+          />
         </div>
       ) : (
         /* ── Yuklanish holati ── */

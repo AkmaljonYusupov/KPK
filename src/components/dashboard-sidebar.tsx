@@ -95,7 +95,8 @@ export function DashboardSidebar({
     { href: "/dashboard", label: t("navOverview"), icon: LayoutDashboard, highlight: false },
     // AI yordamchi ajralib tursin — gradient ikonka bilan
     { href: "/ai", label: t("navAi"), icon: Sparkles, highlight: true },
-    { href: "/assessment", label: t("navAssessment"), icon: ClipboardCheck, highlight: false },
+    // Test alohida sahifada emas, dashboard ustidagi modalda ochiladi
+    { href: "/dashboard?test=1", label: t("navAssessment"), icon: ClipboardCheck, highlight: false },
   ];
 
   /** Barcha havolalar uchun umumiy ko'rinish. */
