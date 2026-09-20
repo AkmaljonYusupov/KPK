@@ -110,44 +110,62 @@ export function ModuleGateDialog({
           <>
             <div
               className={cn(
-                "mx-auto mb-[18px] flex size-[82px] items-center justify-center rounded-3xl text-white max-sm:size-[72px]",
+                "mx-auto mb-5 flex size-[76px] items-center justify-center rounded-[26px] text-white",
                 hasTest
-                  ? "bg-[linear-gradient(135deg,#fbbf24,#d97706)] shadow-[0_18px_45px_rgba(217,119,6,0.28)]"
-                  : "kpk-gradient shadow-[0_18px_45px_rgba(13,110,253,0.28)]"
+                  ? "bg-[linear-gradient(135deg,#fbbf24,#d97706)] shadow-[0_16px_38px_rgba(217,119,6,0.3)]"
+                  : "kpk-gradient shadow-[0_16px_38px_rgba(13,110,253,0.3)]"
               )}
               aria-hidden
             >
-              {hasTest ? <Lock className="size-9" /> : <ClipboardCheck className="size-9" />}
+              {hasTest ? <Lock className="size-8" /> : <ClipboardCheck className="size-8" />}
             </div>
 
             <DialogHeader>
-              <DialogTitle>{t("gateTitle")}</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-[23px]">{t("gateTitle")}</DialogTitle>
+              <DialogDescription className="mx-auto max-w-[40ch]">
                 {hasTest
                   ? t("gateTextLocked", { percent: threshold, current: percent })
                   : t("gateText", { count: ASSESSMENT.questionCount, minutes })}
               </DialogDescription>
             </DialogHeader>
 
-            <div className="mt-5 flex flex-wrap justify-center gap-2">
-              <span className="flex items-center gap-1.5 rounded-full bg-[var(--kpk-subtle)] px-3 py-1.5 text-xs font-bold text-[var(--kpk-muted)]">
-                <ListChecks className="size-3.5" />
-                {t("gateQuestions", { count: ASSESSMENT.questionCount })}
-              </span>
-
-              <span className="flex items-center gap-1.5 rounded-full bg-[var(--kpk-subtle)] px-3 py-1.5 text-xs font-bold text-[var(--kpk-muted)]">
-                <Timer className="size-3.5" />
-                {t("gateMinutes", { minutes: Math.round(ASSESSMENT.totalSeconds / 60) })}
-              </span>
-
-              {hasTest && attempt ? (
-                <span className="flex items-center gap-1.5 rounded-full bg-[var(--kpk-subtle)] px-3 py-1.5 text-xs font-bold text-[var(--kpk-muted)]">
-                  {t("gateAttempt", { count: attempt })}
-                </span>
-              ) : null}
+            {/* Shartlar — ikki ustunli panel, nishonlar o'rniga */}
+            <div className="mt-5 grid grid-cols-2 gap-2.5 text-left">
+              <Stat
+                icon={<ListChecks className="size-4" />}
+                label={t("gateQuestions", { count: ASSESSMENT.questionCount })}
+              />
+              <Stat
+                icon={<Timer className="size-4" />}
+                label={t("gateMinutes", { minutes: Math.round(ASSESSMENT.totalSeconds / 60) })}
+              />
             </div>
 
-            <DialogFooter className="mt-7">
+            {/* Qoidalar ro'yxati */}
+            <ul className="mt-3 space-y-1.5 rounded-2xl bg-[var(--kpk-subtle)] p-3.5 text-left">
+              {[t("examRule1"), t("examRule2"), t("examRule3"), t("examRule4", { max: 3 })].map(
+                (rule) => (
+                  <li
+                    key={rule}
+                    className="flex items-start gap-2 text-[13px] leading-snug text-[var(--kpk-muted)]"
+                  >
+                    <span
+                      className="mt-[6px] size-1.5 shrink-0 rounded-full bg-[var(--kpk-blue)]"
+                      aria-hidden
+                    />
+                    {rule}
+                  </li>
+                )
+              )}
+            </ul>
+
+            {hasTest && attempt ? (
+              <p className="mt-3 text-xs font-bold text-[var(--kpk-muted)]">
+                {t("gateAttempt", { count: attempt })}
+              </p>
+            ) : null}
+
+            <DialogFooter className="mt-6">
               <Button variant="secondary" size="lg" onClick={() => onOpenChange(false)}>
                 {t("gateLater")}
               </Button>
@@ -187,6 +205,18 @@ export function ModuleGateDialog({
   );
 }
 
+/** Kirish ekranidagi kichik ma'lumot paneli. */
+function Stat({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <div className="flex items-center gap-2.5 rounded-2xl bg-[var(--kpk-subtle)] px-3.5 py-3">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-[var(--kpk-surface-solid)] text-[var(--kpk-blue)]">
+        {icon}
+      </span>
+      <span className="text-[13px] font-bold text-[var(--kpk-text)]">{label}</span>
+    </div>
+  );
+}
+
 /* ── Natija ekrani ─────────────────────────────────────────── */
 
 function ResultPanel({
@@ -220,11 +250,12 @@ function ResultPanel({
 
       <div
         className={cn(
-          "mx-auto mb-4 flex size-[110px] flex-col items-center justify-center rounded-full text-white shadow-[var(--kpk-shadow)]",
+          "mx-auto mb-4 flex size-[104px] flex-col items-center justify-center rounded-full text-white",
+          "shadow-[0_18px_40px_rgba(15,23,42,0.18)]",
           toneClass
         )}
       >
-        <strong className="text-[34px] font-black leading-none">{result.percent}%</strong>
+        <strong className="text-[32px] font-black leading-none">{result.percent}%</strong>
         <span className="mt-1 text-xs font-bold opacity-90">
           {result.score} / {result.total}
         </span>

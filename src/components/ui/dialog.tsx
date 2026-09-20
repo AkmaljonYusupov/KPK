@@ -22,7 +22,7 @@ export function DialogOverlay({ className, ...props }: OverlayProps) {
   return (
     <DialogPrimitive.Overlay
       className={cn(
-        "fixed inset-0 z-[99998] bg-[rgba(6,12,24,0.55)] backdrop-blur-[8px]",
+        "fixed inset-0 z-[99998] bg-[var(--kpk-scrim)] backdrop-blur-[8px]",
         "data-[state=open]:animate-in data-[state=closed]:animate-out",
         "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
         className
@@ -39,7 +39,11 @@ export function DialogContent({ className, children, hideClose = false, ...props
       <DialogPrimitive.Content
         className={cn(
           "fixed left-1/2 top-1/2 z-[99999] w-[min(430px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2",
-          "kpk-card rounded-[28px] p-[34px_30px] text-center",
+          // Shishasimon (kpk-card) emas — TO'LIQ fon. Orqadagi
+          // sahifa ko'rinib turmaydi, matn aniq o'qiladi.
+          "rounded-[28px] border border-[var(--kpk-border)] bg-[var(--kpk-surface-solid)]",
+          "p-[34px_30px] text-center shadow-[0_32px_90px_rgba(15,23,42,0.22)]",
+          "dark:border-white/10 dark:bg-[#18233a]",
           "duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out",
           "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
           "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
@@ -74,7 +78,19 @@ export function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLD
 }
 
 export function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("flex w-full gap-3 max-sm:flex-col", className)} {...props} />;
+  return (
+    <div
+      className={cn(
+        // Mobilda ustma-ust va TESKARI tartibda: asosiy tugma yuqorida bo'ladi,
+        // chunki DOM'da u ikkinchi turadi. min-w-0 — matn uzun bo'lsa
+        // tugma konteynerdan chiqib ketmasligi uchun.
+        "flex w-full gap-3 max-sm:flex-col-reverse max-sm:gap-2.5",
+        "[&>*]:min-w-0 [&>*]:flex-1",
+        className
+      )}
+      {...props}
+    />
+  );
 }
 
 export function DialogTitle({ className, ...props }: TitleProps) {

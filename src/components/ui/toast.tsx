@@ -18,12 +18,9 @@ import {
 import { cn } from "@/lib/utils";
 
 /* ══════════════════════════════════════════════════════════════
-   KPK bildirishnomasi — sonner ustida.
-
-   Kartochka `kpk-card` sinfidan foydalanadi, matn esa mavzu
-   o'zgaruvchilaridan — shuning uchun light va dark rejimda
-   avtomatik moslashadi. Faqat ikonka plitkasi va progress
-   chizig'i qat'iy rangda: ular gradient va matni oq.
+   Original loyihadagi ".modern-toast" ni shadcn/sonner ustida
+   1:1 qayta yaratish: gradient ikon plitkasi, sarlavha, matn,
+   yopish tugmasi va pastda kamayib boruvchi progress chizig'i.
 ══════════════════════════════════════════════════════════════ */
 
 export type ToastType = "info" | "success" | "error";
@@ -96,9 +93,8 @@ function KpkToastCard({
       aria-live="polite"
       className={cn(
         "relative flex w-[380px] max-w-[calc(100vw-28px)] items-start gap-3.5 overflow-hidden p-[18px]",
-        "kpk-card rounded-[26px]",
-        // Zaxira: CSS o'zgaruvchisi yetib kelmasa ham to'q qoladi
-        "dark:border-white/10 dark:bg-[#18233a]",
+        "rounded-[26px] border border-[var(--kpk-border)] bg-[var(--kpk-surface-solid)]",
+        "shadow-[0_24px_60px_rgba(15,23,42,0.18)]",
         "max-sm:w-[calc(100vw-28px)] max-sm:rounded-[22px]"
       )}
     >

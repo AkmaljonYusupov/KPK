@@ -253,6 +253,12 @@ const uz = {
   gateMinutes: "{minutes} daqiqa",
   gateAttempt: "Urinish: {count}",
 
+  /* ── Xabarni tahrirlash ── */
+  aiEdit: "Tahrirlash",
+  aiEditMessage: "Xabarni tahrirlash",
+  aiEditSave: "Saqlash va qayta yuborish",
+  aiEditCancel: "Bekor qilish",
+
   /* ── Test yaxlitligi ── */
   examWarning: "Diqqat",
   examBlurText: "Oyna fokusdan chiqdi. Testga qayting.",
@@ -509,6 +515,11 @@ const en: Dictionary = {
   gateMinutes: "{minutes} minutes",
   gateAttempt: "Attempt: {count}",
 
+  aiEdit: "Edit",
+  aiEditMessage: "Edit message",
+  aiEditSave: "Save and resend",
+  aiEditCancel: "Cancel",
+
   examWarning: "Attention",
   examBlurText: "The window lost focus. Return to the test.",
   examViolation: "Violation recorded: {count} / {max}",
@@ -756,6 +767,11 @@ const ru: Dictionary = {
   gateQuestions: "{count} вопросов",
   gateMinutes: "{minutes} минут",
   gateAttempt: "Попытка: {count}",
+
+  aiEdit: "Изменить",
+  aiEditMessage: "Изменить сообщение",
+  aiEditSave: "Сохранить и отправить",
+  aiEditCancel: "Отмена",
 
   examWarning: "Внимание",
   examBlurText: "Окно потеряло фокус. Вернитесь к тесту.",

@@ -36,6 +36,11 @@ export function EmblemLogo({
       className={className}
       priority={priority}
       unoptimized
+      /* Tashqi rasm yuklanmasa, src zaxira belgiga almashadi. Bu
+         gidratatsiya tugashidan oldin sodir bo'lsa, server va klient
+         HTML'i farq qilib React ogohlantirish beradi. Atribut
+         o'zgarishi ataylab bo'lgani uchun uni e'tiborsiz qoldiramiz. */
+      suppressHydrationWarning
       onError={() => setSrc("/images/emblem.svg")}
     />
   );
