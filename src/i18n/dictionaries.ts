@@ -259,6 +259,14 @@ const uz = {
   aiEditSave: "Saqlash va qayta yuborish",
   aiEditCancel: "Bekor qilish",
 
+  /* ── Natijani Telegramga yuborish ── */
+  tgResultSending: "Natija yuborilmoqda",
+  tgResultSendingText: "Test natijangiz Telegram botga yuborilmoqda...",
+  tgResultSent: "Natija yuborildi",
+  tgResultSentText: "Test natijangiz Telegram botga muvaffaqiyatli yuborildi.",
+  tgResultFailed: "Yuborilmadi",
+  tgResultFailedText: "Natija saqlandi, lekin Telegram botga yuborilmadi.",
+
   /* ── Test yaxlitligi ── */
   examWarning: "Diqqat",
   examBlurText: "Oyna fokusdan chiqdi. Testga qayting.",
@@ -520,6 +528,13 @@ const en: Dictionary = {
   aiEditSave: "Save and resend",
   aiEditCancel: "Cancel",
 
+  tgResultSending: "Sending result",
+  tgResultSendingText: "Your test result is being sent to the Telegram bot...",
+  tgResultSent: "Result sent",
+  tgResultSentText: "Your test result was successfully sent to the Telegram bot.",
+  tgResultFailed: "Not sent",
+  tgResultFailedText: "The result was saved, but it was not sent to the Telegram bot.",
+
   examWarning: "Attention",
   examBlurText: "The window lost focus. Return to the test.",
   examViolation: "Violation recorded: {count} / {max}",
@@ -772,6 +787,13 @@ const ru: Dictionary = {
   aiEditMessage: "Изменить сообщение",
   aiEditSave: "Сохранить и отправить",
   aiEditCancel: "Отмена",
+
+  tgResultSending: "Отправка результата",
+  tgResultSendingText: "Ваш результат отправляется в Telegram-бот...",
+  tgResultSent: "Результат отправлен",
+  tgResultSentText: "Ваш результат успешно отправлен в Telegram-бот.",
+  tgResultFailed: "Не отправлено",
+  tgResultFailedText: "Результат сохранён, но не отправлен в Telegram-бот.",
 
   examWarning: "Внимание",
   examBlurText: "Окно потеряло фокус. Вернитесь к тесту.",

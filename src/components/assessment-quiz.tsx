@@ -15,10 +15,12 @@ import { Button } from "@/components/ui/button";
 import { kpkToast } from "@/components/ui/toast";
 import { pickRandomQuestions, questions as allQuestions, type Question } from "@/data/questions";
 import { useExamGuard, type ViolationKind } from "@/hooks/use-exam-guard";
+import { useAuth } from "@/components/auth-provider";
 import { useLanguage } from "@/i18n/language-provider";
 import { ASSESSMENT, STORAGE_KEYS } from "@/lib/constants";
-import { buildProgress } from "@/lib/progress";
+import { buildProgress, getUnlockedCount } from "@/lib/progress";
 import { getStoredProgress, setStoredProgress } from "@/lib/storage";
+import { sendTelegramTestResult } from "@/lib/telegram";
 import type { InitialTestResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +47,8 @@ interface QuizSession {
   questionIds: number[];
   answers: (number | null)[];
   currentIndex: number;
+  /** Test boshlangan vaqt — sarflangan vaqtni hisoblash uchun. */
+  startedAt: number;
   /** Testning tugash vaqti (Unix ms) — taymer shunga qarab hisoblanadi. */
   deadline: number;
   /** Joriy savolning tugash vaqti. */
@@ -94,7 +98,8 @@ interface AssessmentQuizProps {
 }
 
 export function AssessmentQuiz({ onFinish }: AssessmentQuizProps) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const { user } = useAuth();
 
   /* ── Sessiyani tiklash yoki yangisini boshlash ──
         useState'ning lazy initializer'i faqat birinchi renderda
@@ -113,6 +118,7 @@ export function AssessmentQuiz({ onFinish }: AssessmentQuizProps) {
       questionIds: picked.map((question) => question.id),
       answers: picked.map(() => null),
       currentIndex: 0,
+      startedAt: now,
       deadline: now + ASSESSMENT.totalSeconds * 1000,
       questionDeadline: now + ASSESSMENT.questionSeconds * 1000,
       violations: 0,
@@ -178,9 +184,41 @@ export function AssessmentQuiz({ onFinish }: AssessmentQuizProps) {
       }
 
       setStoredProgress(progress);
+
+      /* Natijani Telegram botga yuboramiz. Bu fon jarayoni:
+         yuborilmasa ham natija localStorage'da saqlangan, shuning
+         uchun foydalanuvchi ishi to'xtamaydi. */
+      if (user && progress.initialTest) {
+        const finished = progress.initialTest;
+
+        kpkToast.info(t("tgResultSending"), t("tgResultSendingText"), "send");
+
+        void sendTelegramTestResult(
+          user,
+          {
+            score: finished.score,
+            total: finished.total,
+            percent: finished.percent,
+            unlocked: getUnlockedCount(finished.percent, true),
+            attempt: finished.attempt,
+            violations: finished.violations,
+            autoSubmitted: finished.autoSubmitted,
+            duration: Math.round((Date.now() - current.startedAt) / 1000),
+          },
+          lang
+        ).then((status) => {
+          if (status === "sent") {
+            kpkToast.success(t("tgResultSent"), t("tgResultSentText"), "send-check");
+          } else if (status === "failed") {
+            kpkToast.error(t("tgResultFailed"), t("tgResultFailedText"), "send-error");
+          }
+          // "skipped" — bot sozlanmagan, xabar chiqarmaymiz
+        });
+      }
+
       if (progress.initialTest) onFinish(progress.initialTest, list);
     },
-    [done, onFinish]
+    [done, lang, onFinish, t, user]
   );
 
   /* ── Himoya ── */

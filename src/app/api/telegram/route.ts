@@ -13,7 +13,24 @@ export const dynamic = "force-dynamic";
    hech qachon yuborilmaydi.
 ══════════════════════════════════════════════════════════════ */
 
-type Action = "LOGIN" | "LOGOUT";
+type Action = "LOGIN" | "LOGOUT" | "TEST_RESULT";
+
+/** Test natijasi bilan birga keladigan qo'shimcha ma'lumot. */
+interface TestPayload {
+  score: number;
+  total: number;
+  percent: number;
+  /** Nechta bo'lim ochilgani. */
+  unlocked: number;
+  /** Nechanchi urinish. */
+  attempt?: number;
+  /** Qoida buzilishlari soni. */
+  violations?: number;
+  /** Chegaradan oshgani uchun avtomatik yakunlanganmi. */
+  autoSubmitted?: boolean;
+  /** Testga sarflangan vaqt (soniya). */
+  duration?: number;
+}
 
 interface TelegramPayload {
   action: Action;
@@ -26,6 +43,7 @@ interface TelegramPayload {
   page?: string;
   platform?: string;
   language?: string;
+  test?: TestPayload;
 }
 
 /** Telegram HTML rejimida xavfli belgilarni ekranlaydi. */
@@ -33,7 +51,69 @@ function escapeHtml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+/** Soniyani "12:34" ko'rinishiga keltiradi. */
+function clock(seconds: number): string {
+  const safe = Math.max(0, Math.round(seconds));
+  return `${Math.floor(safe / 60)} daq ${safe % 60} son`;
+}
+
+/** Foizga qarab 10 bo'limli vizual shkala chizadi. */
+function bar(percent: number): string {
+  const filled = Math.round((Math.min(100, Math.max(0, percent)) / 100) * 10);
+  return "█".repeat(filled) + "░".repeat(10 - filled);
+}
+
+/** Natijaga qarab baho belgisi. */
+function grade(percent: number): string {
+  if (percent >= 90) return "🏆 A'lo";
+  if (percent >= 71) return "🥇 Yaxshi";
+  if (percent >= 56) return "🥈 Qoniqarli";
+  return "📕 Past";
+}
+
+function buildTestMessage(payload: TelegramPayload): string {
+  const { user, test, language, platform } = payload;
+  if (!test) return "";
+
+  const time = new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" });
+
+  const lines = [
+    "📝 <b>BILIMNI BAHOLASH TESTI</b>",
+    "━━━━━━━━━━━━━━━━━━━━",
+    "",
+    `👤 <b>${escapeHtml(user.name ?? "—")}</b>`,
+    `📧 <code>${escapeHtml(user.email ?? "—")}</code>`,
+    "",
+    `<code>${bar(test.percent)}</code>  <b>${test.percent}%</b>`,
+    "",
+    `✅ To'g'ri javob: <b>${test.score} / ${test.total}</b>`,
+    `🎯 Baho: ${grade(test.percent)}`,
+    `🔓 Ochilgan bo'limlar: <b>${test.unlocked} / 4</b>`,
+  ];
+
+  if (test.attempt) lines.push(`🔁 Urinish: <b>${test.attempt}</b>`);
+  if (test.duration) lines.push(`⏱ Sarflangan vaqt: <b>${clock(test.duration)}</b>`);
+
+  // Qoida buzilishlari — faqat bo'lsa ko'rsatiladi
+  if (test.violations && test.violations > 0) {
+    lines.push("", `⚠️ Qoida buzilishi: <b>${test.violations}</b>`);
+  }
+
+  if (test.autoSubmitted) {
+    lines.push("🚫 <b>Avtomatik yakunlandi</b> (chegara oshib ketdi)");
+  }
+
+  lines.push("", "━━━━━━━━━━━━━━━━━━━━");
+  lines.push(`🌍 Til: ${escapeHtml(language ?? "—")}`);
+  lines.push(`📱 ${escapeHtml((platform ?? "—").slice(0, 80))}`);
+  lines.push(`⏰ ${time}`);
+
+  return lines.join("\n");
+}
+
 function buildMessage(payload: TelegramPayload): string {
+  if (payload.action === "TEST_RESULT") return buildTestMessage(payload);
+
   const { action, user, page, platform, language } = payload;
   const header = action === "LOGIN" ? "✅ TIZIMGA KIRDI" : "🚪 TIZIMDAN CHIQDI";
   const time = new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" });
@@ -71,8 +151,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, reason: "invalid-json" }, { status: 400 });
   }
 
-  if (payload.action !== "LOGIN" && payload.action !== "LOGOUT") {
+  const allowed: Action[] = ["LOGIN", "LOGOUT", "TEST_RESULT"];
+
+  if (!allowed.includes(payload.action)) {
     return NextResponse.json({ ok: false, reason: "invalid-action" }, { status: 400 });
+  }
+
+  if (payload.action === "TEST_RESULT" && !payload.test) {
+    return NextResponse.json({ ok: false, reason: "missing-test" }, { status: 400 });
   }
 
   try {
